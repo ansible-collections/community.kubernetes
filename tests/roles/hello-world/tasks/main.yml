@@ -1,0 +1,62 @@
+- name: Create project
+  k8s_v1_project:
+    name: hello 
+    display_name: Shiny Foo
+    description: W00T! Bitches
+    debug: yes
+  register: project
+
+- debug: var=project
+
+- name: Create service 
+  k8s_v1_service:
+    name: hello-service 
+    namespace: hello 
+    state: present
+    ports:
+      - port: 8080 
+        target_port: 8080
+        name: web-tcp 
+    selector:
+      app: hello
+    labels:
+      app: hello 
+    debug: yes
+  register: service 
+
+- debug: var=service
+
+- name: Create deployment config
+  k8s_v1_deployment_config:
+    name: hello-depoy
+    namespace: hello
+    state: present 
+    debug: yes
+    labels:
+      app: hello
+    spec_template_metadata_name: hello-pod 
+    spec_template_metadata_labels:
+      app: hello
+    containers:
+      - name: hello
+        image: openshift/busybox-http-app
+        ports:
+        - container_port: 8080 
+          protocol: TCP
+          name: web-8100-tcp 
+    replicas: 1
+    selector:
+       app: hello
+    strategy_type: Rolling
+  register: create_deployment
+
+- debug: var=create_deployment
+  
+- name: Create route
+  k8s_v1_route:
+    name: hello-route 
+    namespace: hello
+    host: www.example.com
+    to_kind: Service
+    to_name: hello-service
+    tls_termination: edge 

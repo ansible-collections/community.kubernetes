@@ -1,0 +1,8 @@
+# tasks/main.yml
+---
+
+- name: Intall role requirements
+  pip:
+    requirements: ../requirements.txt
+  when: install_python_requirements
+

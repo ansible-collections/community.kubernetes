@@ -1,0 +1,2392 @@
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "description": {
+        "description": [
+            "Provides a brief overview or narrative for the project."
+        ]
+    }, 
+    "display_name": {
+        "description": [
+            "Provides a descriptive name for the project."
+        ]
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_finalizers": {
+        "aliases": [
+            "finalizers"
+        ], 
+        "property_path": [
+            "spec", 
+            "finalizers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+set_obj_attribute V1Project, ["metadata", "name"] to "hello"
+set_obj_attribute V1ObjectMeta, ["name"] to "hello"
+Object from params:
+{
+    "status": null, 
+    "kind": "Project", 
+    "spec": null, 
+    "api_version": "v1", 
+    "metadata": {
+        "uid": null, 
+        "owner_references": null, 
+        "generation": null, 
+        "namespace": null, 
+        "labels": null, 
+        "generate_name": null, 
+        "deletion_timestamp": null, 
+        "cluster_name": null, 
+        "finalizers": null, 
+        "deletion_grace_period_seconds": null, 
+        "self_link": null, 
+        "resource_version": null, 
+        "creation_timestamp": null, 
+        "annotations": {
+            "openshift.io/display-name": "Shiny Foo", 
+            "openshift.io/description": "W00T! Bitches"
+        }, 
+        "name": "hello"
+    }
+}
+STREAM FAILED: HTTPSConnectionPool(host='192.168.64.2', port=8443): Read timed out.
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_cluster_ip": {
+        "aliases": [
+            "cluster_ip"
+        ], 
+        "property_path": [
+            "spec", 
+            "cluster_ip"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_deprecated_public_i_ps": {
+        "aliases": [
+            "deprecated_public_i_ps"
+        ], 
+        "property_path": [
+            "spec", 
+            "deprecated_public_i_ps"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_external_i_ps": {
+        "aliases": [
+            "external_i_ps"
+        ], 
+        "property_path": [
+            "spec", 
+            "external_i_ps"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_external_name": {
+        "aliases": [
+            "external_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "external_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_load_balancer_ip": {
+        "aliases": [
+            "load_balancer_ip"
+        ], 
+        "property_path": [
+            "spec", 
+            "load_balancer_ip"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_load_balancer_source_ranges": {
+        "aliases": [
+            "load_balancer_source_ranges"
+        ], 
+        "property_path": [
+            "spec", 
+            "load_balancer_source_ranges"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_ports": {
+        "aliases": [
+            "ports"
+        ], 
+        "property_path": [
+            "spec", 
+            "ports"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_selector": {
+        "aliases": [
+            "selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_session_affinity": {
+        "aliases": [
+            "session_affinity"
+        ], 
+        "property_path": [
+            "spec", 
+            "session_affinity"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_type": {
+        "aliases": [
+            "type"
+        ], 
+        "choices": {}, 
+        "property_path": [
+            "spec", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+request_body:
+{
+    "kind": "Service", 
+    "spec": {
+        "ports": [
+            {
+                "targetPort": 8080, 
+                "port": 8080, 
+                "name": "web-tcp"
+            }
+        ], 
+        "selector": {
+            "app": "hello"
+        }
+    }, 
+    "apiVersion": "v1", 
+    "metadata": {
+        "labels": {
+            "app": "hello"
+        }, 
+        "namespace": "hello", 
+        "name": "hello-service"
+    }
+}
+Starting create object
+STREAM FAILED: list_namespaced_service() takes exactly 2 arguments (1 given)
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_min_ready_seconds": {
+        "aliases": [
+            "min_ready_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "min_ready_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_paused": {
+        "aliases": [
+            "paused"
+        ], 
+        "property_path": [
+            "spec", 
+            "paused"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_replicas": {
+        "aliases": [
+            "replicas"
+        ], 
+        "property_path": [
+            "spec", 
+            "replicas"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_revision_history_limit": {
+        "aliases": [
+            "revision_history_limit"
+        ], 
+        "property_path": [
+            "spec", 
+            "revision_history_limit"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_selector": {
+        "aliases": [
+            "selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_active_deadline_seconds": {
+        "aliases": [
+            "strategy_active_deadline_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "active_deadline_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_strategy_annotations": {
+        "aliases": [
+            "strategy_annotations"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "annotations"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_custom_params": {
+        "aliases": [
+            "strategy_custom_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "custom_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_labels": {
+        "aliases": [
+            "strategy_labels"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "labels"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_recreate_params": {
+        "aliases": [
+            "strategy_recreate_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "recreate_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_resources_limits": {
+        "aliases": [
+            "strategy_resources_limits"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "resources", 
+            "limits"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_resources_requests": {
+        "aliases": [
+            "strategy_resources_requests"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "resources", 
+            "requests"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_rolling_params": {
+        "aliases": [
+            "strategy_rolling_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "rolling_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_type": {
+        "aliases": [
+            "strategy_type"
+        ], 
+        "choices": {
+            "custom_params": "Custom", 
+            "recreate_params": "Recreate", 
+            "rolling_params": "Rolling"
+        }, 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_active_deadline_seconds": {
+        "aliases": [
+            "active_deadline_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "active_deadline_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_containers": {
+        "aliases": [
+            "containers"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "containers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_dns_policy": {
+        "aliases": [
+            "dns_policy"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "dns_policy"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_host_ipc": {
+        "aliases": [
+            "host_ipc"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_ipc"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_host_network": {
+        "aliases": [
+            "host_network"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_network"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_host_pid": {
+        "aliases": [
+            "host_pid"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_pid"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_hostname": {
+        "aliases": [
+            "hostname"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "hostname"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_image_pull_secrets": {
+        "aliases": [
+            "image_pull_secrets"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "image_pull_secrets"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_metadata_annotations": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "spec_template_metadata_labels": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "spec_template_metadata_name": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "spec_template_metadata_namespace": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_template_node_name": {
+        "aliases": [
+            "node_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "node_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_node_selector": {
+        "aliases": [
+            "node_selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "node_selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_template_restart_policy": {
+        "aliases": [
+            "restart_policy"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "restart_policy"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_fs_group": {
+        "aliases": [
+            "security_context_fs_group"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "fs_group"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_security_context_run_as_non_root": {
+        "aliases": [
+            "security_context_run_as_non_root"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "run_as_non_root"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_security_context_run_as_user": {
+        "aliases": [
+            "security_context_run_as_user"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "run_as_user"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_security_context_se_linux_options_level": {
+        "aliases": [
+            "security_context_se_linux_options_level"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "level"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_role": {
+        "aliases": [
+            "security_context_se_linux_options_role"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "role"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_type": {
+        "aliases": [
+            "security_context_se_linux_options_type"
+        ], 
+        "choices": {}, 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_user": {
+        "aliases": [
+            "security_context_se_linux_options_user"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "user"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_supplemental_groups": {
+        "aliases": [
+            "security_context_supplemental_groups"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "supplemental_groups"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_service_account": {
+        "aliases": [
+            "service_account"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "service_account"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_service_account_name": {
+        "aliases": [
+            "service_account_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "service_account_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_subdomain": {
+        "aliases": [
+            "subdomain"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "subdomain"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_termination_grace_period_seconds": {
+        "aliases": [
+            "termination_grace_period_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "termination_grace_period_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_volumes": {
+        "aliases": [
+            "volumes"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "volumes"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_test": {
+        "aliases": [
+            "test"
+        ], 
+        "property_path": [
+            "spec", 
+            "test"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_triggers": {
+        "aliases": [
+            "triggers"
+        ], 
+        "property_path": [
+            "spec", 
+            "triggers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+request_body:
+{
+    "kind": "DeploymentConfig", 
+    "spec": {
+        "strategy": {
+            "type": "Rolling"
+        }, 
+        "replicas": 1, 
+        "template": {
+            "spec": {
+                "containers": [
+                    {
+                        "image": "openshift/busybox-http-app", 
+                        "name": "hello", 
+                        "ports": [
+                            {
+                                "protocol": "TCP", 
+                                "name": "web-8100-tcp", 
+                                "containerPort": 8080
+                            }
+                        ]
+                    }
+                ]
+            }, 
+            "metadata": {
+                "labels": {
+                    "app": "hello"
+                }, 
+                "name": "hello-pod"
+            }
+        }, 
+        "selector": {
+            "app": "hello"
+        }
+    }, 
+    "apiVersion": "v1", 
+    "metadata": {
+        "labels": {
+            "app": "hello"
+        }, 
+        "namespace": "hello", 
+        "name": "hello-depoy"
+    }
+}
+Starting create object
+STREAM FAILED: HTTPSConnectionPool(host='localhost', port=443): Max retries exceeded with url: /oapi/v1/deploymentconfigs?watch=True (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x1085d8a50>: Failed to establish a new connection: [Errno 61] Connection refused',))
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "description": {
+        "description": [
+            "Provides a brief overview or narrative for the project."
+        ]
+    }, 
+    "display_name": {
+        "description": [
+            "Provides a descriptive name for the project."
+        ]
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_finalizers": {
+        "aliases": [
+            "finalizers"
+        ], 
+        "property_path": [
+            "spec", 
+            "finalizers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+set_obj_attribute V1Project, ["metadata", "name"] to "hello"
+set_obj_attribute V1ObjectMeta, ["name"] to "hello"
+Object from params:
+{
+    "status": {
+        "phase": "Active"
+    }, 
+    "kind": "Project", 
+    "spec": {
+        "finalizers": [
+            "openshift.io/origin", 
+            "kubernetes"
+        ]
+    }, 
+    "api_version": "v1", 
+    "metadata": {
+        "uid": "f031e667-0f38-11e7-840c-a2a3304da08d", 
+        "owner_references": null, 
+        "generation": null, 
+        "namespace": null, 
+        "labels": null, 
+        "generate_name": null, 
+        "deletion_timestamp": null, 
+        "cluster_name": null, 
+        "finalizers": null, 
+        "deletion_grace_period_seconds": null, 
+        "self_link": "/oapi/v1/projects/hello", 
+        "resource_version": "42262", 
+        "creation_timestamp": "2017-03-22T19:51:28Z", 
+        "annotations": {
+            "openshift.io/requester": "system:admin", 
+            "openshift.io/sa.scc.supplemental-groups": "1002040000/10000", 
+            "openshift.io/display-name": "Shiny Foo", 
+            "openshift.io/sa.scc.mcs": "s0:c45,c30", 
+            "openshift.io/description": "W00T! Bitches", 
+            "openshift.io/sa.scc.uid-range": "1002040000/10000"
+        }, 
+        "name": "hello"
+    }
+}
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_cluster_ip": {
+        "aliases": [
+            "cluster_ip"
+        ], 
+        "property_path": [
+            "spec", 
+            "cluster_ip"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_deprecated_public_i_ps": {
+        "aliases": [
+            "deprecated_public_i_ps"
+        ], 
+        "property_path": [
+            "spec", 
+            "deprecated_public_i_ps"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_external_i_ps": {
+        "aliases": [
+            "external_i_ps"
+        ], 
+        "property_path": [
+            "spec", 
+            "external_i_ps"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_external_name": {
+        "aliases": [
+            "external_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "external_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_load_balancer_ip": {
+        "aliases": [
+            "load_balancer_ip"
+        ], 
+        "property_path": [
+            "spec", 
+            "load_balancer_ip"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_load_balancer_source_ranges": {
+        "aliases": [
+            "load_balancer_source_ranges"
+        ], 
+        "property_path": [
+            "spec", 
+            "load_balancer_source_ranges"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_ports": {
+        "aliases": [
+            "ports"
+        ], 
+        "property_path": [
+            "spec", 
+            "ports"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_selector": {
+        "aliases": [
+            "selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_session_affinity": {
+        "aliases": [
+            "session_affinity"
+        ], 
+        "property_path": [
+            "spec", 
+            "session_affinity"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_type": {
+        "aliases": [
+            "type"
+        ], 
+        "choices": {}, 
+        "property_path": [
+            "spec", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+set_obj_attribute V1Service, ["metadata", "labels"] to {"app": "hello"}
+set_obj_attribute V1ObjectMeta, ["labels"] to {"app": "hello"}
+set_obj_attribute V1Service, ["spec", "selector"] to {"app": "hello"}
+set_obj_attribute V1ServiceSpec, ["selector"] to {"app": "hello"}
+set_obj_attribute V1Service, ["spec", "selector"] to {"app": "hello"}
+set_obj_attribute V1ServiceSpec, ["selector"] to {"app": "hello"}
+set_obj_attribute V1Service, ["metadata", "name"] to "hello-service"
+set_obj_attribute V1ObjectMeta, ["name"] to "hello-service"
+set_obj_attribute V1Service, ["metadata", "namespace"] to "hello"
+set_obj_attribute V1ObjectMeta, ["namespace"] to "hello"
+set_obj_attribute V1Service, ["spec", "ports"] to [{"target_port": 8080, "port": 8080, "name": "web-tcp"}]
+set_obj_attribute V1ServiceSpec, ["ports"] to [{"target_port": 8080, "port": 8080, "name": "web-tcp"}]
+set_obj_attribute V1Service, ["spec", "ports"] to [{"target_port": 8080, "port": 8080, "name": "web-tcp"}]
+set_obj_attribute V1ServiceSpec, ["ports"] to [{"target_port": 8080, "port": 8080, "name": "web-tcp"}]
+Object from params:
+{
+    "status": {
+        "load_balancer": {
+            "ingress": null
+        }
+    }, 
+    "kind": "Service", 
+    "spec": {
+        "cluster_ip": "172.30.190.55", 
+        "external_i_ps": null, 
+        "load_balancer_ip": null, 
+        "external_name": null, 
+        "deprecated_public_i_ps": null, 
+        "load_balancer_source_ranges": null, 
+        "selector": {
+            "app": "hello"
+        }, 
+        "type": "ClusterIP", 
+        "ports": [
+            {
+                "target_port": 8080, 
+                "protocol": "TCP", 
+                "port": 8080, 
+                "name": "web-tcp", 
+                "node_port": null
+            }
+        ], 
+        "session_affinity": "None"
+    }, 
+    "api_version": "v1", 
+    "metadata": {
+        "uid": "fd228ddb-0f38-11e7-840c-a2a3304da08d", 
+        "owner_references": null, 
+        "generation": null, 
+        "namespace": "hello", 
+        "labels": {
+            "app": "hello"
+        }, 
+        "generate_name": null, 
+        "deletion_timestamp": null, 
+        "cluster_name": null, 
+        "finalizers": null, 
+        "deletion_grace_period_seconds": null, 
+        "self_link": "/api/v1/namespaces/hello/services/hello-service", 
+        "resource_version": "42303", 
+        "creation_timestamp": "2017-03-22T19:51:49Z", 
+        "annotations": null, 
+        "name": "hello-service"
+    }
+}
+arg_spec:
+{
+    "annotations": {
+        "property_path": [
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "cert_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "context": {
+        "auth_option": true, 
+        "description": [
+            "The name of a context found in the Kubernetes config file."
+        ]
+    }, 
+    "debug": {
+        "default": false, 
+        "description": [
+            "Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log"
+        ], 
+        "type": "bool"
+    }, 
+    "host": {
+        "auth_option": true, 
+        "description": [
+            "Provide a URL for acessing the Kubernetes API."
+        ]
+    }, 
+    "key_file": {
+        "auth_option": true, 
+        "description": [
+            "Path to a key file used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "kubeconfig": {
+        "auth_option": true, 
+        "description": [
+            "Path to an existing Kubernetes config file. If not provided, and no other connection options are provided, the openshift client will attempt to load the default configuration file from I(~/.kube/config.json)."
+        ], 
+        "type": "path"
+    }, 
+    "labels": {
+        "property_path": [
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "name": {
+        "property_path": [
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "namespace": {
+        "property_path": [
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_min_ready_seconds": {
+        "aliases": [
+            "min_ready_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "min_ready_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_paused": {
+        "aliases": [
+            "paused"
+        ], 
+        "property_path": [
+            "spec", 
+            "paused"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_replicas": {
+        "aliases": [
+            "replicas"
+        ], 
+        "property_path": [
+            "spec", 
+            "replicas"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_revision_history_limit": {
+        "aliases": [
+            "revision_history_limit"
+        ], 
+        "property_path": [
+            "spec", 
+            "revision_history_limit"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_selector": {
+        "aliases": [
+            "selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_active_deadline_seconds": {
+        "aliases": [
+            "strategy_active_deadline_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "active_deadline_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_strategy_annotations": {
+        "aliases": [
+            "strategy_annotations"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "annotations"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_custom_params": {
+        "aliases": [
+            "strategy_custom_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "custom_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_labels": {
+        "aliases": [
+            "strategy_labels"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "labels"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_recreate_params": {
+        "aliases": [
+            "strategy_recreate_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "recreate_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_resources_limits": {
+        "aliases": [
+            "strategy_resources_limits"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "resources", 
+            "limits"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_resources_requests": {
+        "aliases": [
+            "strategy_resources_requests"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "resources", 
+            "requests"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_rolling_params": {
+        "aliases": [
+            "strategy_rolling_params"
+        ], 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "rolling_params"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_strategy_type": {
+        "aliases": [
+            "strategy_type"
+        ], 
+        "choices": {
+            "custom_params": "Custom", 
+            "recreate_params": "Recreate", 
+            "rolling_params": "Rolling"
+        }, 
+        "property_path": [
+            "spec", 
+            "strategy", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_active_deadline_seconds": {
+        "aliases": [
+            "active_deadline_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "active_deadline_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_containers": {
+        "aliases": [
+            "containers"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "containers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_dns_policy": {
+        "aliases": [
+            "dns_policy"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "dns_policy"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_host_ipc": {
+        "aliases": [
+            "host_ipc"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_ipc"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_host_network": {
+        "aliases": [
+            "host_network"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_network"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_host_pid": {
+        "aliases": [
+            "host_pid"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "host_pid"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_hostname": {
+        "aliases": [
+            "hostname"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "hostname"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_image_pull_secrets": {
+        "aliases": [
+            "image_pull_secrets"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "image_pull_secrets"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_metadata_annotations": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "annotations"
+        ], 
+        "type": "dict"
+    }, 
+    "spec_template_metadata_labels": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "labels"
+        ], 
+        "type": "dict"
+    }, 
+    "spec_template_metadata_name": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "name"
+        ], 
+        "required": true
+    }, 
+    "spec_template_metadata_namespace": {
+        "property_path": [
+            "spec", 
+            "template", 
+            "metadata", 
+            "namespace"
+        ]
+    }, 
+    "spec_template_node_name": {
+        "aliases": [
+            "node_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "node_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_node_selector": {
+        "aliases": [
+            "node_selector"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "node_selector"
+        ], 
+        "required": false, 
+        "type": "dict"
+    }, 
+    "spec_template_restart_policy": {
+        "aliases": [
+            "restart_policy"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "restart_policy"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_fs_group": {
+        "aliases": [
+            "security_context_fs_group"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "fs_group"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_security_context_run_as_non_root": {
+        "aliases": [
+            "security_context_run_as_non_root"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "run_as_non_root"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_template_security_context_run_as_user": {
+        "aliases": [
+            "security_context_run_as_user"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "run_as_user"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_security_context_se_linux_options_level": {
+        "aliases": [
+            "security_context_se_linux_options_level"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "level"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_role": {
+        "aliases": [
+            "security_context_se_linux_options_role"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "role"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_type": {
+        "aliases": [
+            "security_context_se_linux_options_type"
+        ], 
+        "choices": {}, 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "type"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_se_linux_options_user": {
+        "aliases": [
+            "security_context_se_linux_options_user"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "se_linux_options", 
+            "user"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_security_context_supplemental_groups": {
+        "aliases": [
+            "security_context_supplemental_groups"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "security_context", 
+            "supplemental_groups"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_template_service_account": {
+        "aliases": [
+            "service_account"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "service_account"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_service_account_name": {
+        "aliases": [
+            "service_account_name"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "service_account_name"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_subdomain": {
+        "aliases": [
+            "subdomain"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "subdomain"
+        ], 
+        "required": false, 
+        "type": "str"
+    }, 
+    "spec_template_termination_grace_period_seconds": {
+        "aliases": [
+            "termination_grace_period_seconds"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "termination_grace_period_seconds"
+        ], 
+        "required": false, 
+        "type": "int"
+    }, 
+    "spec_template_volumes": {
+        "aliases": [
+            "volumes"
+        ], 
+        "property_path": [
+            "spec", 
+            "template", 
+            "spec", 
+            "volumes"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "spec_test": {
+        "aliases": [
+            "test"
+        ], 
+        "property_path": [
+            "spec", 
+            "test"
+        ], 
+        "required": false, 
+        "type": "bool"
+    }, 
+    "spec_triggers": {
+        "aliases": [
+            "triggers"
+        ], 
+        "property_path": [
+            "spec", 
+            "triggers"
+        ], 
+        "required": false, 
+        "type": "list"
+    }, 
+    "ssl_ca_cert": {
+        "auth_option": true, 
+        "description": [
+            "Path to a CA certificate used to authenticate with the API."
+        ], 
+        "type": "path"
+    }, 
+    "state": {
+        "choices": [
+            "present", 
+            "absent", 
+            "replaced"
+        ], 
+        "default": "present", 
+        "description": [
+            "Determines if the object should be created, patched, deleted or replaced. When set to C(present), the object will be created, if it does not exist, or patched, if requested parameters differ from existing object attributes. If set to C(absent), an existing object will be deleted, and if set to C(replaced), an existing object will be completely replaced with a new object created from the supplied parameters."
+        ]
+    }, 
+    "username": {
+        "auth_option": true, 
+        "description": [
+            "Provide a username for connecting to the API."
+        ]
+    }, 
+    "verify_ssl": {
+        "auth_option": true, 
+        "description": [
+            "Whether or not to verify the API server's SSL certificates."
+        ], 
+        "type": "bool"
+    }
+}
+set_obj_attribute V1DeploymentConfig, ["metadata", "labels"] to {"app": "hello"}
+set_obj_attribute V1ObjectMeta, ["labels"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfig, ["spec", "template", "spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1DeploymentConfigSpec, ["template", "spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1PodTemplateSpec, ["spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1PodSpec, ["containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1DeploymentConfig, ["spec", "selector"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfigSpec, ["selector"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfig, ["metadata", "namespace"] to "hello"
+set_obj_attribute V1ObjectMeta, ["namespace"] to "hello"
+set_obj_attribute V1DeploymentConfig, ["spec", "template", "metadata", "labels"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfigSpec, ["template", "metadata", "labels"] to {"app": "hello"}
+set_obj_attribute V1PodTemplateSpec, ["metadata", "labels"] to {"app": "hello"}
+set_obj_attribute V1ObjectMeta, ["labels"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfig, ["spec", "template", "spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1DeploymentConfigSpec, ["template", "spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1PodTemplateSpec, ["spec", "containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1PodSpec, ["containers"] to [{"image": "openshift/busybox-http-app", "name": "hello", "ports": [{"protocol": "TCP", "name": "web-8100-tcp", "container_port": 8080}]}]
+set_obj_attribute V1DeploymentConfig, ["spec", "replicas"] to 1
+set_obj_attribute V1DeploymentConfigSpec, ["replicas"] to 1
+set_obj_attribute V1DeploymentConfig, ["spec", "template", "metadata", "name"] to "hello-pod"
+set_obj_attribute V1DeploymentConfigSpec, ["template", "metadata", "name"] to "hello-pod"
+set_obj_attribute V1PodTemplateSpec, ["metadata", "name"] to "hello-pod"
+set_obj_attribute V1ObjectMeta, ["name"] to "hello-pod"
+set_obj_attribute V1DeploymentConfig, ["spec", "selector"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfigSpec, ["selector"] to {"app": "hello"}
+set_obj_attribute V1DeploymentConfig, ["spec", "strategy", "type"] to "Rolling"
+set_obj_attribute V1DeploymentConfigSpec, ["strategy", "type"] to "Rolling"
+set_obj_attribute V1DeploymentStrategy, ["type"] to "Rolling"
+set_obj_attribute V1DeploymentConfig, ["metadata", "name"] to "hello-depoy"
+set_obj_attribute V1ObjectMeta, ["name"] to "hello-depoy"
+set_obj_attribute V1DeploymentConfig, ["spec", "strategy", "type"] to "Rolling"
+set_obj_attribute V1DeploymentConfigSpec, ["strategy", "type"] to "Rolling"
+set_obj_attribute V1DeploymentStrategy, ["type"] to "Rolling"
+set_obj_attribute V1DeploymentConfig, ["spec", "replicas"] to 1
+set_obj_attribute V1DeploymentConfigSpec, ["replicas"] to 1
+Object from params:
+{
+    "status": {
+        "replicas": 1, 
+        "latest_version": 1, 
+        "observed_generation": 2, 
+        "updated_replicas": 1, 
+        "available_replicas": 1, 
+        "details": {
+            "message": "config change", 
+            "causes": [
+                {
+                    "type": "ConfigChange", 
+                    "image_trigger": null
+                }
+            ]
+        }, 
+        "ready_replicas": null, 
+        "unavailable_replicas": null, 
+        "conditions": [
+            {
+                "last_update_time": null, 
+                "status": "True", 
+                "last_transition_time": "2017-03-22T19:51:58Z", 
+                "reason": null, 
+                "message": "Deployment config has minimum availability.", 
+                "type": "Available"
+            }, 
+            {
+                "last_update_time": null, 
+                "status": "True", 
+                "last_transition_time": "2017-03-22T19:51:55Z", 
+                "reason": "NewReplicationControllerAvailable", 
+                "message": "Replication controller \"hello-depoy-1\" has completed progressing", 
+                "type": "Progressing"
+            }
+        ]
+    }, 
+    "kind": "DeploymentConfig", 
+    "spec": {
+        "replicas": 1, 
+        "min_ready_seconds": null, 
+        "strategy": {
+            "custom_params": null, 
+            "rolling_params": {
+                "pre": null, 
+                "timeout_seconds": 600, 
+                "interval_seconds": 1, 
+                "max_unavailable": "25%", 
+                "post": null, 
+                "max_surge": "25%", 
+                "update_period_seconds": 1
+            }, 
+            "labels": null, 
+            "active_deadline_seconds": null, 
+            "type": "Rolling", 
+            "annotations": null, 
+            "resources": {
+                "requests": null, 
+                "limits": null
+            }, 
+            "recreate_params": null
+        }, 
+        "paused": null, 
+        "revision_history_limit": null, 
+        "template": {
+            "spec": {
+                "hostname": null, 
+                "service_account": null, 
+                "image_pull_secrets": null, 
+                "service_account_name": null, 
+                "termination_grace_period_seconds": 30, 
+                "restart_policy": "Always", 
+                "node_name": null, 
+                "dns_policy": "ClusterFirst", 
+                "host_ipc": null, 
+                "security_context": {
+                    "fs_group": null, 
+                    "run_as_non_root": null, 
+                    "se_linux_options": null, 
+                    "supplemental_groups": null, 
+                    "run_as_user": null
+                }, 
+                "host_network": null, 
+                "host_pid": null, 
+                "active_deadline_seconds": null, 
+                "subdomain": null, 
+                "volumes": null, 
+                "containers": [
+                    {
+                        "image_pull_policy": "Always", 
+                        "tty": null, 
+                        "args": null, 
+                        "stdin_once": null, 
+                        "name": "hello", 
+                        "security_context": null, 
+                        "image": "openshift/busybox-http-app", 
+                        "stdin": null, 
+                        "volume_mounts": null, 
+                        "ports": [
+                            {
+                                "host_port": null, 
+                                "protocol": "TCP", 
+                                "host_ip": null, 
+                                "name": "web-8100-tcp", 
+                                "container_port": 8080
+                            }
+                        ], 
+                        "working_dir": null, 
+                        "command": null, 
+                        "env": null, 
+                        "termination_message_path": "/dev/termination-log", 
+                        "readiness_probe": null, 
+                        "liveness_probe": null, 
+                        "lifecycle": null, 
+                        "resources": {
+                            "requests": null, 
+                            "limits": null
+                        }
+                    }
+                ], 
+                "node_selector": null
+            }, 
+            "metadata": {
+                "uid": null, 
+                "owner_references": null, 
+                "generation": null, 
+                "namespace": null, 
+                "labels": {
+                    "app": "hello"
+                }, 
+                "generate_name": null, 
+                "deletion_timestamp": null, 
+                "cluster_name": null, 
+                "finalizers": null, 
+                "deletion_grace_period_seconds": null, 
+                "self_link": null, 
+                "resource_version": null, 
+                "creation_timestamp": {}, 
+                "annotations": null, 
+                "name": "hello-pod"
+            }
+        }, 
+        "test": false, 
+        "selector": {
+            "app": "hello"
+        }, 
+        "triggers": [
+            {
+                "type": "ConfigChange", 
+                "image_change_params": null
+            }
+        ]
+    }, 
+    "api_version": "v1", 
+    "metadata": {
+        "uid": "fe10ebd6-0f38-11e7-840c-a2a3304da08d", 
+        "owner_references": null, 
+        "generation": 2, 
+        "namespace": "hello", 
+        "labels": {
+            "app": "hello"
+        }, 
+        "generate_name": null, 
+        "deletion_timestamp": null, 
+        "cluster_name": null, 
+        "finalizers": null, 
+        "deletion_grace_period_seconds": null, 
+        "self_link": "/oapi/v1/namespaces/hello/deploymentconfigs/hello-depoy", 
+        "resource_version": "42351", 
+        "creation_timestamp": "2017-03-22T19:51:51Z", 
+        "annotations": null, 
+        "name": "hello-depoy"
+    }
+}
