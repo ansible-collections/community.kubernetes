@@ -2,9 +2,9 @@
 
 Provides access to the latest pre-release K8s modules. Include this role in a playbook, and any other plays or roles will have access to the modules.
 
-The modules are found in the [library folder](./library). Each has full documentation for parameters and the returned data structure. However, not all modules will include examples, only those where [test data]() has been created.
+The modules are found in the [library folder](./library). Each has full documentation for parameters and the returned data structure. However, not all modules will include examples, only those where [test data](https://github.com/openshift/openshift-restclient-python/tree/master/openshift/ansiblegen/examples) has been created.
 
-If you find an issue with a particular module, or have suggestions, please file an issue [here]((https://github.com/openshift/openshift-restclient-python/issues) 
+If you find an issue with a particular module, or have suggestions, please file an issue [here](https://github.com/openshift/openshift-restclient-python/issues).
 
 Requirements
 ------------
@@ -28,12 +28,12 @@ Once installed, add it to a playbook:
 - hosts: localhost
   remote_user: root
   roles:
-    - role: ansible-kubernetes-modules
+    - role: ansible.ansible-kubernetes-modules
       install_python_requirements: no
     - role: hello-world
 ```
 
-Because the role is referenced, the `hello-world` role is able to deploy an applicatoin using the K8s modules. To see the contents of the role, check in the [tests/roles](./tests/roles) folder.
+Because the role is referenced, the `hello-world` role is able to deploy an applicatoin using the K8s modules. To see contents of the actual role, check in the [tests/roles](./tests/roles) folder.
 
 Role Variables
 --------------
