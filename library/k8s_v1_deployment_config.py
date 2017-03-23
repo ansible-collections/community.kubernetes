@@ -56,7 +56,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
@@ -66,6 +65,11 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
+  resource_definition:
+    description:
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
   spec_min_ready_seconds:
     description:
     - MinReadySeconds is the minimum number of seconds for which a newly created pod
@@ -119,7 +123,7 @@ options:
     type: dict
   spec_strategy_custom_params:
     description:
-    - When C(spec_strategy_type) is I(Custom), provide a mapping of 'key:value' settings.
+    - When C(spec_strategy_type) is I(custom), provide a mapping of 'key:value' settings.
     aliases:
     - strategy_custom_params
     type: dict
@@ -132,7 +136,7 @@ options:
     type: dict
   spec_strategy_recreate_params:
     description:
-    - When C(spec_strategy_type) is I(Recreate), provide a mapping of 'key:value'
+    - When C(spec_strategy_type) is I(recreate), provide a mapping of 'key:value'
       settings.
     aliases:
     - strategy_recreate_params
@@ -153,7 +157,7 @@ options:
     type: dict
   spec_strategy_rolling_params:
     description:
-    - When C(spec_strategy_type) is I(Rolling), provide a mapping of 'key:value' settings.
+    - When C(spec_strategy_type) is I(rolling), provide a mapping of 'key:value' settings.
     aliases:
     - strategy_rolling_params
     type: dict
@@ -161,67 +165,11 @@ options:
     description:
     - Type is the name of a deployment strategy.
     choices:
-    - Rolling
-    - Custom
-    - Recreate
+    - rolling
+    - custom
+    - recreate
     aliases:
     - strategy_type
-  spec_template_active_deadline_seconds:
-    description:
-    - Optional duration in seconds the pod may be active on the node relative to StartTime
-      before the system will actively try to mark it failed and kill associated containers.
-      Value must be a positive integer.
-    aliases:
-    - active_deadline_seconds
-    type: int
-  spec_template_containers:
-    description:
-    - List of containers belonging to the pod. Containers cannot currently be added
-      or removed. There must be at least one container in a Pod. Cannot be updated.
-    aliases:
-    - containers
-    type: list
-  spec_template_dns_policy:
-    description:
-    - Set DNS policy for containers within the pod. One of 'ClusterFirst' or 'Default'.
-      Defaults to "ClusterFirst".
-    aliases:
-    - dns_policy
-  spec_template_host_ipc:
-    description:
-    - "Use the host's ipc namespace. Optional: Default to false."
-    aliases:
-    - host_ipc
-    type: bool
-  spec_template_host_network:
-    description:
-    - Host networking requested for this pod. Use the host's network namespace. If
-      this option is set, the ports that will be used must be specified. Default to
-      false.
-    aliases:
-    - host_network
-    type: bool
-  spec_template_host_pid:
-    description:
-    - "Use the host's pid namespace. Optional: Default to false."
-    aliases:
-    - host_pid
-    type: bool
-  spec_template_hostname:
-    description:
-    - Specifies the hostname of the Pod If not specified, the pod's hostname will
-      be set to a system-defined value.
-    aliases:
-    - hostname
-  spec_template_image_pull_secrets:
-    description:
-    - ImagePullSecrets is an optional list of references to secrets in the same namespace
-      to use for pulling any of the images used by this PodSpec. If specified, these
-      secrets will be passed to individual puller implementations for them to use.
-      For example, in the case of docker, only DockerConfig type secrets are honored.
-    aliases:
-    - image_pull_secrets
-    type: list
   spec_template_metadata_annotations:
     description:
     - Annotations is an unstructured key value map stored with a resource that may
@@ -239,21 +187,76 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   spec_template_metadata_namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
       is equivalent to the "default" namespace, but "default" is the canonical representation.
       Not all objects are required to be scoped to a namespace - the value of this
       field for those objects will be empty. Must be a DNS_LABEL. Cannot be updated.
-  spec_template_node_name:
+  spec_template_spec_active_deadline_seconds:
+    description:
+    - Optional duration in seconds the pod may be active on the node relative to StartTime
+      before the system will actively try to mark it failed and kill associated containers.
+      Value must be a positive integer.
+    aliases:
+    - active_deadline_seconds
+    type: int
+  spec_template_spec_containers:
+    description:
+    - List of containers belonging to the pod. Containers cannot currently be added
+      or removed. There must be at least one container in a Pod. Cannot be updated.
+    aliases:
+    - containers
+    type: list
+  spec_template_spec_dns_policy:
+    description:
+    - Set DNS policy for containers within the pod. One of 'ClusterFirst' or 'Default'.
+      Defaults to "ClusterFirst".
+    aliases:
+    - dns_policy
+  spec_template_spec_host_ipc:
+    description:
+    - "Use the host's ipc namespace. Optional: Default to false."
+    aliases:
+    - host_ipc
+    type: bool
+  spec_template_spec_host_network:
+    description:
+    - Host networking requested for this pod. Use the host's network namespace. If
+      this option is set, the ports that will be used must be specified. Default to
+      false.
+    aliases:
+    - host_network
+    type: bool
+  spec_template_spec_host_pid:
+    description:
+    - "Use the host's pid namespace. Optional: Default to false."
+    aliases:
+    - host_pid
+    type: bool
+  spec_template_spec_hostname:
+    description:
+    - Specifies the hostname of the Pod If not specified, the pod's hostname will
+      be set to a system-defined value.
+    aliases:
+    - hostname
+  spec_template_spec_image_pull_secrets:
+    description:
+    - ImagePullSecrets is an optional list of references to secrets in the same namespace
+      to use for pulling any of the images used by this PodSpec. If specified, these
+      secrets will be passed to individual puller implementations for them to use.
+      For example, in the case of docker, only DockerConfig type secrets are honored.
+    aliases:
+    - image_pull_secrets
+    type: list
+  spec_template_spec_node_name:
     description:
     - NodeName is a request to schedule this pod onto a specific node. If it is non-empty,
       the scheduler simply schedules this pod onto that node, assuming that it fits
       resource requirements.
     aliases:
     - node_name
-  spec_template_node_selector:
+  spec_template_spec_node_selector:
     description:
     - NodeSelector is a selector which must be true for the pod to fit on a node.
       Selector which must match a node's labels for the pod to be scheduled on that
@@ -261,13 +264,13 @@ options:
     aliases:
     - node_selector
     type: dict
-  spec_template_restart_policy:
+  spec_template_spec_restart_policy:
     description:
     - Restart policy for all containers within the pod. One of Always, OnFailure,
       Never. Default to Always.
     aliases:
     - restart_policy
-  spec_template_security_context_fs_group:
+  spec_template_spec_security_context_fs_group:
     description:
     - "A special supplemental group that applies to all containers in a pod. Some\
       \ volume types allow the Kubelet to change the ownership of that volume to be\
@@ -278,7 +281,7 @@ options:
     aliases:
     - security_context_fs_group
     type: int
-  spec_template_security_context_run_as_non_root:
+  spec_template_spec_security_context_run_as_non_root:
     description:
     - Indicates that the container must run as a non-root user. If true, the Kubelet
       will validate the image at runtime to ensure that it does not run as UID 0 (root)
@@ -288,7 +291,7 @@ options:
     aliases:
     - security_context_run_as_non_root
     type: bool
-  spec_template_security_context_run_as_user:
+  spec_template_spec_security_context_run_as_user:
     description:
     - The UID to run the entrypoint of the container process. Defaults to user specified
       in image metadata if unspecified. May also be set in SecurityContext. If set
@@ -297,27 +300,27 @@ options:
     aliases:
     - security_context_run_as_user
     type: int
-  spec_template_security_context_se_linux_options_level:
+  spec_template_spec_security_context_se_linux_options_level:
     description:
     - Level is SELinux level label that applies to the container.
     aliases:
     - security_context_se_linux_options_level
-  spec_template_security_context_se_linux_options_role:
+  spec_template_spec_security_context_se_linux_options_role:
     description:
     - Role is a SELinux role label that applies to the container.
     aliases:
     - security_context_se_linux_options_role
-  spec_template_security_context_se_linux_options_type:
+  spec_template_spec_security_context_se_linux_options_type:
     description:
     - Type is a SELinux type label that applies to the container.
     aliases:
     - security_context_se_linux_options_type
-  spec_template_security_context_se_linux_options_user:
+  spec_template_spec_security_context_se_linux_options_user:
     description:
     - User is a SELinux user label that applies to the container.
     aliases:
     - security_context_se_linux_options_user
-  spec_template_security_context_supplemental_groups:
+  spec_template_spec_security_context_supplemental_groups:
     description:
     - A list of groups applied to the first process run in each container, in addition
       to the container's primary GID. If unspecified, no groups will be added to any
@@ -325,25 +328,25 @@ options:
     aliases:
     - security_context_supplemental_groups
     type: list
-  spec_template_service_account:
+  spec_template_spec_service_account:
     description:
     - 'DeprecatedServiceAccount is a depreciated alias for ServiceAccountName. Deprecated:
       Use serviceAccountName instead.'
     aliases:
     - service_account
-  spec_template_service_account_name:
+  spec_template_spec_service_account_name:
     description:
     - ServiceAccountName is the name of the ServiceAccount to use to run this pod.
     aliases:
     - service_account_name
-  spec_template_subdomain:
+  spec_template_spec_subdomain:
     description:
     - If specified, the fully qualified Pod hostname will be "<hostname>.<subdomain>.<pod
       namespace>.svc.<cluster domain>". If not specified, the pod will not have a
       domainname at all.
     aliases:
     - subdomain
-  spec_template_termination_grace_period_seconds:
+  spec_template_spec_termination_grace_period_seconds:
     description:
     - Optional duration in seconds the pod needs to terminate gracefully. May be decreased
       in delete request. Value must be non-negative integer. The value zero indicates
@@ -355,7 +358,7 @@ options:
     aliases:
     - termination_grace_period_seconds
     type: int
-  spec_template_volumes:
+  spec_template_spec_volumes:
     description:
     - List of volumes that can be mounted by containers belonging to the pod.
     aliases:
@@ -380,6 +383,11 @@ options:
     aliases:
     - triggers
     type: list
+  src:
+    description:
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.

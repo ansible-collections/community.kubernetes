@@ -104,7 +104,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
@@ -118,6 +117,11 @@ options:
     description:
     - This should be a short, machine understandable string that gives the reason
       for the transition into the object's current status.
+  resource_definition:
+    description:
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
   source_component:
     description:
     - Component from which the event is generated.
@@ -128,6 +132,11 @@ options:
     - Node name on which the event is generated.
     aliases:
     - host
+  src:
+    description:
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.

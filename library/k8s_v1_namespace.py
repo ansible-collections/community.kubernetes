@@ -56,7 +56,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
@@ -66,6 +65,11 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
+  resource_definition:
+    description:
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
   spec_finalizers:
     description:
     - Finalizers is an opaque list of values that must be empty to permanently remove
@@ -73,6 +77,11 @@ options:
     aliases:
     - finalizers
     type: list
+  src:
+    description:
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.

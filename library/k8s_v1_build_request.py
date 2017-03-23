@@ -118,7 +118,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace

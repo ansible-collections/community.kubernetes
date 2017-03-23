@@ -69,7 +69,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
@@ -83,6 +82,11 @@ options:
     description:
     - RedirectURIs is the valid redirection URIs associated with a client
     type: list
+  resource_definition:
+    description:
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
   respond_with_challenges:
     description:
     - RespondWithChallenges indicates whether the client wants authentication needed
@@ -97,6 +101,11 @@ options:
   secret:
     description:
     - Secret is the unique secret associated with a client
+  src:
+    description:
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.

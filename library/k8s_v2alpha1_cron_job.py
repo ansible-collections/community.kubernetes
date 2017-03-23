@@ -56,7 +56,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
   namespace:
     description:
     - Namespace defines the space within each name must be unique. An empty namespace
@@ -66,89 +65,16 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
+  resource_definition:
+    description:
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
   spec_concurrency_policy:
     description:
     - ConcurrencyPolicy specifies how to treat concurrent executions of a Job.
     aliases:
     - concurrency_policy
-  spec_job_template_active_deadline_seconds:
-    description:
-    - Optional duration in seconds the pod may be active on the node relative to StartTime
-      before the system will actively try to mark it failed and kill associated containers.
-      Value must be a positive integer.
-    aliases:
-    - job__active_deadline_seconds
-    type: int
-  spec_job_template_completions:
-    description:
-    - Completions specifies the desired number of successfully finished pods the job
-      should be run with. Setting to nil means that the success of any pod signals
-      the success of all pods, and allows parallelism to have any positive value.
-      Setting to 1 means that parallelism is limited to 1 and the success of that
-      pod signals the success of the job.
-    aliases:
-    - job__completions
-    type: int
-  spec_job_template_containers:
-    description:
-    - List of containers belonging to the pod. Containers cannot currently be added
-      or removed. There must be at least one container in a Pod. Cannot be updated.
-    aliases:
-    - job__containers
-    type: list
-  spec_job_template_dns_policy:
-    description:
-    - Set DNS policy for containers within the pod. One of 'ClusterFirst' or 'Default'.
-      Defaults to "ClusterFirst".
-    aliases:
-    - job__dns_policy
-  spec_job_template_host_ipc:
-    description:
-    - "Use the host's ipc namespace. Optional: Default to false."
-    aliases:
-    - job__host_ipc
-    type: bool
-  spec_job_template_host_network:
-    description:
-    - Host networking requested for this pod. Use the host's network namespace. If
-      this option is set, the ports that will be used must be specified. Default to
-      false.
-    aliases:
-    - job__host_network
-    type: bool
-  spec_job_template_host_pid:
-    description:
-    - "Use the host's pid namespace. Optional: Default to false."
-    aliases:
-    - job__host_pid
-    type: bool
-  spec_job_template_hostname:
-    description:
-    - Specifies the hostname of the Pod If not specified, the pod's hostname will
-      be set to a system-defined value.
-    aliases:
-    - job__hostname
-  spec_job_template_image_pull_secrets:
-    description:
-    - ImagePullSecrets is an optional list of references to secrets in the same namespace
-      to use for pulling any of the images used by this PodSpec. If specified, these
-      secrets will be passed to individual puller implementations for them to use.
-      For example, in the case of docker, only DockerConfig type secrets are honored.
-    aliases:
-    - job__image_pull_secrets
-    type: list
-  spec_job_template_manual_selector:
-    description:
-    - ManualSelector controls generation of pod labels and pod selectors. Leave `manualSelector`
-      unset unless you are certain what you are doing. When false or unset, the system
-      pick labels unique to this job and appends those labels to the pod template.
-      When true, the user is responsible for picking unique labels and specifying
-      the selector. Failure to pick a unique label may cause this and other jobs to
-      not function correctly. However, You may see `manualSelector=true` in jobs that
-      were created with the old `extensions/v1beta1` API.
-    aliases:
-    - job__manual_selector
-    type: bool
   spec_job_template_metadata_annotations:
     description:
     - Annotations is an unstructured key value map stored with a resource that may
@@ -170,7 +96,6 @@ options:
       although some resources may allow a client to request the generation of an appropriate
       name automatically. Name is primarily intended for creation idempotence and
       configuration definition. Cannot be updated.
-    required: true
     aliases:
     - job__metadata_name
   spec_job_template_metadata_namespace:
@@ -181,22 +106,36 @@ options:
       field for those objects will be empty. Must be a DNS_LABEL. Cannot be updated.
     aliases:
     - job__metadata_namespace
-  spec_job_template_node_name:
+  spec_job_template_spec_active_deadline_seconds:
     description:
-    - NodeName is a request to schedule this pod onto a specific node. If it is non-empty,
-      the scheduler simply schedules this pod onto that node, assuming that it fits
-      resource requirements.
+    - Optional duration in seconds relative to the startTime that the job may be active
+      before the system tries to terminate it; value must be positive integer
     aliases:
-    - job__node_name
-  spec_job_template_node_selector:
+    - job__active_deadline_seconds
+    type: int
+  spec_job_template_spec_completions:
     description:
-    - NodeSelector is a selector which must be true for the pod to fit on a node.
-      Selector which must match a node's labels for the pod to be scheduled on that
-      node.
+    - Completions specifies the desired number of successfully finished pods the job
+      should be run with. Setting to nil means that the success of any pod signals
+      the success of all pods, and allows parallelism to have any positive value.
+      Setting to 1 means that parallelism is limited to 1 and the success of that
+      pod signals the success of the job.
     aliases:
-    - job__node_selector
-    type: dict
-  spec_job_template_parallelism:
+    - job__completions
+    type: int
+  spec_job_template_spec_manual_selector:
+    description:
+    - ManualSelector controls generation of pod labels and pod selectors. Leave `manualSelector`
+      unset unless you are certain what you are doing. When false or unset, the system
+      pick labels unique to this job and appends those labels to the pod template.
+      When true, the user is responsible for picking unique labels and specifying
+      the selector. Failure to pick a unique label may cause this and other jobs to
+      not function correctly. However, You may see `manualSelector=true` in jobs that
+      were created with the old `extensions/v1beta1` API.
+    aliases:
+    - job__manual_selector
+    type: bool
+  spec_job_template_spec_parallelism:
     description:
     - Parallelism specifies the maximum desired number of pods the job should run
       at any given time. The actual number of pods running in steady state will be
@@ -205,13 +144,131 @@ options:
     aliases:
     - job__parallelism
     type: int
-  spec_job_template_restart_policy:
+  spec_job_template_spec_selector_match_expressions:
+    description:
+    - matchExpressions is a list of label selector requirements. The requirements
+      are ANDed.
+    aliases:
+    - job__selector_match_expressions
+    type: list
+  spec_job_template_spec_selector_match_labels:
+    description:
+    - matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
+      map is equivalent to an element of matchExpressions, whose key field is "key",
+      the operator is "In", and the values array contains only "value". The requirements
+      are ANDed.
+    aliases:
+    - job__selector_match_labels
+    type: dict
+  spec_job_template_spec_template_metadata_annotations:
+    description:
+    - Annotations is an unstructured key value map stored with a resource that may
+      be set by external tools to store and retrieve arbitrary metadata. They are
+      not queryable and should be preserved when modifying objects.
+    aliases:
+    - job__metadata_annotations
+    type: dict
+  spec_job_template_spec_template_metadata_labels:
+    description:
+    - Map of string keys and values that can be used to organize and categorize (scope
+      and select) objects. May match selectors of replication controllers and services.
+    aliases:
+    - job__metadata_labels
+    type: dict
+  spec_job_template_spec_template_metadata_name:
+    description:
+    - Name must be unique within a namespace. Is required when creating resources,
+      although some resources may allow a client to request the generation of an appropriate
+      name automatically. Name is primarily intended for creation idempotence and
+      configuration definition. Cannot be updated.
+    aliases:
+    - job__metadata_name
+  spec_job_template_spec_template_metadata_namespace:
+    description:
+    - Namespace defines the space within each name must be unique. An empty namespace
+      is equivalent to the "default" namespace, but "default" is the canonical representation.
+      Not all objects are required to be scoped to a namespace - the value of this
+      field for those objects will be empty. Must be a DNS_LABEL. Cannot be updated.
+    aliases:
+    - job__metadata_namespace
+  spec_job_template_spec_template_spec_active_deadline_seconds:
+    description:
+    - Optional duration in seconds the pod may be active on the node relative to StartTime
+      before the system will actively try to mark it failed and kill associated containers.
+      Value must be a positive integer.
+    aliases:
+    - job__active_deadline_seconds
+    type: int
+  spec_job_template_spec_template_spec_containers:
+    description:
+    - List of containers belonging to the pod. Containers cannot currently be added
+      or removed. There must be at least one container in a Pod. Cannot be updated.
+    aliases:
+    - job__containers
+    type: list
+  spec_job_template_spec_template_spec_dns_policy:
+    description:
+    - Set DNS policy for containers within the pod. One of 'ClusterFirst' or 'Default'.
+      Defaults to "ClusterFirst".
+    aliases:
+    - job__dns_policy
+  spec_job_template_spec_template_spec_host_ipc:
+    description:
+    - "Use the host's ipc namespace. Optional: Default to false."
+    aliases:
+    - job__host_ipc
+    type: bool
+  spec_job_template_spec_template_spec_host_network:
+    description:
+    - Host networking requested for this pod. Use the host's network namespace. If
+      this option is set, the ports that will be used must be specified. Default to
+      false.
+    aliases:
+    - job__host_network
+    type: bool
+  spec_job_template_spec_template_spec_host_pid:
+    description:
+    - "Use the host's pid namespace. Optional: Default to false."
+    aliases:
+    - job__host_pid
+    type: bool
+  spec_job_template_spec_template_spec_hostname:
+    description:
+    - Specifies the hostname of the Pod If not specified, the pod's hostname will
+      be set to a system-defined value.
+    aliases:
+    - job__hostname
+  spec_job_template_spec_template_spec_image_pull_secrets:
+    description:
+    - ImagePullSecrets is an optional list of references to secrets in the same namespace
+      to use for pulling any of the images used by this PodSpec. If specified, these
+      secrets will be passed to individual puller implementations for them to use.
+      For example, in the case of docker, only DockerConfig type secrets are honored.
+    aliases:
+    - job__image_pull_secrets
+    type: list
+  spec_job_template_spec_template_spec_node_name:
+    description:
+    - NodeName is a request to schedule this pod onto a specific node. If it is non-empty,
+      the scheduler simply schedules this pod onto that node, assuming that it fits
+      resource requirements.
+    aliases:
+    - job__node_name
+  spec_job_template_spec_template_spec_node_selector:
+    description:
+    - NodeSelector is a selector which must be true for the pod to fit on a node.
+      Selector which must match a node's labels for the pod to be scheduled on that
+      node.
+    aliases:
+    - job__node_selector
+    type: dict
+  spec_job_template_spec_template_spec_restart_policy:
     description:
     - Restart policy for all containers within the pod. One of Always, OnFailure,
       Never. Default to Always.
     aliases:
     - job__restart_policy
-  spec_job_template_security_context_fs_group:
+  spec_job_template_spec_template_spec_security_context_fs_group:
     description:
     - "A special supplemental group that applies to all containers in a pod. Some\
       \ volume types allow the Kubelet to change the ownership of that volume to be\
@@ -222,7 +279,7 @@ options:
     aliases:
     - job__securitycontext_fs_group
     type: int
-  spec_job_template_security_context_run_as_non_root:
+  spec_job_template_spec_template_spec_security_context_run_as_non_root:
     description:
     - Indicates that the container must run as a non-root user. If true, the Kubelet
       will validate the image at runtime to ensure that it does not run as UID 0 (root)
@@ -232,7 +289,7 @@ options:
     aliases:
     - job__securitycontext_run_as_non_root
     type: bool
-  spec_job_template_security_context_run_as_user:
+  spec_job_template_spec_template_spec_security_context_run_as_user:
     description:
     - The UID to run the entrypoint of the container process. Defaults to user specified
       in image metadata if unspecified. May also be set in SecurityContext. If set
@@ -241,27 +298,27 @@ options:
     aliases:
     - job__securitycontext_run_as_user
     type: int
-  spec_job_template_security_context_se_linux_options_level:
+  spec_job_template_spec_template_spec_security_context_se_linux_options_level:
     description:
     - Level is SELinux level label that applies to the container.
     aliases:
     - job__securitycontext_se_linux_options_level
-  spec_job_template_security_context_se_linux_options_role:
+  spec_job_template_spec_template_spec_security_context_se_linux_options_role:
     description:
     - Role is a SELinux role label that applies to the container.
     aliases:
     - job__securitycontext_se_linux_options_role
-  spec_job_template_security_context_se_linux_options_type:
+  spec_job_template_spec_template_spec_security_context_se_linux_options_type:
     description:
     - Type is a SELinux type label that applies to the container.
     aliases:
     - job__securitycontext_se_linux_options_type
-  spec_job_template_security_context_se_linux_options_user:
+  spec_job_template_spec_template_spec_security_context_se_linux_options_user:
     description:
     - User is a SELinux user label that applies to the container.
     aliases:
     - job__securitycontext_se_linux_options_user
-  spec_job_template_security_context_supplemental_groups:
+  spec_job_template_spec_template_spec_security_context_supplemental_groups:
     description:
     - A list of groups applied to the first process run in each container, in addition
       to the container's primary GID. If unspecified, no groups will be added to any
@@ -269,41 +326,25 @@ options:
     aliases:
     - job__securitycontext_supplemental_groups
     type: list
-  spec_job_template_selector_match_expressions:
-    description:
-    - matchExpressions is a list of label selector requirements. The requirements
-      are ANDed.
-    aliases:
-    - job__selector_match_expressions
-    type: list
-  spec_job_template_selector_match_labels:
-    description:
-    - matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels
-      map is equivalent to an element of matchExpressions, whose key field is "key",
-      the operator is "In", and the values array contains only "value". The requirements
-      are ANDed.
-    aliases:
-    - job__selector_match_labels
-    type: dict
-  spec_job_template_service_account:
+  spec_job_template_spec_template_spec_service_account:
     description:
     - 'DeprecatedServiceAccount is a depreciated alias for ServiceAccountName. Deprecated:
       Use serviceAccountName instead.'
     aliases:
     - job__service_account
-  spec_job_template_service_account_name:
+  spec_job_template_spec_template_spec_service_account_name:
     description:
     - ServiceAccountName is the name of the ServiceAccount to use to run this pod.
     aliases:
     - job__service_account_name
-  spec_job_template_subdomain:
+  spec_job_template_spec_template_spec_subdomain:
     description:
     - If specified, the fully qualified Pod hostname will be "<hostname>.<subdomain>.<pod
       namespace>.svc.<cluster domain>". If not specified, the pod will not have a
       domainname at all.
     aliases:
     - job__subdomain
-  spec_job_template_termination_grace_period_seconds:
+  spec_job_template_spec_template_spec_termination_grace_period_seconds:
     description:
     - Optional duration in seconds the pod needs to terminate gracefully. May be decreased
       in delete request. Value must be non-negative integer. The value zero indicates
@@ -315,7 +356,7 @@ options:
     aliases:
     - job__termination_grace_period_seconds
     type: int
-  spec_job_template_volumes:
+  spec_job_template_spec_template_spec_volumes:
     description:
     - List of volumes that can be mounted by containers belonging to the pod.
     aliases:
@@ -340,6 +381,11 @@ options:
     aliases:
     - suspend
     type: bool
+  src:
+    description:
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.
