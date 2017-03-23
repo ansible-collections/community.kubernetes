@@ -87,6 +87,13 @@ options:
     - Path that the router watches for, to route traffic for to the service. Optional
     aliases:
     - path
+  spec_port_target_port:
+    description:
+    - The target port on pods selected by the service this route points to. If this
+      is a string, it will be looked up as a named port in the target endpoints port
+      list. Required
+    aliases:
+    - port_target_port
   spec_tls_ca_certificate:
     description:
     - caCertificate provides the cert authority certificate contents
@@ -181,21 +188,20 @@ EXAMPLES = '''
     namespace: k8s-project
     state: present
     host: www.example.com
-    target_reference_kind: Service
-    target_reference_name: service-name
+    spec_to_kind: Service
+    spec_to_name: service-name
     tls_termination: edge
     tls_key: |-
       -----BEGIN PRIVATE KEY-----
-      asjdflajd0fjasldjflsjflkjlkjfaljsdfljasljflasjfljsdf
-      sdlfjalsdjfljasdfljsljfljsfljdf
+      key_file_contents
       -----END PRIVATE KEY-----
     tls_certificate: |-
       -----BEGIN CERTIFICATE-----
-      kdlslfsfljetuoeiursljflsdjffljsfsf90909wrjf94lsjdf99KK
+      certificate contents
       -----END CERTIFICATE-----
     tls_ca_certificate: |-
       -----BEGIN CERTIFICATE-----
-      asdfajflasfjfsljlrjlrjlsjfoijlsornkvksflsbgoehfflf54444
+      ca_certificate_contents
       -----END CERTIFICATE-----
 
 - name: Patch route
@@ -205,11 +211,11 @@ EXAMPLES = '''
     state: present
     host: www.example.com
     tls_termination: reencrypt
-    target_reference_kind: Service
-    target_reference_name: other-service-name
+    spec_to_kind: Service
+    spec_to_name: other-service-name
     tls_destination_ca_certificate: |-
       -----BEGIN CERTIFICATE-----
-      destination cetricate_contents
+      destination_cetricate_contents
       -----END CERTIFICATE-----
 
 - name: Replace route
@@ -219,8 +225,8 @@ EXAMPLES = '''
     state: replaced
     host: www.example.com
     path: /foo/bar/baz.html
-    target_reference_kind: Service
-    target_reference_name: whimsy-name
+    spec_to_kind: Service
+    spec_to_name: whimsy-name
     tls_termination: edge
     tls_key: |-
       -----BEGIN PRIVATE KEY-----

@@ -1,8 +1,10 @@
 # tasks/main.yml
 ---
 
-- name: Intall role requirements
+- name: Intall latest openshift client 
   pip:
-    requirements: ../requirements.txt
+    name: git+https://github.com/openshift/openshift-restclient-python.git#egg=openshift 
+    state: latest 
+    virtualenv: "{{ virtualenv }}"
   when: install_python_requirements
 

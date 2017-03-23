@@ -66,6 +66,14 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
+  spec_min_available:
+    description:
+    - An eviction is allowed if at least "minAvailable" pods selected by "selector"
+      will still be available after the eviction, i.e. even in the absence of the
+      evicted pod. So for example you can prevent all voluntary evictions by specifying
+      "100%".
+    aliases:
+    - min_available
   spec_selector_match_expressions:
     description:
     - matchExpressions is a list of label selector requirements. The requirements

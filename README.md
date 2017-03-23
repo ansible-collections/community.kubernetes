@@ -1,38 +1,51 @@
-Role Name
-=========
+# ansible-kubernetes-modules
 
-A brief description of the role goes here.
+Provides access to the latest pre-release K8s modules. Include this role in a playbook, and any other plays or roles will have access to the modules.
+
+The modules are found in the [library folder](./library). Each has full documentation for parameters and the returned data structure. However, not all modules will include examples, only those where [test data]() has been created.
+
+If you find an issue with a particular module, or have suggestions, please file an issue [here]((https://github.com/openshift/openshift-restclient-python/issues) 
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+- Ansible installed from source
+- [OpenShift Rest Client](https://github.com/openshift/openshift-restclient-python) installed on the host where the modules will execute.
+
+Installation and use
+--------------------
+
+Use the Galaxy client to install the role:
+
+```
+$ ansible-galaxy install ansible.ansible-kubernetes-modules
+```
+
+Once installed, add it to a playbook:
+
+```
+---
+- hosts: localhost
+  remote_user: root
+  roles:
+    - role: ansible-kubernetes-modules
+      install_python_requirements: no
+    - role: hello-world
+```
+
+Because the role is referenced, the `hello-world` role is able to deploy an applicatoin using the K8s modules. To see the contents of the role, check in the [tests/roles](./tests/roles) folder.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+install_python_requirements
+> Set to true, if you want the OpenShift Rest Client installed. Defaults to false. Will install via `pip`.
 
-Dependencies
-------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
-
-Example Playbook
-----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+virtualenv
+> Provide the name of a virtualenv to use when installing `pip` packages.
 
 License
 -------
 
-BSD
+Apache V2
 
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).

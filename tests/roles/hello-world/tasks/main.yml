@@ -1,12 +1,12 @@
 - name: Create project
   k8s_v1_project:
     name: hello 
-    display_name: Shiny Foo
-    description: W00T! Bitches
+    display_name: Hello World 
+    description: Hello.
     debug: yes
-  register: project
+  register: create_project
 
-- debug: var=project
+- debug: var=create_project
 
 - name: Create service 
   k8s_v1_service:
@@ -22,9 +22,9 @@
     labels:
       app: hello 
     debug: yes
-  register: service 
+  register: create_service 
 
-- debug: var=service
+- debug: var=create_service
 
 - name: Create deployment config
   k8s_v1_deployment_config:
@@ -56,7 +56,12 @@
   k8s_v1_route:
     name: hello-route 
     namespace: hello
-    host: www.example.com
+    state: present
     to_kind: Service
     to_name: hello-service
-    tls_termination: edge 
+    to_weight: 100
+    port_target_port: web-tcp
+    tls_termination: edge
+  register: create_route
+
+- debug: var=create_route

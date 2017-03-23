@@ -71,6 +71,11 @@ options:
     - Specifies the name of the referenced service.
     aliases:
     - backend_service_name
+  spec_backend_service_port:
+    description:
+    - Specifies the port of the referenced service.
+    aliases:
+    - backend_service_port
   spec_rules:
     description:
     - A list of host rules used to configure the Ingress. If unspecified, or no rule

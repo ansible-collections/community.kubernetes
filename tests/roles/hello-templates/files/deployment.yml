@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  name: hello-depoy
+  namespace: hello
+  labels:
+    app: hello
+spec:
+  strategy:
+    type: Rolling
+    rollingParams:
+      updatePeriodSeconds: 1
+      intervalSeconds: 1
+      timeoutSeconds: 600
+      maxUnavailable: 25%
+      maxSurge: 25%
+    resources: {}
+  triggers:
+    - type: ConfigChange
+  replicas: 1
+  test: false
+  selector:
+    app: hello
+  template:
+    metadata:
+      name: hello-pod
+      labels:
+        app: hello
+    spec:
+      containers:
+        - name: hello
+          image: openshift/busybox-http-app
+          ports:
+            - name: web-8100-tcp
+              containerPort: 8080
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
