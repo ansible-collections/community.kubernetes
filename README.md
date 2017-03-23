@@ -18,7 +18,7 @@ Installation and use
 Use the Galaxy client to install the role:
 
 ```
-$ ansible-galaxy install ansible.ansible-kubernetes-modules
+$ ansible-galaxy install ansible.kubernetes-modules
 ```
 
 Once installed, add it to a playbook:
@@ -28,7 +28,7 @@ Once installed, add it to a playbook:
 - hosts: localhost
   remote_user: root
   roles:
-    - role: ansible.ansible-kubernetes-modules
+    - role: ansible.kubernetes-modules
       install_python_requirements: no
     - role: hello-world
 ```
