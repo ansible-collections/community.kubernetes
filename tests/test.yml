@@ -3,5 +3,7 @@
   remote_user: root
   roles:
     - role: ansible-kubernetes-modules
-      install_python_requirements: no
+      install_python_requirements: no 
+    - role: hello-world
     - role: hello-templates
+

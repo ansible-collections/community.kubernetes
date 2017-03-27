@@ -1,6 +1,16 @@
+- name: Delete project
+  k8s_v1_project:
+    name: hello 
+    state: absent
+    debug: yes
+  register: delete_project 
+
+- debug: var=delete_project
+
 - name: Create project
   k8s_v1_project:
     name: hello 
+    state: present
     display_name: Hello World 
     description: Hello.
     debug: yes
@@ -28,7 +38,7 @@
 
 - name: Create deployment config
   k8s_v1_deployment_config:
-    name: hello-depoy
+    name: hello-deploy
     namespace: hello
     state: present 
     debug: yes
@@ -42,6 +52,9 @@
         image: openshift/busybox-http-app
         ports:
         - container_port: 8080 
+          protocol: TCP
+          name: web-8080-tcp 
+        - container_port: 8100
           protocol: TCP
           name: web-8100-tcp 
     replicas: 1
@@ -65,3 +78,4 @@
   register: create_route
 
 - debug: var=create_route
+
