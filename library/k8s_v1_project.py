@@ -38,6 +38,12 @@ options:
   display_name:
     description:
     - Provides a descriptive name for the project.
+  force:
+    description:
+    - If set to C(True), and I(state) is C(present), an existing object will updated,
+      and lists will be replaced, rather than merged.
+    default: false
+    type: bool
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.
@@ -94,16 +100,18 @@ options:
     type: path
   state:
     description:
-    - Determines if the object should be created, patched, deleted or replaced. When
-      set to C(present), the object will be created, if it does not exist, or patched,
-      if requested parameters differ from existing object attributes. If set to C(absent),
-      an existing object will be deleted, and if set to C(replaced), an existing object
-      will be completely replaced with a new object created from the supplied parameters.
+    - Determines if an object should be created, patched, or deleted. When set to
+      C(present), the object will be created, if it does not exist, or patched, if
+      parameter values differ from the existing object's attributes, and deleted,
+      if set to C(absent). A patch operation results in merging lists and updating
+      dictionaries, with lists being merged into a unique set of values. If a list
+      contains a dictionary with a I(name) or I(type) attribute, a strategic merge
+      is performed, where individual elements with a matching I(name_) or I(type)
+      are merged. To force the replacement of lists, set the I(force) option to C(True).
     default: present
     choices:
     - present
     - absent
-    - replaced
   username:
     description:
     - Provide a username for connecting to the API.

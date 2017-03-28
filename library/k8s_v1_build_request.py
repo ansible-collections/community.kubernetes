@@ -88,6 +88,12 @@ options:
     - env contains additional environment variables you want to pass into a builder
       container
     type: list
+  force:
+    description:
+    - If set to C(True), and I(state) is C(present), an existing object will updated,
+      and lists will be replaced, rather than merged.
+    default: false
+    type: bool
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.

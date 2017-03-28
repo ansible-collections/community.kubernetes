@@ -32,6 +32,12 @@ options:
     - Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log
     default: false
     type: bool
+  force:
+    description:
+    - If set to C(True), and I(state) is C(present), an existing object will updated,
+      and lists will be replaced, rather than merged.
+    default: false
+    type: bool
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.
@@ -123,7 +129,7 @@ options:
     type: dict
   spec_strategy_custom_params:
     description:
-    - When C(spec_strategy_type) is I(custom), provide a mapping of 'key:value' settings.
+    - When C(spec_strategy_type) is I(Custom), provide a mapping of 'key:value' settings.
     aliases:
     - strategy_custom_params
     type: dict
@@ -136,7 +142,7 @@ options:
     type: dict
   spec_strategy_recreate_params:
     description:
-    - When C(spec_strategy_type) is I(recreate), provide a mapping of 'key:value'
+    - When C(spec_strategy_type) is I(Recreate), provide a mapping of 'key:value'
       settings.
     aliases:
     - strategy_recreate_params
@@ -157,7 +163,7 @@ options:
     type: dict
   spec_strategy_rolling_params:
     description:
-    - When C(spec_strategy_type) is I(rolling), provide a mapping of 'key:value' settings.
+    - When C(spec_strategy_type) is I(Rolling), provide a mapping of 'key:value' settings.
     aliases:
     - strategy_rolling_params
     type: dict
@@ -165,9 +171,9 @@ options:
     description:
     - Type is the name of a deployment strategy.
     choices:
-    - rolling
-    - custom
-    - recreate
+    - Rolling
+    - Custom
+    - Recreate
     aliases:
     - strategy_type
   spec_template_metadata_annotations:
@@ -394,16 +400,18 @@ options:
     type: path
   state:
     description:
-    - Determines if the object should be created, patched, deleted or replaced. When
-      set to C(present), the object will be created, if it does not exist, or patched,
-      if requested parameters differ from existing object attributes. If set to C(absent),
-      an existing object will be deleted, and if set to C(replaced), an existing object
-      will be completely replaced with a new object created from the supplied parameters.
+    - Determines if an object should be created, patched, or deleted. When set to
+      C(present), the object will be created, if it does not exist, or patched, if
+      parameter values differ from the existing object's attributes, and deleted,
+      if set to C(absent). A patch operation results in merging lists and updating
+      dictionaries, with lists being merged into a unique set of values. If a list
+      contains a dictionary with a I(name) or I(type) attribute, a strategic merge
+      is performed, where individual elements with a matching I(name_) or I(type)
+      are merged. To force the replacement of lists, set the I(force) option to C(True).
     default: present
     choices:
     - present
     - absent
-    - replaced
   username:
     description:
     - Provide a username for connecting to the API.

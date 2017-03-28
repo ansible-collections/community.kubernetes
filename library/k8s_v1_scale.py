@@ -32,6 +32,12 @@ options:
     - Enable debug output from the OpenShift helper. Logging info is written to KubeObjHelper.log
     default: false
     type: bool
+  force:
+    description:
+    - If set to C(True), and I(state) is C(present), an existing object will updated,
+      and lists will be replaced, rather than merged.
+    default: false
+    type: bool
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.

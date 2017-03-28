@@ -47,6 +47,12 @@ options:
     description:
     - ExpiresIn is the seconds from CreationTime before this token expires.
     type: int
+  force:
+    description:
+    - If set to C(True), and I(state) is C(present), an existing object will updated,
+      and lists will be replaced, rather than merged.
+    default: false
+    type: bool
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.
