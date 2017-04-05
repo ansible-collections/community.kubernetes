@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ansible.module_utils.k8s_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
+from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
 module: k8s_v1_namespace
@@ -114,18 +114,18 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- kubernetes == 1.0.0
 '''
 
 EXAMPLES = '''
 - name: Create a namespace
-  k8s_v1_namespace:
-    name: k8s-project
+  k8s_v1_namespace.yml:
+    name: k8s-namespace
     state: present
 
 - name: Add labels and annotations
-  k8s_v1_namespace:
-    name: k8s-project
+  k8s_v1_namespace.yml:
+    name: k8s-namespace
     state: present
     labels:
       app_env: production
@@ -134,8 +134,8 @@ EXAMPLES = '''
       domain: namespace.com.acmecorp
 
 - name: Update labels and annotations
-  k8s_v1_namespace:
-    name: k8s-project
+  k8s_v1_namespace.yml:
+    name: k8s-namespace
     state: present
     labels:
       app_env: production
@@ -146,8 +146,8 @@ EXAMPLES = '''
       monitoring_group: '1'
 
 - name: Create a namespace
-  k8s_v1_namespace:
-    name: search-project
+  k8s_v1_namespace.yml:
+    name: search-namespace
     state: present
     labels:
       app: web
@@ -156,8 +156,8 @@ EXAMPLES = '''
       company: acme.com
 
 - name: Replace namespace
-  k8s_v1_namespace:
-    name: search-project
+  k8s_v1_namespace.yml:
+    name: search-namespace
     state: replaced
     labels:
       app: web_app
@@ -166,8 +166,8 @@ EXAMPLES = '''
       company: acme.com
 
 - name: Remove namespace
-  k8s_v1_namespace:
-    name: search-project
+  k8s_v1_namespace.yml:
+    name: search-namespace
     state: absent
 '''
 
@@ -368,17 +368,16 @@ namespace:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('namespace', 'V1')
-    except OpenShiftAnsibleException as exc:
+        module = KubernetesAnsibleModule('namespace', 'V1')
+    except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)
 
     try:
         module.execute_module()
-    except OpenShiftAnsibleException as exc:
+    except KubernetesAnsibleException as exc:
         module.fail_json(msg="Module failed!", error=str(exc))
 
 
 if __name__ == '__main__':
     main()
-

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ansible.module_utils.k8s_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
+from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
 module: k8s_v1_replication_controller_list
@@ -89,7 +89,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- kubernetes == 1.0.0
 '''
 
 EXAMPLES = '''
@@ -1888,82 +1888,6 @@ replication_controller_list:
                                 ip_addr:port if the port is other than default (typically
                                 TCP ports 860 and 3260).
                               type: str
-                        metadata:
-                          description:
-                          - 'Metadata represents metadata about the pod that should
-                            populate this volume Deprecated: Use downwardAPI instead.'
-                          type: complex
-                          contains:
-                            default_mode:
-                              description:
-                              - 'Optional: mode bits to use on created files by default.
-                                Must be a value between 0 and 0777. Defaults to 0644.
-                                Directories within the path are not affected by this
-                                setting. This might be in conflict with other options
-                                that affect the file mode, like fsGroup, and the result
-                                can be other mode bits set.'
-                              type: int
-                            items:
-                              description:
-                              - Items is a list of downward API volume file
-                              type: list
-                              contains:
-                                field_ref:
-                                  description:
-                                  - 'Required: Selects a field of the pod: only annotations,
-                                    labels, name and namespace are supported.'
-                                  type: complex
-                                  contains:
-                                    api_version:
-                                      description:
-                                      - Version of the schema the FieldPath is written
-                                        in terms of, defaults to "v1".
-                                      type: str
-                                    field_path:
-                                      description:
-                                      - Path of the field to select in the specified
-                                        API version.
-                                      type: str
-                                mode:
-                                  description:
-                                  - 'Optional: mode bits to use on this file, must
-                                    be a value between 0 and 0777. If not specified,
-                                    the volume defaultMode will be used. This might
-                                    be in conflict with other options that affect
-                                    the file mode, like fsGroup, and the result can
-                                    be other mode bits set.'
-                                  type: int
-                                name:
-                                  description:
-                                  - "Required: Name is the relative path name of the\
-                                    \ file to be created. Must not be absolute or\
-                                    \ contain the '..' path. Must be utf-8 encoded.\
-                                    \ The first item of the relative path must not\
-                                    \ start with '..'"
-                                  type: str
-                                resource_field_ref:
-                                  description:
-                                  - 'Selects a resource of the container: only resources
-                                    limits and requests (limits.cpu, limits.memory,
-                                    requests.cpu and requests.memory) are currently
-                                    supported.'
-                                  type: complex
-                                  contains:
-                                    container_name:
-                                      description:
-                                      - 'Container name: required for volumes, optional
-                                        for env vars'
-                                      type: str
-                                    divisor:
-                                      description:
-                                      - Specifies the output format of the exposed
-                                        resources, defaults to "1"
-                                      type: complex
-                                      contains: {}
-                                    resource:
-                                      description:
-                                      - 'Required: resource to select'
-                                      type: str
                         name:
                           description:
                           - Volume's name. Must be a DNS_LABEL and unique within the
@@ -2256,17 +2180,16 @@ replication_controller_list:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('replication_controller_list', 'V1')
-    except OpenShiftAnsibleException as exc:
+        module = KubernetesAnsibleModule('replication_controller_list', 'V1')
+    except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)
 
     try:
         module.execute_module()
-    except OpenShiftAnsibleException as exc:
+    except KubernetesAnsibleException as exc:
         module.fail_json(msg="Module failed!", error=str(exc))
 
 
 if __name__ == '__main__':
     main()
-

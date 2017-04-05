@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from ansible.module_utils.k8s_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
+from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
 module: k8s_v1beta1_storage_class_list
@@ -89,7 +89,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- kubernetes == 1.0.0
 '''
 
 EXAMPLES = '''
@@ -322,17 +322,16 @@ storage_class_list:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('storage_class_list', 'V1beta1')
-    except OpenShiftAnsibleException as exc:
+        module = KubernetesAnsibleModule('storage_class_list', 'V1beta1')
+    except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)
 
     try:
         module.execute_module()
-    except OpenShiftAnsibleException as exc:
+    except KubernetesAnsibleException as exc:
         module.fail_json(msg="Module failed!", error=str(exc))
 
 
 if __name__ == '__main__':
     main()
-
