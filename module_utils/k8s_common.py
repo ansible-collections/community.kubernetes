@@ -271,7 +271,7 @@ class KubernetesAnsibleModule(AnsibleModule):
                     if meta_key in ('name', 'namespace', 'labels', 'annotations'):
                         parameters[meta_key] = meta_value
             elif key in self.helper.argspec and value is not None:
-                    parameters[key] = value
+                parameters[key] = value
             elif isinstance(value, dict):
                 self._add_parameter(value, [key], parameters)
         self.helper.log("Request to parameters: {}".format(json.dumps(parameters)))

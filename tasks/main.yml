@@ -3,7 +3,7 @@
 
 - name: Intall latest openshift client 
   pip:
-    name: git+https://github.com/openshift/openshift-restclient-python.git#egg=openshift 
+    name: https://github.com/openshift/openshift-restclient-python/archive/master.tar.gz
     state: latest 
     virtualenv: "{{ virtualenv }}"
   when: install_python_requirements
