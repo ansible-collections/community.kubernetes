@@ -1,6 +1,6 @@
 # ansible-kubernetes-modules
 
-Provides access to the latest pre-release K8s modules. 
+Provides access to the latest release of the K8s modules. 
 
 Include this role in a playbook, and any other plays, roles, and includes will have access to the modules.
 
