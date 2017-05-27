@@ -1,5 +1,5 @@
 - name: Create project
-  k8s_v1_project:
+  openshift_v1_project:
     name: test-resource-defn
     display_name: Resource Defn 
     description: Load resources 
@@ -42,7 +42,7 @@
 - debug: var=create_service
 
 - name: Create deployment from resource file
-  k8s_v1_deployment_config:
+  openshift_v1_deployment_config:
     state: present
     debug: yes
     src: "{{ role_path }}/files/deployment.yml"

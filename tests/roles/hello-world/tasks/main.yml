@@ -1,5 +1,5 @@
 - name: Delete project
-  k8s_v1_project:
+  openshift_v1_project:
     name: hello 
     state: absent
     debug: yes
@@ -8,7 +8,7 @@
 - debug: var=delete_project
 
 - name: Create project
-  k8s_v1_project:
+  openshift_v1_project:
     name: hello 
     state: present
     display_name: Hello World 
@@ -37,7 +37,7 @@
 - debug: var=create_service
 
 - name: Create deployment config
-  k8s_v1_deployment_config:
+  openshift_v1_deployment_config:
     name: hello-deploy
     namespace: hello
     state: present 
@@ -66,7 +66,7 @@
 - debug: var=create_deployment
   
 - name: Create route
-  k8s_v1_route:
+  openshift_v1_route:
     name: hello-route 
     namespace: hello
     state: present
