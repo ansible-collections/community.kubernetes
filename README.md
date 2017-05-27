@@ -8,14 +8,12 @@ The modules are found in the [library folder](./library). Each has full document
 
 If you find an issue with a particular module, or have suggestions, please file an issue at the [OpenShift Rest Client repo](https://github.com/openshift/openshift-restclient-python/issues).
 
-Requirements
-------------
+## Requirements
 
 - Ansible installed from source
 - [OpenShift Rest Client](https://github.com/openshift/openshift-restclient-python) installed on the host where the modules will execute.
 
-Installation and use
---------------------
+## Installation and use
 
 Use the Galaxy client to install the role:
 
@@ -37,19 +35,45 @@ Once installed, add it to a playbook:
 
 Because the role is referenced, the `hello-world` role is able to deploy an applicatoin using the K8s modules. To see contents of the actual role, check in the [tests/roles](./tests/roles) folder.
 
-Authenticating with the API
----------------------------
+## Authenticating with the API
+
 The modules interact directly with the Kubernetes or OpenShift API. It is not required that you have the `kubectl` or `oc` CLI tool installed. 
 
-By default the OpenShift Rest Client will look for `~/.kube/config`, and if found, connect using the active context. You can override the location of the file using the `kubeconfig` parameter, and the context, using the `context` parameter.
+### Module parameters 
 
-Basic authentication is also supported using the `username` and `password` options. You can override the URL using the `host` parameter. Certificate authentication works through the `ssl_ca_cert`, `cert_file`, and `key_file` parameters, and for token authentication, use the `api_key` parameter.
+The OpenShift rest client requires a Kubernetes config file. Use the following options to control where it looks for the file, and the context it uses to authenticate with the API:
 
-To disable SSL certificate verification, set `verify_ssl` to false.
+kubeonfig
+> The default path to the config file is `~/.kube/config`. Use to pass an alternate file path.
 
+context
+> Name of the configuration context to use for authentication. If not specified, the current, active contexts is used.
 
-Role Variables
---------------
+Use the following parameters to ovrride the settings found in the config file:
+
+host
+> Provide the URL to the API server.
+
+ssl_ca_cert
+> Path to the Certificate Authority certificate file.
+
+cert_file
+> Path to the server certificate file.
+
+key_file
+> Path to the private key file.
+
+api_key
+> API token.
+
+verify_ssl
+> Set to *true* or *false*. If *false*, SSL verification will not be enforced. 
+
+### Environment Variables
+
+Rather than pass the authentication settings as parameters to individual modules,  you can pass the information using environment variables. The name of the environment variables is *K8S_AUTH_* followed by the variable name in uppercase. For example, *key_file* would be *K8S_AUTH_KEY_FILE*
+
+## Role Variables
 
 install_python_requirements
 > Set to true, if you want the OpenShift Rest Client installed. Defaults to false. Will install via `pip`.
@@ -57,8 +81,6 @@ install_python_requirements
 virtualenv
 > Provide the name of a virtualenv to use when installing `pip` packages.
 
-License
--------
+## License
 
 Apache V2
-

@@ -1,1 +1,1 @@
--e git+https://github.com/openshift/openshift-restclient-python.git#egg=openshift
+https://github.com/openshift/openshift-restclient-python/archive/master.tar.gz#egg=openshift-1.0.0
