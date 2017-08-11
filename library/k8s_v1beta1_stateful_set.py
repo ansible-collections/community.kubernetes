@@ -349,6 +349,22 @@ requirements:
 '''
 
 EXAMPLES = '''
+- name: Create stateful set
+  k8s_v1beta1_stateful_set.yml:
+    name: test
+    labels:
+      name: test
+    namespace: test
+    state: present
+    service_name: test
+    replicas: 3
+    spec_template_metadata_labels:
+      name: test
+    spec_template_metadata_name: test
+    termination_grace_period_seconds: 10
+    containers:
+    - name: test
+      image: openshift/origin-ruby-sample:v1.0
 '''
 
 RETURN = '''

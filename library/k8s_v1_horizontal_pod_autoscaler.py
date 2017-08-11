@@ -147,6 +147,15 @@ requirements:
 '''
 
 EXAMPLES = '''
+- name: Create replica set
+  k8s_v1_horizontal_pod_autoscaler.yml:
+    name: test-scaler
+    namespace: test
+    state: present
+    scale_target_ref_kind: ReplicaSet
+    scale_target_ref_name: test
+    min_replicas: 2
+    max_replicas: 5
 '''
 
 RETURN = '''

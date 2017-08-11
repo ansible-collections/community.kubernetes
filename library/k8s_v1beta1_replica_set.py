@@ -336,6 +336,17 @@ requirements:
 '''
 
 EXAMPLES = '''
+- name: Create replica set
+  k8s_v1beta1_replica_set.yml:
+    name: myreplicaset
+    namespace: test
+    state: present
+    replicas: 3
+    spec_template_metadata_labels:
+      name: myreplicaset
+    containers:
+    - name: myreplicaset
+      image: openshift/origin-ruby-sample:v1.0
 '''
 
 RETURN = '''
