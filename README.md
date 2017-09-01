@@ -8,7 +8,7 @@ The modules are found in the [library folder](./library). Each has full document
 
 If you find an issue with a particular module, or have suggestions, please file an issue at the [OpenShift Rest Client repo](https://github.com/openshift/openshift-restclient-python/issues).
 
-For convenience, the `k8s_common.py` module is included under [module_utils](./module_utils). It is not currenlty part of an official Ansible release, but it is part of Ansible, and lives in the `devel` branch. In the meantime, if you happen to find a bug, or would like to make a change, please open issues and submit pull requests at the [Ansible repo](https://github.com/ansible/ansible).
+For convenience, the `k8s_common.py` and `openshift_common.py` modules are included under [module_utils](./module_utils). It is not currenlty part of an official Ansible release, but it is part of Ansible, and lives in the `devel` branch. In the meantime, if you happen to find a bug, or would like to make a change, please open issues and submit pull requests at the [Ansible repo](https://github.com/ansible/ansible).
 
 ## Requirements
 
