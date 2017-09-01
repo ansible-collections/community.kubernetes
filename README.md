@@ -45,7 +45,7 @@ The modules interact directly with the Kubernetes or OpenShift API. It is not re
 
 The OpenShift rest client requires a Kubernetes config file. Use the following options to control where it looks for the file, and the context it uses to authenticate with the API:
 
-kubeonfig
+kubeconfig
 > The default path to the config file is `~/.kube/config`. Use to pass an alternate file path.
 
 context
