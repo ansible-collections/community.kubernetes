@@ -78,13 +78,25 @@ options:
     type: dict
   spec_docker_image_repository:
     description:
-    - DockerImageRepository is optional, if specified this stream is backed by a Docker
-      repository on this server
+    - 'dockerImageRepository is optional, if specified this stream is backed by a
+      Docker repository on this server Deprecated: This field is deprecated as of
+      v3.7 and will be removed in a future release. Specify the source for the tags
+      to be imported in each tag via the spec.tags.from reference instead.'
     aliases:
     - docker_image_repository
+  spec_lookup_policy_local:
+    description:
+    - local will change the docker short image references (like "mysql" or "php:latest")
+      on objects in this namespace to the image ID whenever they match this image
+      stream, instead of reaching out to a remote registry. The name will be fully
+      qualified to an image ID if found. The tag's referencePolicy is taken into account
+      on the replaced value. Only works within the current namespace.
+    aliases:
+    - lookup_policy_local
+    type: bool
   spec_tags:
     description:
-    - Tags map arbitrary string values to specific image locators
+    - tags map arbitrary string values to specific image locators
     aliases:
     - tags
     type: list
@@ -119,7 +131,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- openshift == 0.3.1
 '''
 
 EXAMPLES = '''
@@ -226,6 +238,150 @@ image_stream:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -261,6 +417,14 @@ image_stream:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -304,18 +468,37 @@ image_stream:
       contains:
         docker_image_repository:
           description:
-          - DockerImageRepository is optional, if specified this stream is backed
-            by a Docker repository on this server
+          - 'dockerImageRepository is optional, if specified this stream is backed
+            by a Docker repository on this server Deprecated: This field is deprecated
+            as of v3.7 and will be removed in a future release. Specify the source
+            for the tags to be imported in each tag via the spec.tags.from reference
+            instead.'
           type: str
+        lookup_policy:
+          description:
+          - lookupPolicy controls how other resources reference images within this
+            namespace.
+          type: complex
+          contains:
+            local:
+              description:
+              - local will change the docker short image references (like "mysql"
+                or "php:latest") on objects in this namespace to the image ID whenever
+                they match this image stream, instead of reaching out to a remote
+                registry. The name will be fully qualified to an image ID if found.
+                The tag's referencePolicy is taken into account on the replaced value.
+                Only works within the current namespace.
+              type: bool
         tags:
           description:
-          - Tags map arbitrary string values to specific image locators
+          - tags map arbitrary string values to specific image locators
           type: list
           contains:
             _from:
               description:
-              - From is a reference to an image stream tag or image stream this tag
-                should track
+              - Optional; if specified, a reference to another image that this tag
+                should point to. Valid values are ImageStreamTag, ImageStreamImage,
+                and DockerImage.
               type: complex
               contains:
                 api_version:
@@ -356,20 +539,27 @@ image_stream:
                   type: str
             annotations:
               description:
-              - Annotations associated with images using this tag
+              - Optional; if specified, annotations that are applied to images retrieved
+                via ImageStreamTags.
               type: complex
               contains: str, str
             generation:
               description:
-              - Generation is the image stream generation that updated this tag -
-                setting it to 0 is an indication that the generation must be updated.
-                Legacy clients will send this as nil, which means the client doesn't
-                know or care.
+              - Generation is a counter that tracks mutations to the spec tag (user
+                intent). When a tag reference is changed the generation is set to
+                match the current stream generation (which is incremented every time
+                spec is changed). Other processes in the system like the image importer
+                observe that the generation of spec tag is newer than the generation
+                recorded in the status and use that as a trigger to import the newest
+                remote tag. To trigger a new import, clients may set this value to
+                zero which will reset the generation to the latest stream generation.
+                Legacy clients will send this value as nil which will be merged with
+                the current tag generation.
               type: int
             import_policy:
               description:
-              - Import is information that controls how images may be imported by
-                the server.
+              - ImportPolicy is information that controls how images may be imported
+                by the server.
               type: complex
               contains:
                 insecure:
@@ -393,7 +583,7 @@ image_stream:
               type: bool
             reference_policy:
               description:
-              - ReferencePolicy defines how other components should consume the image
+              - ReferencePolicy defines how other components should consume the image.
               type: complex
               contains:
                 type:
@@ -422,6 +612,12 @@ image_stream:
           - DockerImageRepository represents the effective location this stream may
             be accessed at. May be empty until the server determines where the repository
             is located
+          type: str
+        public_docker_image_repository:
+          description:
+          - PublicDockerImageRepository represents the public location from where
+            the image can be pulled outside the cluster. This field may be empty if
+            the administrator has not exposed the integrated registry externally.
           type: str
         tags:
           description:

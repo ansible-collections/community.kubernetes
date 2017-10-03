@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -111,7 +107,7 @@ job_list:
       type: str
     items:
       description:
-      - Items is the list of Job.
+      - items is the list of Jobs.
       type: list
       contains:
         api_version:
@@ -210,6 +206,153 @@ job_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -246,6 +389,14 @@ job_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -287,7 +438,7 @@ job_list:
               type: str
         spec:
           description:
-          - Spec is a structure defining the expected behavior of a job.
+          - Specification of the desired behavior of a job.
           type: complex
           contains:
             active_deadline_seconds:
@@ -298,16 +449,15 @@ job_list:
               type: int
             completions:
               description:
-              - Completions specifies the desired number of successfully finished
-                pods the job should be run with. Setting to nil means that the success
-                of any pod signals the success of all pods, and allows parallelism
-                to have any positive value. Setting to 1 means that parallelism is
-                limited to 1 and the success of that pod signals the success of the
-                job.
+              - Specifies the desired number of successfully finished pods the job
+                should be run with. Setting to nil means that the success of any pod
+                signals the success of all pods, and allows parallelism to have any
+                positive value. Setting to 1 means that parallelism is limited to
+                1 and the success of that pod signals the success of the job.
               type: int
             manual_selector:
               description:
-              - ManualSelector controls generation of pod labels and pod selectors.
+              - manualSelector controls generation of pod labels and pod selectors.
                 Leave `manualSelector` unset unless you are certain what you are doing.
                 When false or unset, the system pick labels unique to this job and
                 appends those labels to the pod template. When true, the user is responsible
@@ -318,16 +468,16 @@ job_list:
               type: bool
             parallelism:
               description:
-              - Parallelism specifies the maximum desired number of pods the job should
-                run at any given time. The actual number of pods running in steady
-                state will be less than this number when ((.spec.completions - .status.successful)
+              - Specifies the maximum desired number of pods the job should run at
+                any given time. The actual number of pods running in steady state
+                will be less than this number when ((.spec.completions - .status.successful)
                 < .spec.parallelism), i.e. when the work left to do is less than max
                 parallelism.
               type: int
             selector:
               description:
-              - Selector is a label query over pods that should match the pod count.
-                Normally, the system sets this field for you.
+              - A label query over pods that should match the pod count. Normally,
+                the system sets this field for you.
               type: complex
               contains:
                 match_expressions:
@@ -363,8 +513,7 @@ job_list:
                   contains: str, str
             template:
               description:
-              - Template is the object that describes the pod that will be created
-                when executing a job.
+              - Describes the pod that will be created when executing a job.
               type: complex
               contains:
                 metadata:
@@ -458,6 +607,162 @@ job_list:
                       - A sequence number representing a specific generation of the
                         desired state. Populated by the system. Read-only.
                       type: int
+                    initializers:
+                      description:
+                      - An initializer is a controller which enforces some system
+                        invariant at object creation time. This field is a list of
+                        initializers that have not yet acted on this object. If nil
+                        or empty, this object has been completely initialized. Otherwise,
+                        the object is considered uninitialized and is hidden (in list/watch
+                        and get calls) from clients that haven't explicitly asked
+                        to observe uninitialized objects. When an object is created,
+                        the system will populate this list with the current set of
+                        initializers. Only privileged users may set or modify this
+                        list. Once it is empty, it may not be modified further by
+                        any user.
+                      type: complex
+                      contains:
+                        pending:
+                          description:
+                          - Pending is a list of initializers that must execute in
+                            order before this object is visible. When the last pending
+                            initializer is removed, and no failing result is set,
+                            the initializers struct will be set to nil and the object
+                            is considered as initialized and visible to all clients.
+                          type: list
+                          contains:
+                            name:
+                              description:
+                              - name of the process that is responsible for initializing
+                                this object.
+                              type: str
+                        result:
+                          description:
+                          - If result is set with the Failure field, the object will
+                            be persisted to storage and then deleted, ensuring that
+                            other clients can observe the deletion.
+                          type: complex
+                          contains:
+                            api_version:
+                              description:
+                              - APIVersion defines the versioned schema of this representation
+                                of an object. Servers should convert recognized schemas
+                                to the latest internal value, and may reject unrecognized
+                                values.
+                              type: str
+                            code:
+                              description:
+                              - Suggested HTTP return code for this status, 0 if not
+                                set.
+                              type: int
+                            details:
+                              description:
+                              - Extended data associated with the reason. Each reason
+                                may define its own extended details. This field is
+                                optional and the data returned is not guaranteed to
+                                conform to any schema except that defined by the reason
+                                type.
+                              type: complex
+                              contains:
+                                causes:
+                                  description:
+                                  - The Causes array includes more details associated
+                                    with the StatusReason failure. Not all StatusReasons
+                                    may provide detailed causes.
+                                  type: list
+                                  contains:
+                                    field:
+                                      description:
+                                      - 'The field of the resource that has caused
+                                        this error, as named by its JSON serialization.
+                                        May include dot and postfix notation for nested
+                                        attributes. Arrays are zero-indexed. Fields
+                                        may appear more than once in an array of causes
+                                        due to fields having multiple errors. Optional.
+                                        Examples: "name" - the field "name" on the
+                                        current resource "items[0].name" - the field
+                                        "name" on the first array entry in "items"'
+                                      type: str
+                                    message:
+                                      description:
+                                      - A human-readable description of the cause
+                                        of the error. This field may be presented
+                                        as-is to a reader.
+                                      type: str
+                                    reason:
+                                      description:
+                                      - A machine-readable description of the cause
+                                        of the error. If this value is empty there
+                                        is no information available.
+                                      type: str
+                                group:
+                                  description:
+                                  - The group attribute of the resource associated
+                                    with the status StatusReason.
+                                  type: str
+                                kind:
+                                  description:
+                                  - The kind attribute of the resource associated
+                                    with the status StatusReason. On some operations
+                                    may differ from the requested resource Kind.
+                                  type: str
+                                name:
+                                  description:
+                                  - The name attribute of the resource associated
+                                    with the status StatusReason (when there is a
+                                    single name which can be described).
+                                  type: str
+                                retry_after_seconds:
+                                  description:
+                                  - If specified, the time in seconds before the operation
+                                    should be retried.
+                                  type: int
+                                uid:
+                                  description:
+                                  - UID of the resource. (when there is a single resource
+                                    which can be described).
+                                  type: str
+                            kind:
+                              description:
+                              - Kind is a string value representing the REST resource
+                                this object represents. Servers may infer this from
+                                the endpoint the client submits requests to. Cannot
+                                be updated. In CamelCase.
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the status of this
+                                operation.
+                              type: str
+                            metadata:
+                              description:
+                              - Standard list metadata.
+                              type: complex
+                              contains:
+                                resource_version:
+                                  description:
+                                  - String that identifies the server's internal version
+                                    of this object that can be used by clients to
+                                    determine when objects have changed. Value must
+                                    be treated as opaque by clients and passed unmodified
+                                    back to the server. Populated by the system. Read-only.
+                                  type: str
+                                self_link:
+                                  description:
+                                  - SelfLink is a URL representing this object. Populated
+                                    by the system. Read-only.
+                                  type: str
+                            reason:
+                              description:
+                              - A machine-readable description of why this operation
+                                is in the "Failure" status. If this value is empty
+                                there is no information available. A Reason clarifies
+                                an HTTP status code but does not override it.
+                              type: str
+                            status:
+                              description:
+                              - 'Status of the operation. One of: "Success" or "Failure".'
+                              type: str
                     labels:
                       description:
                       - Map of string keys and values that can be used to organize
@@ -496,6 +801,15 @@ job_list:
                           description:
                           - API version of the referent.
                           type: str
+                        block_owner_deletion:
+                          description:
+                          - If true, AND if the owner has the "foregroundDeletion"
+                            finalizer, then the owner cannot be deleted from the key-value
+                            store until this reference is removed. Defaults to false.
+                            To set this field, a user needs "delete" permission of
+                            the owner, otherwise 422 (Unprocessable Entity) will be
+                            returned.
+                          type: bool
                         controller:
                           description:
                           - If true, this reference points to the managing controller.
@@ -548,6 +862,510 @@ job_list:
                         try to mark it failed and kill associated containers. Value
                         must be a positive integer.
                       type: int
+                    affinity:
+                      description:
+                      - If specified, the pod's scheduling constraints
+                      type: complex
+                      contains:
+                        node_affinity:
+                          description:
+                          - Describes node affinity scheduling rules for the pod.
+                          type: complex
+                          contains:
+                            preferred_during_scheduling_ignored_during_execution:
+                              description:
+                              - The scheduler will prefer to schedule pods to nodes
+                                that satisfy the affinity expressions specified by
+                                this field, but it may choose a node that violates
+                                one or more of the expressions. The node that is most
+                                preferred is the one with the greatest sum of weights,
+                                i.e. for each node that meets all of the scheduling
+                                requirements (resource request, requiredDuringScheduling
+                                affinity expressions, etc.), compute a sum by iterating
+                                through the elements of this field and adding "weight"
+                                to the sum if the node matches the corresponding matchExpressions;
+                                the node(s) with the highest sum are the most preferred.
+                              type: list
+                              contains:
+                                preference:
+                                  description:
+                                  - A node selector term, associated with the corresponding
+                                    weight.
+                                  type: complex
+                                  contains:
+                                    match_expressions:
+                                      description:
+                                      - Required. A list of node selector requirements.
+                                        The requirements are ANDed.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - The label key that the selector applies
+                                            to.
+                                          type: str
+                                        operator:
+                                          description:
+                                          - Represents a key's relationship to a set
+                                            of values. Valid operators are In, NotIn,
+                                            Exists, DoesNotExist. Gt, and Lt.
+                                          type: str
+                                        values:
+                                          description:
+                                          - An array of string values. If the operator
+                                            is In or NotIn, the values array must
+                                            be non-empty. If the operator is Exists
+                                            or DoesNotExist, the values array must
+                                            be empty. If the operator is Gt or Lt,
+                                            the values array must have a single element,
+                                            which will be interpreted as an integer.
+                                            This array is replaced during a strategic
+                                            merge patch.
+                                          type: list
+                                          contains: str
+                                weight:
+                                  description:
+                                  - Weight associated with matching the corresponding
+                                    nodeSelectorTerm, in the range 1-100.
+                                  type: int
+                            required_during_scheduling_ignored_during_execution:
+                              description:
+                              - If the affinity requirements specified by this field
+                                are not met at scheduling time, the pod will not be
+                                scheduled onto the node. If the affinity requirements
+                                specified by this field cease to be met at some point
+                                during pod execution (e.g. due to an update), the
+                                system may or may not try to eventually evict the
+                                pod from its node.
+                              type: complex
+                              contains:
+                                node_selector_terms:
+                                  description:
+                                  - Required. A list of node selector terms. The terms
+                                    are ORed.
+                                  type: list
+                                  contains:
+                                    match_expressions:
+                                      description:
+                                      - Required. A list of node selector requirements.
+                                        The requirements are ANDed.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - The label key that the selector applies
+                                            to.
+                                          type: str
+                                        operator:
+                                          description:
+                                          - Represents a key's relationship to a set
+                                            of values. Valid operators are In, NotIn,
+                                            Exists, DoesNotExist. Gt, and Lt.
+                                          type: str
+                                        values:
+                                          description:
+                                          - An array of string values. If the operator
+                                            is In or NotIn, the values array must
+                                            be non-empty. If the operator is Exists
+                                            or DoesNotExist, the values array must
+                                            be empty. If the operator is Gt or Lt,
+                                            the values array must have a single element,
+                                            which will be interpreted as an integer.
+                                            This array is replaced during a strategic
+                                            merge patch.
+                                          type: list
+                                          contains: str
+                        pod_affinity:
+                          description:
+                          - Describes pod affinity scheduling rules (e.g. co-locate
+                            this pod in the same node, zone, etc. as some other pod(s)).
+                          type: complex
+                          contains:
+                            preferred_during_scheduling_ignored_during_execution:
+                              description:
+                              - The scheduler will prefer to schedule pods to nodes
+                                that satisfy the affinity expressions specified by
+                                this field, but it may choose a node that violates
+                                one or more of the expressions. The node that is most
+                                preferred is the one with the greatest sum of weights,
+                                i.e. for each node that meets all of the scheduling
+                                requirements (resource request, requiredDuringScheduling
+                                affinity expressions, etc.), compute a sum by iterating
+                                through the elements of this field and adding "weight"
+                                to the sum if the node has pods which matches the
+                                corresponding podAffinityTerm; the node(s) with the
+                                highest sum are the most preferred.
+                              type: list
+                              contains:
+                                pod_affinity_term:
+                                  description:
+                                  - Required. A pod affinity term, associated with
+                                    the corresponding weight.
+                                  type: complex
+                                  contains:
+                                    label_selector:
+                                      description:
+                                      - A label query over a set of resources, in
+                                        this case pods.
+                                      type: complex
+                                      contains:
+                                        match_expressions:
+                                          description:
+                                          - matchExpressions is a list of label selector
+                                            requirements. The requirements are ANDed.
+                                          type: list
+                                          contains:
+                                            key:
+                                              description:
+                                              - key is the label key that the selector
+                                                applies to.
+                                              type: str
+                                            operator:
+                                              description:
+                                              - operator represents a key's relationship
+                                                to a set of values. Valid operators
+                                                ard In, NotIn, Exists and DoesNotExist.
+                                              type: str
+                                            values:
+                                              description:
+                                              - values is an array of string values.
+                                                If the operator is In or NotIn, the
+                                                values array must be non-empty. If
+                                                the operator is Exists or DoesNotExist,
+                                                the values array must be empty. This
+                                                array is replaced during a strategic
+                                                merge patch.
+                                              type: list
+                                              contains: str
+                                        match_labels:
+                                          description:
+                                          - matchLabels is a map of {key,value} pairs.
+                                            A single {key,value} in the matchLabels
+                                            map is equivalent to an element of matchExpressions,
+                                            whose key field is "key", the operator
+                                            is "In", and the values array contains
+                                            only "value". The requirements are ANDed.
+                                          type: complex
+                                          contains: str, str
+                                    namespaces:
+                                      description:
+                                      - namespaces specifies which namespaces the
+                                        labelSelector applies to (matches against);
+                                        null or empty list means "this pod's namespace"
+                                      type: list
+                                      contains: str
+                                    topology_key:
+                                      description:
+                                      - This pod should be co-located (affinity) or
+                                        not co-located (anti-affinity) with the pods
+                                        matching the labelSelector in the specified
+                                        namespaces, where co-located is defined as
+                                        running on a node whose value of the label
+                                        with key topologyKey matches that of any node
+                                        on which any of the selected pods is running.
+                                        For PreferredDuringScheduling pod anti-affinity,
+                                        empty topologyKey is interpreted as "all topologies"
+                                        ("all topologies" here means all the topologyKeys
+                                        indicated by scheduler command-line argument
+                                        --failure-domains); for affinity and for RequiredDuringScheduling
+                                        pod anti-affinity, empty topologyKey is not
+                                        allowed.
+                                      type: str
+                                weight:
+                                  description:
+                                  - weight associated with matching the corresponding
+                                    podAffinityTerm, in the range 1-100.
+                                  type: int
+                            required_during_scheduling_ignored_during_execution:
+                              description:
+                              - 'NOT YET IMPLEMENTED. TODO: Uncomment field once it
+                                is implemented. If the affinity requirements specified
+                                by this field are not met at scheduling time, the
+                                pod will not be scheduled onto the node. If the affinity
+                                requirements specified by this field cease to be met
+                                at some point during pod execution (e.g. due to a
+                                pod label update), the system will try to eventually
+                                evict the pod from its node. When there are multiple
+                                elements, the lists of nodes corresponding to each
+                                podAffinityTerm are intersected, i.e. all terms must
+                                be satisfied. RequiredDuringSchedulingRequiredDuringExecution
+                                []PodAffinityTerm `json:"requiredDuringSchedulingRequiredDuringExecution,omitempty"`
+                                If the affinity requirements specified by this field
+                                are not met at scheduling time, the pod will not be
+                                scheduled onto the node. If the affinity requirements
+                                specified by this field cease to be met at some point
+                                during pod execution (e.g. due to a pod label update),
+                                the system may or may not try to eventually evict
+                                the pod from its node. When there are multiple elements,
+                                the lists of nodes corresponding to each podAffinityTerm
+                                are intersected, i.e. all terms must be satisfied.'
+                              type: list
+                              contains:
+                                label_selector:
+                                  description:
+                                  - A label query over a set of resources, in this
+                                    case pods.
+                                  type: complex
+                                  contains:
+                                    match_expressions:
+                                      description:
+                                      - matchExpressions is a list of label selector
+                                        requirements. The requirements are ANDed.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - key is the label key that the selector
+                                            applies to.
+                                          type: str
+                                        operator:
+                                          description:
+                                          - operator represents a key's relationship
+                                            to a set of values. Valid operators ard
+                                            In, NotIn, Exists and DoesNotExist.
+                                          type: str
+                                        values:
+                                          description:
+                                          - values is an array of string values. If
+                                            the operator is In or NotIn, the values
+                                            array must be non-empty. If the operator
+                                            is Exists or DoesNotExist, the values
+                                            array must be empty. This array is replaced
+                                            during a strategic merge patch.
+                                          type: list
+                                          contains: str
+                                    match_labels:
+                                      description:
+                                      - matchLabels is a map of {key,value} pairs.
+                                        A single {key,value} in the matchLabels map
+                                        is equivalent to an element of matchExpressions,
+                                        whose key field is "key", the operator is
+                                        "In", and the values array contains only "value".
+                                        The requirements are ANDed.
+                                      type: complex
+                                      contains: str, str
+                                namespaces:
+                                  description:
+                                  - namespaces specifies which namespaces the labelSelector
+                                    applies to (matches against); null or empty list
+                                    means "this pod's namespace"
+                                  type: list
+                                  contains: str
+                                topology_key:
+                                  description:
+                                  - This pod should be co-located (affinity) or not
+                                    co-located (anti-affinity) with the pods matching
+                                    the labelSelector in the specified namespaces,
+                                    where co-located is defined as running on a node
+                                    whose value of the label with key topologyKey
+                                    matches that of any node on which any of the selected
+                                    pods is running. For PreferredDuringScheduling
+                                    pod anti-affinity, empty topologyKey is interpreted
+                                    as "all topologies" ("all topologies" here means
+                                    all the topologyKeys indicated by scheduler command-line
+                                    argument --failure-domains); for affinity and
+                                    for RequiredDuringScheduling pod anti-affinity,
+                                    empty topologyKey is not allowed.
+                                  type: str
+                        pod_anti_affinity:
+                          description:
+                          - Describes pod anti-affinity scheduling rules (e.g. avoid
+                            putting this pod in the same node, zone, etc. as some
+                            other pod(s)).
+                          type: complex
+                          contains:
+                            preferred_during_scheduling_ignored_during_execution:
+                              description:
+                              - The scheduler will prefer to schedule pods to nodes
+                                that satisfy the anti-affinity expressions specified
+                                by this field, but it may choose a node that violates
+                                one or more of the expressions. The node that is most
+                                preferred is the one with the greatest sum of weights,
+                                i.e. for each node that meets all of the scheduling
+                                requirements (resource request, requiredDuringScheduling
+                                anti-affinity expressions, etc.), compute a sum by
+                                iterating through the elements of this field and adding
+                                "weight" to the sum if the node has pods which matches
+                                the corresponding podAffinityTerm; the node(s) with
+                                the highest sum are the most preferred.
+                              type: list
+                              contains:
+                                pod_affinity_term:
+                                  description:
+                                  - Required. A pod affinity term, associated with
+                                    the corresponding weight.
+                                  type: complex
+                                  contains:
+                                    label_selector:
+                                      description:
+                                      - A label query over a set of resources, in
+                                        this case pods.
+                                      type: complex
+                                      contains:
+                                        match_expressions:
+                                          description:
+                                          - matchExpressions is a list of label selector
+                                            requirements. The requirements are ANDed.
+                                          type: list
+                                          contains:
+                                            key:
+                                              description:
+                                              - key is the label key that the selector
+                                                applies to.
+                                              type: str
+                                            operator:
+                                              description:
+                                              - operator represents a key's relationship
+                                                to a set of values. Valid operators
+                                                ard In, NotIn, Exists and DoesNotExist.
+                                              type: str
+                                            values:
+                                              description:
+                                              - values is an array of string values.
+                                                If the operator is In or NotIn, the
+                                                values array must be non-empty. If
+                                                the operator is Exists or DoesNotExist,
+                                                the values array must be empty. This
+                                                array is replaced during a strategic
+                                                merge patch.
+                                              type: list
+                                              contains: str
+                                        match_labels:
+                                          description:
+                                          - matchLabels is a map of {key,value} pairs.
+                                            A single {key,value} in the matchLabels
+                                            map is equivalent to an element of matchExpressions,
+                                            whose key field is "key", the operator
+                                            is "In", and the values array contains
+                                            only "value". The requirements are ANDed.
+                                          type: complex
+                                          contains: str, str
+                                    namespaces:
+                                      description:
+                                      - namespaces specifies which namespaces the
+                                        labelSelector applies to (matches against);
+                                        null or empty list means "this pod's namespace"
+                                      type: list
+                                      contains: str
+                                    topology_key:
+                                      description:
+                                      - This pod should be co-located (affinity) or
+                                        not co-located (anti-affinity) with the pods
+                                        matching the labelSelector in the specified
+                                        namespaces, where co-located is defined as
+                                        running on a node whose value of the label
+                                        with key topologyKey matches that of any node
+                                        on which any of the selected pods is running.
+                                        For PreferredDuringScheduling pod anti-affinity,
+                                        empty topologyKey is interpreted as "all topologies"
+                                        ("all topologies" here means all the topologyKeys
+                                        indicated by scheduler command-line argument
+                                        --failure-domains); for affinity and for RequiredDuringScheduling
+                                        pod anti-affinity, empty topologyKey is not
+                                        allowed.
+                                      type: str
+                                weight:
+                                  description:
+                                  - weight associated with matching the corresponding
+                                    podAffinityTerm, in the range 1-100.
+                                  type: int
+                            required_during_scheduling_ignored_during_execution:
+                              description:
+                              - 'NOT YET IMPLEMENTED. TODO: Uncomment field once it
+                                is implemented. If the anti-affinity requirements
+                                specified by this field are not met at scheduling
+                                time, the pod will not be scheduled onto the node.
+                                If the anti-affinity requirements specified by this
+                                field cease to be met at some point during pod execution
+                                (e.g. due to a pod label update), the system will
+                                try to eventually evict the pod from its node. When
+                                there are multiple elements, the lists of nodes corresponding
+                                to each podAffinityTerm are intersected, i.e. all
+                                terms must be satisfied. RequiredDuringSchedulingRequiredDuringExecution
+                                []PodAffinityTerm `json:"requiredDuringSchedulingRequiredDuringExecution,omitempty"`
+                                If the anti-affinity requirements specified by this
+                                field are not met at scheduling time, the pod will
+                                not be scheduled onto the node. If the anti-affinity
+                                requirements specified by this field cease to be met
+                                at some point during pod execution (e.g. due to a
+                                pod label update), the system may or may not try to
+                                eventually evict the pod from its node. When there
+                                are multiple elements, the lists of nodes corresponding
+                                to each podAffinityTerm are intersected, i.e. all
+                                terms must be satisfied.'
+                              type: list
+                              contains:
+                                label_selector:
+                                  description:
+                                  - A label query over a set of resources, in this
+                                    case pods.
+                                  type: complex
+                                  contains:
+                                    match_expressions:
+                                      description:
+                                      - matchExpressions is a list of label selector
+                                        requirements. The requirements are ANDed.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - key is the label key that the selector
+                                            applies to.
+                                          type: str
+                                        operator:
+                                          description:
+                                          - operator represents a key's relationship
+                                            to a set of values. Valid operators ard
+                                            In, NotIn, Exists and DoesNotExist.
+                                          type: str
+                                        values:
+                                          description:
+                                          - values is an array of string values. If
+                                            the operator is In or NotIn, the values
+                                            array must be non-empty. If the operator
+                                            is Exists or DoesNotExist, the values
+                                            array must be empty. This array is replaced
+                                            during a strategic merge patch.
+                                          type: list
+                                          contains: str
+                                    match_labels:
+                                      description:
+                                      - matchLabels is a map of {key,value} pairs.
+                                        A single {key,value} in the matchLabels map
+                                        is equivalent to an element of matchExpressions,
+                                        whose key field is "key", the operator is
+                                        "In", and the values array contains only "value".
+                                        The requirements are ANDed.
+                                      type: complex
+                                      contains: str, str
+                                namespaces:
+                                  description:
+                                  - namespaces specifies which namespaces the labelSelector
+                                    applies to (matches against); null or empty list
+                                    means "this pod's namespace"
+                                  type: list
+                                  contains: str
+                                topology_key:
+                                  description:
+                                  - This pod should be co-located (affinity) or not
+                                    co-located (anti-affinity) with the pods matching
+                                    the labelSelector in the specified namespaces,
+                                    where co-located is defined as running on a node
+                                    whose value of the label with key topologyKey
+                                    matches that of any node on which any of the selected
+                                    pods is running. For PreferredDuringScheduling
+                                    pod anti-affinity, empty topologyKey is interpreted
+                                    as "all topologies" ("all topologies" here means
+                                    all the topologyKeys indicated by scheduler command-line
+                                    argument --failure-domains); for affinity and
+                                    for RequiredDuringScheduling pod anti-affinity,
+                                    empty topologyKey is not allowed.
+                                  type: str
+                    automount_service_account_token:
+                      description:
+                      - AutomountServiceAccountToken indicates whether a service account
+                        token should be automatically mounted.
+                      type: bool
                     containers:
                       description:
                       - List of containers belonging to the pod. Containers cannot
@@ -621,11 +1439,17 @@ job_list:
                                       description:
                                       - Name of the referent.
                                       type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the ConfigMap or it's key
+                                        must be defined
+                                      type: bool
                                 field_ref:
                                   description:
                                   - 'Selects a field of the pod: supports metadata.name,
                                     metadata.namespace, metadata.labels, metadata.annotations,
-                                    spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                    spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                    status.podIP.'
                                   type: complex
                                   contains:
                                     api_version:
@@ -655,8 +1479,7 @@ job_list:
                                       description:
                                       - Specifies the output format of the exposed
                                         resources, defaults to "1"
-                                      type: complex
-                                      contains: {}
+                                      type: str
                                     resource:
                                       description:
                                       - 'Required: resource to select'
@@ -675,6 +1498,53 @@ job_list:
                                       description:
                                       - Name of the referent.
                                       type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the Secret or it's key must
+                                        be defined
+                                      type: bool
+                        env_from:
+                          description:
+                          - List of sources to populate environment variables in the
+                            container. The keys defined within a source must be a
+                            C_IDENTIFIER. All invalid keys will be reported as an
+                            event when the container is starting. When a key exists
+                            in multiple sources, the value associated with the last
+                            source will take precedence. Values defined by an Env
+                            with a duplicate key will take precedence. Cannot be updated.
+                          type: list
+                          contains:
+                            config_map_ref:
+                              description:
+                              - The ConfigMap to select from
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap must be defined
+                                  type: bool
+                            prefix:
+                              description:
+                              - An optional identifer to prepend to each key in the
+                                ConfigMap. Must be a C_IDENTIFIER.
+                              type: str
+                            secret_ref:
+                              description:
+                              - The Secret to select from
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret must be defined
+                                  type: bool
                         image:
                           description:
                           - Docker image name.
@@ -753,8 +1623,7 @@ job_list:
                                       - Name or number of the port to access on the
                                         container. Number must be in the range 1 to
                                         65535. Name must be an IANA_SVC_NAME.
-                                      type: complex
-                                      contains: {}
+                                      type: str
                                     scheme:
                                       description:
                                       - Scheme to use for connecting to the host.
@@ -766,13 +1635,17 @@ job_list:
                                     port. TCP hooks not yet supported
                                   type: complex
                                   contains:
+                                    host:
+                                      description:
+                                      - 'Optional: Host name to connect to, defaults
+                                        to the pod IP.'
+                                      type: str
                                     port:
                                       description:
                                       - Number or name of the port to access on the
                                         container. Number must be in the range 1 to
                                         65535. Name must be an IANA_SVC_NAME.
-                                      type: complex
-                                      contains: {}
+                                      type: str
                             pre_stop:
                               description:
                               - PreStop is called immediately before a container is
@@ -836,8 +1709,7 @@ job_list:
                                       - Name or number of the port to access on the
                                         container. Number must be in the range 1 to
                                         65535. Name must be an IANA_SVC_NAME.
-                                      type: complex
-                                      contains: {}
+                                      type: str
                                     scheme:
                                       description:
                                       - Scheme to use for connecting to the host.
@@ -849,13 +1721,17 @@ job_list:
                                     port. TCP hooks not yet supported
                                   type: complex
                                   contains:
+                                    host:
+                                      description:
+                                      - 'Optional: Host name to connect to, defaults
+                                        to the pod IP.'
+                                      type: str
                                     port:
                                       description:
                                       - Number or name of the port to access on the
                                         container. Number must be in the range 1 to
                                         65535. Name must be an IANA_SVC_NAME.
-                                      type: complex
-                                      contains: {}
+                                      type: str
                         liveness_probe:
                           description:
                           - Periodic probe of container liveness. Container will be
@@ -920,8 +1796,7 @@ job_list:
                                   - Name or number of the port to access on the container.
                                     Number must be in the range 1 to 65535. Name must
                                     be an IANA_SVC_NAME.
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 scheme:
                                   description:
                                   - Scheme to use for connecting to the host. Defaults
@@ -949,13 +1824,17 @@ job_list:
                                 TCP hooks not yet supported
                               type: complex
                               contains:
+                                host:
+                                  description:
+                                  - 'Optional: Host name to connect to, defaults to
+                                    the pod IP.'
+                                  type: str
                                 port:
                                   description:
                                   - Number or name of the port to access on the container.
                                     Number must be in the range 1 to 65535. Name must
                                     be an IANA_SVC_NAME.
-                                  type: complex
-                                  contains: {}
+                                  type: str
                             timeout_seconds:
                               description:
                               - Number of seconds after which the probe times out.
@@ -1071,8 +1950,7 @@ job_list:
                                   - Name or number of the port to access on the container.
                                     Number must be in the range 1 to 65535. Name must
                                     be an IANA_SVC_NAME.
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 scheme:
                                   description:
                                   - Scheme to use for connecting to the host. Defaults
@@ -1100,13 +1978,17 @@ job_list:
                                 TCP hooks not yet supported
                               type: complex
                               contains:
+                                host:
+                                  description:
+                                  - 'Optional: Host name to connect to, defaults to
+                                    the pod IP.'
+                                  type: str
                                 port:
                                   description:
                                   - Number or name of the port to access on the container.
                                     Number must be in the range 1 to 65535. Name must
                                     be an IANA_SVC_NAME.
-                                  type: complex
-                                  contains: {}
+                                  type: str
                             timeout_seconds:
                               description:
                               - Number of seconds after which the probe times out.
@@ -1123,7 +2005,7 @@ job_list:
                               - Limits describes the maximum amount of compute resources
                                 allowed.
                               type: complex
-                              contains: str, ResourceQuantity
+                              contains: str, str
                             requests:
                               description:
                               - Requests describes the minimum amount of compute resources
@@ -1131,10 +2013,10 @@ job_list:
                                 it defaults to Limits if that is explicitly specified,
                                 otherwise to an implementation-defined value.
                               type: complex
-                              contains: str, ResourceQuantity
+                              contains: str, str
                         security_context:
                           description:
-                          - Security options the pod should run with.
+                          - 'Security options the pod should run with. More info:'
                           type: complex
                           contains:
                             capabilities:
@@ -1240,8 +2122,21 @@ job_list:
                             \ termination message will be written is mounted into\
                             \ the container's filesystem. Message written is intended\
                             \ to be brief final status, such as an assertion failure\
-                            \ message. Defaults to /dev/termination-log. Cannot be\
-                            \ updated."
+                            \ message. Will be truncated by the node if greater than\
+                            \ 4096 bytes. The total message length across all containers\
+                            \ will be limited to 12kb. Defaults to /dev/termination-log.\
+                            \ Cannot be updated."
+                          type: str
+                        termination_message_policy:
+                          description:
+                          - Indicate how the termination message should be populated.
+                            File will use the contents of terminationMessagePath to
+                            populate the container status message on both success
+                            and failure. FallbackToLogsOnError will use the last chunk
+                            of container log output if the termination message file
+                            is empty and the container exited with an error. The log
+                            output is limited to 2048 bytes or 80 lines, whichever
+                            is smaller. Defaults to File. Cannot be updated.
                           type: str
                         tty:
                           description:
@@ -1282,9 +2177,27 @@ job_list:
                           type: str
                     dns_policy:
                       description:
-                      - Set DNS policy for containers within the pod. One of 'ClusterFirst'
-                        or 'Default'. Defaults to "ClusterFirst".
+                      - Set DNS policy for containers within the pod. One of 'ClusterFirstWithHostNet',
+                        'ClusterFirst' or 'Default'. Defaults to "ClusterFirst". To
+                        have DNS options set along with hostNetwork, you have to specify
+                        DNS policy explicitly to 'ClusterFirstWithHostNet'.
                       type: str
+                    host_aliases:
+                      description:
+                      - HostAliases is an optional list of hosts and IPs that will
+                        be injected into the pod's hosts file if specified. This is
+                        only valid for non-hostNetwork pods.
+                      type: list
+                      contains:
+                        hostnames:
+                          description:
+                          - Hostnames for the above IP address.
+                          type: list
+                          contains: str
+                        ip:
+                          description:
+                          - IP address of the host file entry.
+                          type: str
                     host_ipc:
                       description:
                       - "Use the host's ipc namespace. Optional: Default to false."
@@ -1318,6 +2231,825 @@ job_list:
                           description:
                           - Name of the referent.
                           type: str
+                    init_containers:
+                      description:
+                      - List of initialization containers belonging to the pod. Init
+                        containers are executed in order prior to containers being
+                        started. If any init container fails, the pod is considered
+                        to have failed and is handled according to its restartPolicy.
+                        The name for an init container or normal container must be
+                        unique among all containers. Init containers may not have
+                        Lifecycle actions, Readiness probes, or Liveness probes. The
+                        resourceRequirements of an init container are taken into account
+                        during scheduling by finding the highest request/limit for
+                        each resource type, and then using the max of of that value
+                        or the sum of the normal containers. Limits are applied to
+                        init containers in a similar fashion. Init containers cannot
+                        currently be added or removed. Cannot be updated.
+                      type: list
+                      contains:
+                        args:
+                          description:
+                          - "Arguments to the entrypoint. The docker image's CMD is\
+                            \ used if this is not provided. Variable references $(VAR_NAME)\
+                            \ are expanded using the container's environment. If a\
+                            \ variable cannot be resolved, the reference in the input\
+                            \ string will be unchanged. The $(VAR_NAME) syntax can\
+                            \ be escaped with a double $$, ie: $$(VAR_NAME). Escaped\
+                            \ references will never be expanded, regardless of whether\
+                            \ the variable exists or not. Cannot be updated."
+                          type: list
+                          contains: str
+                        command:
+                          description:
+                          - "Entrypoint array. Not executed within a shell. The docker\
+                            \ image's ENTRYPOINT is used if this is not provided.\
+                            \ Variable references $(VAR_NAME) are expanded using the\
+                            \ container's environment. If a variable cannot be resolved,\
+                            \ the reference in the input string will be unchanged.\
+                            \ The $(VAR_NAME) syntax can be escaped with a double\
+                            \ $$, ie: $$(VAR_NAME). Escaped references will never\
+                            \ be expanded, regardless of whether the variable exists\
+                            \ or not. Cannot be updated."
+                          type: list
+                          contains: str
+                        env:
+                          description:
+                          - List of environment variables to set in the container.
+                            Cannot be updated.
+                          type: list
+                          contains:
+                            name:
+                              description:
+                              - Name of the environment variable. Must be a C_IDENTIFIER.
+                              type: str
+                            value:
+                              description:
+                              - 'Variable references $(VAR_NAME) are expanded using
+                                the previous defined environment variables in the
+                                container and any service environment variables. If
+                                a variable cannot be resolved, the reference in the
+                                input string will be unchanged. The $(VAR_NAME) syntax
+                                can be escaped with a double $$, ie: $$(VAR_NAME).
+                                Escaped references will never be expanded, regardless
+                                of whether the variable exists or not. Defaults to
+                                "".'
+                              type: str
+                            value_from:
+                              description:
+                              - Source for the environment variable's value. Cannot
+                                be used if value is not empty.
+                              type: complex
+                              contains:
+                                config_map_key_ref:
+                                  description:
+                                  - Selects a key of a ConfigMap.
+                                  type: complex
+                                  contains:
+                                    key:
+                                      description:
+                                      - The key to select.
+                                      type: str
+                                    name:
+                                      description:
+                                      - Name of the referent.
+                                      type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the ConfigMap or it's key
+                                        must be defined
+                                      type: bool
+                                field_ref:
+                                  description:
+                                  - 'Selects a field of the pod: supports metadata.name,
+                                    metadata.namespace, metadata.labels, metadata.annotations,
+                                    spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                    status.podIP.'
+                                  type: complex
+                                  contains:
+                                    api_version:
+                                      description:
+                                      - Version of the schema the FieldPath is written
+                                        in terms of, defaults to "v1".
+                                      type: str
+                                    field_path:
+                                      description:
+                                      - Path of the field to select in the specified
+                                        API version.
+                                      type: str
+                                resource_field_ref:
+                                  description:
+                                  - 'Selects a resource of the container: only resources
+                                    limits and requests (limits.cpu, limits.memory,
+                                    requests.cpu and requests.memory) are currently
+                                    supported.'
+                                  type: complex
+                                  contains:
+                                    container_name:
+                                      description:
+                                      - 'Container name: required for volumes, optional
+                                        for env vars'
+                                      type: str
+                                    divisor:
+                                      description:
+                                      - Specifies the output format of the exposed
+                                        resources, defaults to "1"
+                                      type: str
+                                    resource:
+                                      description:
+                                      - 'Required: resource to select'
+                                      type: str
+                                secret_key_ref:
+                                  description:
+                                  - Selects a key of a secret in the pod's namespace
+                                  type: complex
+                                  contains:
+                                    key:
+                                      description:
+                                      - The key of the secret to select from. Must
+                                        be a valid secret key.
+                                      type: str
+                                    name:
+                                      description:
+                                      - Name of the referent.
+                                      type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the Secret or it's key must
+                                        be defined
+                                      type: bool
+                        env_from:
+                          description:
+                          - List of sources to populate environment variables in the
+                            container. The keys defined within a source must be a
+                            C_IDENTIFIER. All invalid keys will be reported as an
+                            event when the container is starting. When a key exists
+                            in multiple sources, the value associated with the last
+                            source will take precedence. Values defined by an Env
+                            with a duplicate key will take precedence. Cannot be updated.
+                          type: list
+                          contains:
+                            config_map_ref:
+                              description:
+                              - The ConfigMap to select from
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap must be defined
+                                  type: bool
+                            prefix:
+                              description:
+                              - An optional identifer to prepend to each key in the
+                                ConfigMap. Must be a C_IDENTIFIER.
+                              type: str
+                            secret_ref:
+                              description:
+                              - The Secret to select from
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret must be defined
+                                  type: bool
+                        image:
+                          description:
+                          - Docker image name.
+                          type: str
+                        image_pull_policy:
+                          description:
+                          - Image pull policy. One of Always, Never, IfNotPresent.
+                            Defaults to Always if :latest tag is specified, or IfNotPresent
+                            otherwise. Cannot be updated.
+                          type: str
+                        lifecycle:
+                          description:
+                          - Actions that the management system should take in response
+                            to container lifecycle events. Cannot be updated.
+                          type: complex
+                          contains:
+                            post_start:
+                              description:
+                              - PostStart is called immediately after a container
+                                is created. If the handler fails, the container is
+                                terminated and restarted according to its restart
+                                policy. Other management of the container blocks until
+                                the hook completes.
+                              type: complex
+                              contains:
+                                _exec:
+                                  description:
+                                  - One and only one of the following should be specified.
+                                    Exec specifies the action to take.
+                                  type: complex
+                                  contains:
+                                    command:
+                                      description:
+                                      - Command is the command line to execute inside
+                                        the container, the working directory for the
+                                        command is root ('/') in the container's filesystem.
+                                        The command is simply exec'd, it is not run
+                                        inside a shell, so traditional shell instructions
+                                        ('|', etc) won't work. To use a shell, you
+                                        need to explicitly call out to that shell.
+                                        Exit status of 0 is treated as live/healthy
+                                        and non-zero is unhealthy.
+                                      type: list
+                                      contains: str
+                                http_get:
+                                  description:
+                                  - HTTPGet specifies the http request to perform.
+                                  type: complex
+                                  contains:
+                                    host:
+                                      description:
+                                      - Host name to connect to, defaults to the pod
+                                        IP. You probably want to set "Host" in httpHeaders
+                                        instead.
+                                      type: str
+                                    http_headers:
+                                      description:
+                                      - Custom headers to set in the request. HTTP
+                                        allows repeated headers.
+                                      type: list
+                                      contains:
+                                        name:
+                                          description:
+                                          - The header field name
+                                          type: str
+                                        value:
+                                          description:
+                                          - The header field value
+                                          type: str
+                                    path:
+                                      description:
+                                      - Path to access on the HTTP server.
+                                      type: str
+                                    port:
+                                      description:
+                                      - Name or number of the port to access on the
+                                        container. Number must be in the range 1 to
+                                        65535. Name must be an IANA_SVC_NAME.
+                                      type: str
+                                    scheme:
+                                      description:
+                                      - Scheme to use for connecting to the host.
+                                        Defaults to HTTP.
+                                      type: str
+                                tcp_socket:
+                                  description:
+                                  - TCPSocket specifies an action involving a TCP
+                                    port. TCP hooks not yet supported
+                                  type: complex
+                                  contains:
+                                    host:
+                                      description:
+                                      - 'Optional: Host name to connect to, defaults
+                                        to the pod IP.'
+                                      type: str
+                                    port:
+                                      description:
+                                      - Number or name of the port to access on the
+                                        container. Number must be in the range 1 to
+                                        65535. Name must be an IANA_SVC_NAME.
+                                      type: str
+                            pre_stop:
+                              description:
+                              - PreStop is called immediately before a container is
+                                terminated. The container is terminated after the
+                                handler completes. The reason for termination is passed
+                                to the handler. Regardless of the outcome of the handler,
+                                the container is eventually terminated. Other management
+                                of the container blocks until the hook completes.
+                              type: complex
+                              contains:
+                                _exec:
+                                  description:
+                                  - One and only one of the following should be specified.
+                                    Exec specifies the action to take.
+                                  type: complex
+                                  contains:
+                                    command:
+                                      description:
+                                      - Command is the command line to execute inside
+                                        the container, the working directory for the
+                                        command is root ('/') in the container's filesystem.
+                                        The command is simply exec'd, it is not run
+                                        inside a shell, so traditional shell instructions
+                                        ('|', etc) won't work. To use a shell, you
+                                        need to explicitly call out to that shell.
+                                        Exit status of 0 is treated as live/healthy
+                                        and non-zero is unhealthy.
+                                      type: list
+                                      contains: str
+                                http_get:
+                                  description:
+                                  - HTTPGet specifies the http request to perform.
+                                  type: complex
+                                  contains:
+                                    host:
+                                      description:
+                                      - Host name to connect to, defaults to the pod
+                                        IP. You probably want to set "Host" in httpHeaders
+                                        instead.
+                                      type: str
+                                    http_headers:
+                                      description:
+                                      - Custom headers to set in the request. HTTP
+                                        allows repeated headers.
+                                      type: list
+                                      contains:
+                                        name:
+                                          description:
+                                          - The header field name
+                                          type: str
+                                        value:
+                                          description:
+                                          - The header field value
+                                          type: str
+                                    path:
+                                      description:
+                                      - Path to access on the HTTP server.
+                                      type: str
+                                    port:
+                                      description:
+                                      - Name or number of the port to access on the
+                                        container. Number must be in the range 1 to
+                                        65535. Name must be an IANA_SVC_NAME.
+                                      type: str
+                                    scheme:
+                                      description:
+                                      - Scheme to use for connecting to the host.
+                                        Defaults to HTTP.
+                                      type: str
+                                tcp_socket:
+                                  description:
+                                  - TCPSocket specifies an action involving a TCP
+                                    port. TCP hooks not yet supported
+                                  type: complex
+                                  contains:
+                                    host:
+                                      description:
+                                      - 'Optional: Host name to connect to, defaults
+                                        to the pod IP.'
+                                      type: str
+                                    port:
+                                      description:
+                                      - Number or name of the port to access on the
+                                        container. Number must be in the range 1 to
+                                        65535. Name must be an IANA_SVC_NAME.
+                                      type: str
+                        liveness_probe:
+                          description:
+                          - Periodic probe of container liveness. Container will be
+                            restarted if the probe fails. Cannot be updated.
+                          type: complex
+                          contains:
+                            _exec:
+                              description:
+                              - One and only one of the following should be specified.
+                                Exec specifies the action to take.
+                              type: complex
+                              contains:
+                                command:
+                                  description:
+                                  - Command is the command line to execute inside
+                                    the container, the working directory for the command
+                                    is root ('/') in the container's filesystem. The
+                                    command is simply exec'd, it is not run inside
+                                    a shell, so traditional shell instructions ('|',
+                                    etc) won't work. To use a shell, you need to explicitly
+                                    call out to that shell. Exit status of 0 is treated
+                                    as live/healthy and non-zero is unhealthy.
+                                  type: list
+                                  contains: str
+                            failure_threshold:
+                              description:
+                              - Minimum consecutive failures for the probe to be considered
+                                failed after having succeeded. Defaults to 3. Minimum
+                                value is 1.
+                              type: int
+                            http_get:
+                              description:
+                              - HTTPGet specifies the http request to perform.
+                              type: complex
+                              contains:
+                                host:
+                                  description:
+                                  - Host name to connect to, defaults to the pod IP.
+                                    You probably want to set "Host" in httpHeaders
+                                    instead.
+                                  type: str
+                                http_headers:
+                                  description:
+                                  - Custom headers to set in the request. HTTP allows
+                                    repeated headers.
+                                  type: list
+                                  contains:
+                                    name:
+                                      description:
+                                      - The header field name
+                                      type: str
+                                    value:
+                                      description:
+                                      - The header field value
+                                      type: str
+                                path:
+                                  description:
+                                  - Path to access on the HTTP server.
+                                  type: str
+                                port:
+                                  description:
+                                  - Name or number of the port to access on the container.
+                                    Number must be in the range 1 to 65535. Name must
+                                    be an IANA_SVC_NAME.
+                                  type: str
+                                scheme:
+                                  description:
+                                  - Scheme to use for connecting to the host. Defaults
+                                    to HTTP.
+                                  type: str
+                            initial_delay_seconds:
+                              description:
+                              - Number of seconds after the container has started
+                                before liveness probes are initiated.
+                              type: int
+                            period_seconds:
+                              description:
+                              - How often (in seconds) to perform the probe. Default
+                                to 10 seconds. Minimum value is 1.
+                              type: int
+                            success_threshold:
+                              description:
+                              - Minimum consecutive successes for the probe to be
+                                considered successful after having failed. Defaults
+                                to 1. Must be 1 for liveness. Minimum value is 1.
+                              type: int
+                            tcp_socket:
+                              description:
+                              - TCPSocket specifies an action involving a TCP port.
+                                TCP hooks not yet supported
+                              type: complex
+                              contains:
+                                host:
+                                  description:
+                                  - 'Optional: Host name to connect to, defaults to
+                                    the pod IP.'
+                                  type: str
+                                port:
+                                  description:
+                                  - Number or name of the port to access on the container.
+                                    Number must be in the range 1 to 65535. Name must
+                                    be an IANA_SVC_NAME.
+                                  type: str
+                            timeout_seconds:
+                              description:
+                              - Number of seconds after which the probe times out.
+                                Defaults to 1 second. Minimum value is 1.
+                              type: int
+                        name:
+                          description:
+                          - Name of the container specified as a DNS_LABEL. Each container
+                            in a pod must have a unique name (DNS_LABEL). Cannot be
+                            updated.
+                          type: str
+                        ports:
+                          description:
+                          - List of ports to expose from the container. Exposing a
+                            port here gives the system additional information about
+                            the network connections a container uses, but is primarily
+                            informational. Not specifying a port here DOES NOT prevent
+                            that port from being exposed. Any port which is listening
+                            on the default "0.0.0.0" address inside a container will
+                            be accessible from the network. Cannot be updated.
+                          type: list
+                          contains:
+                            container_port:
+                              description:
+                              - Number of port to expose on the pod's IP address.
+                                This must be a valid port number, 0 < x < 65536.
+                              type: int
+                            host_ip:
+                              description:
+                              - What host IP to bind the external port to.
+                              type: str
+                            host_port:
+                              description:
+                              - Number of port to expose on the host. If specified,
+                                this must be a valid port number, 0 < x < 65536. If
+                                HostNetwork is specified, this must match ContainerPort.
+                                Most containers do not need this.
+                              type: int
+                            name:
+                              description:
+                              - If specified, this must be an IANA_SVC_NAME and unique
+                                within the pod. Each named port in a pod must have
+                                a unique name. Name for the port that can be referred
+                                to by services.
+                              type: str
+                            protocol:
+                              description:
+                              - Protocol for port. Must be UDP or TCP. Defaults to
+                                "TCP".
+                              type: str
+                        readiness_probe:
+                          description:
+                          - Periodic probe of container service readiness. Container
+                            will be removed from service endpoints if the probe fails.
+                            Cannot be updated.
+                          type: complex
+                          contains:
+                            _exec:
+                              description:
+                              - One and only one of the following should be specified.
+                                Exec specifies the action to take.
+                              type: complex
+                              contains:
+                                command:
+                                  description:
+                                  - Command is the command line to execute inside
+                                    the container, the working directory for the command
+                                    is root ('/') in the container's filesystem. The
+                                    command is simply exec'd, it is not run inside
+                                    a shell, so traditional shell instructions ('|',
+                                    etc) won't work. To use a shell, you need to explicitly
+                                    call out to that shell. Exit status of 0 is treated
+                                    as live/healthy and non-zero is unhealthy.
+                                  type: list
+                                  contains: str
+                            failure_threshold:
+                              description:
+                              - Minimum consecutive failures for the probe to be considered
+                                failed after having succeeded. Defaults to 3. Minimum
+                                value is 1.
+                              type: int
+                            http_get:
+                              description:
+                              - HTTPGet specifies the http request to perform.
+                              type: complex
+                              contains:
+                                host:
+                                  description:
+                                  - Host name to connect to, defaults to the pod IP.
+                                    You probably want to set "Host" in httpHeaders
+                                    instead.
+                                  type: str
+                                http_headers:
+                                  description:
+                                  - Custom headers to set in the request. HTTP allows
+                                    repeated headers.
+                                  type: list
+                                  contains:
+                                    name:
+                                      description:
+                                      - The header field name
+                                      type: str
+                                    value:
+                                      description:
+                                      - The header field value
+                                      type: str
+                                path:
+                                  description:
+                                  - Path to access on the HTTP server.
+                                  type: str
+                                port:
+                                  description:
+                                  - Name or number of the port to access on the container.
+                                    Number must be in the range 1 to 65535. Name must
+                                    be an IANA_SVC_NAME.
+                                  type: str
+                                scheme:
+                                  description:
+                                  - Scheme to use for connecting to the host. Defaults
+                                    to HTTP.
+                                  type: str
+                            initial_delay_seconds:
+                              description:
+                              - Number of seconds after the container has started
+                                before liveness probes are initiated.
+                              type: int
+                            period_seconds:
+                              description:
+                              - How often (in seconds) to perform the probe. Default
+                                to 10 seconds. Minimum value is 1.
+                              type: int
+                            success_threshold:
+                              description:
+                              - Minimum consecutive successes for the probe to be
+                                considered successful after having failed. Defaults
+                                to 1. Must be 1 for liveness. Minimum value is 1.
+                              type: int
+                            tcp_socket:
+                              description:
+                              - TCPSocket specifies an action involving a TCP port.
+                                TCP hooks not yet supported
+                              type: complex
+                              contains:
+                                host:
+                                  description:
+                                  - 'Optional: Host name to connect to, defaults to
+                                    the pod IP.'
+                                  type: str
+                                port:
+                                  description:
+                                  - Number or name of the port to access on the container.
+                                    Number must be in the range 1 to 65535. Name must
+                                    be an IANA_SVC_NAME.
+                                  type: str
+                            timeout_seconds:
+                              description:
+                              - Number of seconds after which the probe times out.
+                                Defaults to 1 second. Minimum value is 1.
+                              type: int
+                        resources:
+                          description:
+                          - Compute Resources required by this container. Cannot be
+                            updated.
+                          type: complex
+                          contains:
+                            limits:
+                              description:
+                              - Limits describes the maximum amount of compute resources
+                                allowed.
+                              type: complex
+                              contains: str, str
+                            requests:
+                              description:
+                              - Requests describes the minimum amount of compute resources
+                                required. If Requests is omitted for a container,
+                                it defaults to Limits if that is explicitly specified,
+                                otherwise to an implementation-defined value.
+                              type: complex
+                              contains: str, str
+                        security_context:
+                          description:
+                          - 'Security options the pod should run with. More info:'
+                          type: complex
+                          contains:
+                            capabilities:
+                              description:
+                              - The capabilities to add/drop when running containers.
+                                Defaults to the default set of capabilities granted
+                                by the container runtime.
+                              type: complex
+                              contains:
+                                add:
+                                  description:
+                                  - Added capabilities
+                                  type: list
+                                  contains: str
+                                drop:
+                                  description:
+                                  - Removed capabilities
+                                  type: list
+                                  contains: str
+                            privileged:
+                              description:
+                              - Run container in privileged mode. Processes in privileged
+                                containers are essentially equivalent to root on the
+                                host. Defaults to false.
+                              type: bool
+                            read_only_root_filesystem:
+                              description:
+                              - Whether this container has a read-only root filesystem.
+                                Default is false.
+                              type: bool
+                            run_as_non_root:
+                              description:
+                              - Indicates that the container must run as a non-root
+                                user. If true, the Kubelet will validate the image
+                                at runtime to ensure that it does not run as UID 0
+                                (root) and fail to start the container if it does.
+                                If unset or false, no such validation will be performed.
+                                May also be set in PodSecurityContext. If set in both
+                                SecurityContext and PodSecurityContext, the value
+                                specified in SecurityContext takes precedence.
+                              type: bool
+                            run_as_user:
+                              description:
+                              - The UID to run the entrypoint of the container process.
+                                Defaults to user specified in image metadata if unspecified.
+                                May also be set in PodSecurityContext. If set in both
+                                SecurityContext and PodSecurityContext, the value
+                                specified in SecurityContext takes precedence.
+                              type: int
+                            se_linux_options:
+                              description:
+                              - The SELinux context to be applied to the container.
+                                If unspecified, the container runtime will allocate
+                                a random SELinux context for each container. May also
+                                be set in PodSecurityContext. If set in both SecurityContext
+                                and PodSecurityContext, the value specified in SecurityContext
+                                takes precedence.
+                              type: complex
+                              contains:
+                                level:
+                                  description:
+                                  - Level is SELinux level label that applies to the
+                                    container.
+                                  type: str
+                                role:
+                                  description:
+                                  - Role is a SELinux role label that applies to the
+                                    container.
+                                  type: str
+                                type:
+                                  description:
+                                  - Type is a SELinux type label that applies to the
+                                    container.
+                                  type: str
+                                user:
+                                  description:
+                                  - User is a SELinux user label that applies to the
+                                    container.
+                                  type: str
+                        stdin:
+                          description:
+                          - Whether this container should allocate a buffer for stdin
+                            in the container runtime. If this is not set, reads from
+                            stdin in the container will always result in EOF. Default
+                            is false.
+                          type: bool
+                        stdin_once:
+                          description:
+                          - Whether the container runtime should close the stdin channel
+                            after it has been opened by a single attach. When stdin
+                            is true the stdin stream will remain open across multiple
+                            attach sessions. If stdinOnce is set to true, stdin is
+                            opened on container start, is empty until the first client
+                            attaches to stdin, and then remains open and accepts data
+                            until the client disconnects, at which time stdin is closed
+                            and remains closed until the container is restarted. If
+                            this flag is false, a container processes that reads from
+                            stdin will never receive an EOF. Default is false
+                          type: bool
+                        termination_message_path:
+                          description:
+                          - "Optional: Path at which the file to which the container's\
+                            \ termination message will be written is mounted into\
+                            \ the container's filesystem. Message written is intended\
+                            \ to be brief final status, such as an assertion failure\
+                            \ message. Will be truncated by the node if greater than\
+                            \ 4096 bytes. The total message length across all containers\
+                            \ will be limited to 12kb. Defaults to /dev/termination-log.\
+                            \ Cannot be updated."
+                          type: str
+                        termination_message_policy:
+                          description:
+                          - Indicate how the termination message should be populated.
+                            File will use the contents of terminationMessagePath to
+                            populate the container status message on both success
+                            and failure. FallbackToLogsOnError will use the last chunk
+                            of container log output if the termination message file
+                            is empty and the container exited with an error. The log
+                            output is limited to 2048 bytes or 80 lines, whichever
+                            is smaller. Defaults to File. Cannot be updated.
+                          type: str
+                        tty:
+                          description:
+                          - Whether this container should allocate a TTY for itself,
+                            also requires 'stdin' to be true. Default is false.
+                          type: bool
+                        volume_mounts:
+                          description:
+                          - Pod volumes to mount into the container's filesystem.
+                            Cannot be updated.
+                          type: list
+                          contains:
+                            mount_path:
+                              description:
+                              - Path within the container at which the volume should
+                                be mounted. Must not contain ':'.
+                              type: str
+                            name:
+                              description:
+                              - This must match the Name of a Volume.
+                              type: str
+                            read_only:
+                              description:
+                              - Mounted read-only if true, read-write otherwise (false
+                                or unspecified). Defaults to false.
+                              type: bool
+                            sub_path:
+                              description:
+                              - Path within the volume from which the container's
+                                volume should be mounted. Defaults to "" (volume's
+                                root).
+                              type: str
+                        working_dir:
+                          description:
+                          - Container's working directory. If not specified, the container
+                            runtime's default will be used, which might be configured
+                            in the container image. Cannot be updated.
+                          type: str
                     node_name:
                       description:
                       - NodeName is a request to schedule this pod onto a specific
@@ -1335,6 +3067,11 @@ job_list:
                       description:
                       - Restart policy for all containers within the pod. One of Always,
                         OnFailure, Never. Default to Always.
+                      type: str
+                    scheduler_name:
+                      description:
+                      - If specified, the pod will be dispatched by specified scheduler.
+                        If not specified, the pod will be dispatched by default scheduler.
                       type: str
                     security_context:
                       description:
@@ -1434,6 +3171,46 @@ job_list:
                         Set this value longer than the expected cleanup time for your
                         process. Defaults to 30 seconds.
                       type: int
+                    tolerations:
+                      description:
+                      - If specified, the pod's tolerations.
+                      type: list
+                      contains:
+                        effect:
+                          description:
+                          - Effect indicates the taint effect to match. Empty means
+                            match all taint effects. When specified, allowed values
+                            are NoSchedule, PreferNoSchedule and NoExecute.
+                          type: str
+                        key:
+                          description:
+                          - Key is the taint key that the toleration applies to. Empty
+                            means match all taint keys. If the key is empty, operator
+                            must be Exists; this combination means to match all values
+                            and all keys.
+                          type: str
+                        operator:
+                          description:
+                          - Operator represents a key's relationship to the value.
+                            Valid operators are Exists and Equal. Defaults to Equal.
+                            Exists is equivalent to wildcard for value, so that a
+                            pod can tolerate all taints of a particular category.
+                          type: str
+                        toleration_seconds:
+                          description:
+                          - TolerationSeconds represents the period of time the toleration
+                            (which must be of effect NoExecute, otherwise this field
+                            is ignored) tolerates the taint. By default, it is not
+                            set, which means tolerate the taint forever (do not evict).
+                            Zero and negative values will be treated as 0 (evict immediately)
+                            by the system.
+                          type: int
+                        value:
+                          description:
+                          - Value is the taint value the toleration matches to. If
+                            the operator is Exists, the value should be empty, otherwise
+                            just a regular string.
+                          type: str
                     volumes:
                       description:
                       - List of volumes that can be mounted by containers belonging
@@ -1497,6 +3274,13 @@ job_list:
                                 supported by the host operating system. Ex. "ext4",
                                 "xfs", "ntfs". Implicitly inferred to be "ext4" if
                                 unspecified.
+                              type: str
+                            kind:
+                              description:
+                              - 'Expected values Shared: mulitple blob disks per storage
+                                account Dedicated: single blob disk per storage account
+                                Managed: azure managed data disk (only in managed
+                                availability set). defaults to shared'
                               type: str
                             read_only:
                               description:
@@ -1610,8 +3394,9 @@ job_list:
                                 projected into the specified paths, and unlisted keys
                                 will not be present. If a key is specified which is
                                 not present in the ConfigMap, the volume setup will
-                                error. Paths must be relative and may not contain
-                                the '..' path or start with '..'.
+                                error unless it is marked optional. Paths must be
+                                relative and may not contain the '..' path or start
+                                with '..'.
                               type: list
                               contains:
                                 key:
@@ -1638,6 +3423,11 @@ job_list:
                               description:
                               - Name of the referent.
                               type: str
+                            optional:
+                              description:
+                              - Specify whether the ConfigMap or it's keys must be
+                                defined
+                              type: bool
                         downward_api:
                           description:
                           - DownwardAPI represents downward API about the pod that
@@ -1708,8 +3498,7 @@ job_list:
                                       description:
                                       - Specifies the output format of the exposed
                                         resources, defaults to "1"
-                                      type: complex
-                                      contains: {}
+                                      type: str
                                     resource:
                                       description:
                                       - 'Required: resource to select'
@@ -1725,6 +3514,16 @@ job_list:
                               - What type of storage medium should back this directory.
                                 The default is "" which means to use the node's default
                                 medium. Must be an empty string (default) or Memory.
+                              type: str
+                            size_limit:
+                              description:
+                              - Total amount of local storage required for this EmptyDir
+                                volume. The size limit is also applicable for memory
+                                medium. The maximum usage on memory medium EmptyDir
+                                would be the minimum value between the SizeLimit specified
+                                here and the sum of memory limits of all containers
+                                in a pod. The default is nil which means that the
+                                limit is undefined.
                               type: str
                         fc:
                           description:
@@ -1903,6 +3702,14 @@ job_list:
                             to a kubelet's host machine and then exposed to the pod.
                           type: complex
                           contains:
+                            chap_auth_discovery:
+                              description:
+                              - whether support iSCSI Discovery CHAP authentication
+                              type: bool
+                            chap_auth_session:
+                              description:
+                              - whether support iSCSI Session CHAP authentication
+                              type: bool
                             fs_type:
                               description:
                               - 'Filesystem type of the volume that you want to mount.
@@ -1923,11 +3730,27 @@ job_list:
                               description:
                               - iSCSI target lun number.
                               type: int
+                            portals:
+                              description:
+                              - iSCSI target portal List. The portal is either an
+                                IP or ip_addr:port if the port is other than default
+                                (typically TCP ports 860 and 3260).
+                              type: list
+                              contains: str
                             read_only:
                               description:
                               - ReadOnly here will force the ReadOnly setting in VolumeMounts.
                                 Defaults to false.
                               type: bool
+                            secret_ref:
+                              description:
+                              - CHAP secret for iSCSI target and initiator authentication
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
                             target_portal:
                               description:
                               - iSCSI target portal. The portal is either an IP or
@@ -1991,6 +3814,217 @@ job_list:
                               description:
                               - ID that identifies Photon Controller persistent disk
                               type: str
+                        portworx_volume:
+                          description:
+                          - PortworxVolume represents a portworx volume attached and
+                            mounted on kubelets host machine
+                          type: complex
+                          contains:
+                            fs_type:
+                              description:
+                              - FSType represents the filesystem type to mount Must
+                                be a filesystem type supported by the host operating
+                                system. Ex. "ext4", "xfs". Implicitly inferred to
+                                be "ext4" if unspecified.
+                              type: str
+                            read_only:
+                              description:
+                              - Defaults to false (read/write). ReadOnly here will
+                                force the ReadOnly setting in VolumeMounts.
+                              type: bool
+                            volume_id:
+                              description:
+                              - VolumeID uniquely identifies a Portworx volume
+                              type: str
+                        projected:
+                          description:
+                          - Items for all in one resources secrets, configmaps, and
+                            downward API
+                          type: complex
+                          contains:
+                            default_mode:
+                              description:
+                              - Mode bits to use on created files by default. Must
+                                be a value between 0 and 0777. Directories within
+                                the path are not affected by this setting. This might
+                                be in conflict with other options that affect the
+                                file mode, like fsGroup, and the result can be other
+                                mode bits set.
+                              type: int
+                            sources:
+                              description:
+                              - list of volume projections
+                              type: list
+                              contains:
+                                config_map:
+                                  description:
+                                  - information about the configMap data to project
+                                  type: complex
+                                  contains:
+                                    items:
+                                      description:
+                                      - If unspecified, each key-value pair in the
+                                        Data field of the referenced ConfigMap will
+                                        be projected into the volume as a file whose
+                                        name is the key and content is the value.
+                                        If specified, the listed keys will be projected
+                                        into the specified paths, and unlisted keys
+                                        will not be present. If a key is specified
+                                        which is not present in the ConfigMap, the
+                                        volume setup will error unless it is marked
+                                        optional. Paths must be relative and may not
+                                        contain the '..' path or start with '..'.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - The key to project.
+                                          type: str
+                                        mode:
+                                          description:
+                                          - 'Optional: mode bits to use on this file,
+                                            must be a value between 0 and 0777. If
+                                            not specified, the volume defaultMode
+                                            will be used. This might be in conflict
+                                            with other options that affect the file
+                                            mode, like fsGroup, and the result can
+                                            be other mode bits set.'
+                                          type: int
+                                        path:
+                                          description:
+                                          - The relative path of the file to map the
+                                            key to. May not be an absolute path. May
+                                            not contain the path element '..'. May
+                                            not start with the string '..'.
+                                          type: str
+                                    name:
+                                      description:
+                                      - Name of the referent.
+                                      type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the ConfigMap or it's keys
+                                        must be defined
+                                      type: bool
+                                downward_api:
+                                  description:
+                                  - information about the downwardAPI data to project
+                                  type: complex
+                                  contains:
+                                    items:
+                                      description:
+                                      - Items is a list of DownwardAPIVolume file
+                                      type: list
+                                      contains:
+                                        field_ref:
+                                          description:
+                                          - 'Required: Selects a field of the pod:
+                                            only annotations, labels, name and namespace
+                                            are supported.'
+                                          type: complex
+                                          contains:
+                                            api_version:
+                                              description:
+                                              - Version of the schema the FieldPath
+                                                is written in terms of, defaults to
+                                                "v1".
+                                              type: str
+                                            field_path:
+                                              description:
+                                              - Path of the field to select in the
+                                                specified API version.
+                                              type: str
+                                        mode:
+                                          description:
+                                          - 'Optional: mode bits to use on this file,
+                                            must be a value between 0 and 0777. If
+                                            not specified, the volume defaultMode
+                                            will be used. This might be in conflict
+                                            with other options that affect the file
+                                            mode, like fsGroup, and the result can
+                                            be other mode bits set.'
+                                          type: int
+                                        path:
+                                          description:
+                                          - "Required: Path is the relative path name\
+                                            \ of the file to be created. Must not\
+                                            \ be absolute or contain the '..' path.\
+                                            \ Must be utf-8 encoded. The first item\
+                                            \ of the relative path must not start\
+                                            \ with '..'"
+                                          type: str
+                                        resource_field_ref:
+                                          description:
+                                          - 'Selects a resource of the container:
+                                            only resources limits and requests (limits.cpu,
+                                            limits.memory, requests.cpu and requests.memory)
+                                            are currently supported.'
+                                          type: complex
+                                          contains:
+                                            container_name:
+                                              description:
+                                              - 'Container name: required for volumes,
+                                                optional for env vars'
+                                              type: str
+                                            divisor:
+                                              description:
+                                              - Specifies the output format of the
+                                                exposed resources, defaults to "1"
+                                              type: str
+                                            resource:
+                                              description:
+                                              - 'Required: resource to select'
+                                              type: str
+                                secret:
+                                  description:
+                                  - information about the secret data to project
+                                  type: complex
+                                  contains:
+                                    items:
+                                      description:
+                                      - If unspecified, each key-value pair in the
+                                        Data field of the referenced Secret will be
+                                        projected into the volume as a file whose
+                                        name is the key and content is the value.
+                                        If specified, the listed keys will be projected
+                                        into the specified paths, and unlisted keys
+                                        will not be present. If a key is specified
+                                        which is not present in the Secret, the volume
+                                        setup will error unless it is marked optional.
+                                        Paths must be relative and may not contain
+                                        the '..' path or start with '..'.
+                                      type: list
+                                      contains:
+                                        key:
+                                          description:
+                                          - The key to project.
+                                          type: str
+                                        mode:
+                                          description:
+                                          - 'Optional: mode bits to use on this file,
+                                            must be a value between 0 and 0777. If
+                                            not specified, the volume defaultMode
+                                            will be used. This might be in conflict
+                                            with other options that affect the file
+                                            mode, like fsGroup, and the result can
+                                            be other mode bits set.'
+                                          type: int
+                                        path:
+                                          description:
+                                          - The relative path of the file to map the
+                                            key to. May not be an absolute path. May
+                                            not contain the path element '..'. May
+                                            not start with the string '..'.
+                                          type: str
+                                    name:
+                                      description:
+                                      - Name of the referent.
+                                      type: str
+                                    optional:
+                                      description:
+                                      - Specify whether the Secret or its key must
+                                        be defined
+                                      type: bool
                         quobyte:
                           description:
                           - Quobyte represents a Quobyte mount on the host that shares
@@ -2074,6 +4108,68 @@ job_list:
                               description:
                               - The rados user name. Default is admin.
                               type: str
+                        scale_io:
+                          description:
+                          - ScaleIO represents a ScaleIO persistent volume attached
+                            and mounted on Kubernetes nodes.
+                          type: complex
+                          contains:
+                            fs_type:
+                              description:
+                              - Filesystem type to mount. Must be a filesystem type
+                                supported by the host operating system. Ex. "ext4",
+                                "xfs", "ntfs". Implicitly inferred to be "ext4" if
+                                unspecified.
+                              type: str
+                            gateway:
+                              description:
+                              - The host address of the ScaleIO API Gateway.
+                              type: str
+                            protection_domain:
+                              description:
+                              - The name of the Protection Domain for the configured
+                                storage (defaults to "default").
+                              type: str
+                            read_only:
+                              description:
+                              - Defaults to false (read/write). ReadOnly here will
+                                force the ReadOnly setting in VolumeMounts.
+                              type: bool
+                            secret_ref:
+                              description:
+                              - SecretRef references to the secret for ScaleIO user
+                                and other sensitive information. If this is not provided,
+                                Login operation will fail.
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                            ssl_enabled:
+                              description:
+                              - Flag to enable/disable SSL communication with Gateway,
+                                default false
+                              type: bool
+                            storage_mode:
+                              description:
+                              - Indicates whether the storage for a volume should
+                                be thick or thin (defaults to "thin").
+                              type: str
+                            storage_pool:
+                              description:
+                              - The Storage Pool associated with the protection domain
+                                (defaults to "default").
+                              type: str
+                            system:
+                              description:
+                              - The name of the storage system as configured in ScaleIO.
+                              type: str
+                            volume_name:
+                              description:
+                              - The name of a volume already created in the ScaleIO
+                                system that is associated with this volume source.
+                              type: str
                         secret:
                           description:
                           - Secret represents a secret that should populate this volume.
@@ -2096,9 +4192,9 @@ job_list:
                                 is the value. If specified, the listed keys will be
                                 projected into the specified paths, and unlisted keys
                                 will not be present. If a key is specified which is
-                                not present in the Secret, the volume setup will error.
-                                Paths must be relative and may not contain the '..'
-                                path or start with '..'.
+                                not present in the Secret, the volume setup will error
+                                unless it is marked optional. Paths must be relative
+                                and may not contain the '..' path or start with '..'.
                               type: list
                               contains:
                                 key:
@@ -2121,9 +4217,59 @@ job_list:
                                     path element '..'. May not start with the string
                                     '..'.
                                   type: str
+                            optional:
+                              description:
+                              - Specify whether the Secret or it's keys must be defined
+                              type: bool
                             secret_name:
                               description:
                               - Name of the secret in the pod's namespace to use.
+                              type: str
+                        storageos:
+                          description:
+                          - StorageOS represents a StorageOS volume attached and mounted
+                            on Kubernetes nodes.
+                          type: complex
+                          contains:
+                            fs_type:
+                              description:
+                              - Filesystem type to mount. Must be a filesystem type
+                                supported by the host operating system. Ex. "ext4",
+                                "xfs", "ntfs". Implicitly inferred to be "ext4" if
+                                unspecified.
+                              type: str
+                            read_only:
+                              description:
+                              - Defaults to false (read/write). ReadOnly here will
+                                force the ReadOnly setting in VolumeMounts.
+                              type: bool
+                            secret_ref:
+                              description:
+                              - SecretRef specifies the secret to use for obtaining
+                                the StorageOS API credentials. If not specified, default
+                                values will be attempted.
+                              type: complex
+                              contains:
+                                name:
+                                  description:
+                                  - Name of the referent.
+                                  type: str
+                            volume_name:
+                              description:
+                              - VolumeName is the human-readable name of the StorageOS
+                                volume. Volume names are only unique within a namespace.
+                              type: str
+                            volume_namespace:
+                              description:
+                              - VolumeNamespace specifies the scope of the volume
+                                within StorageOS. If no namespace is specified then
+                                the Pod's namespace will be used. This allows the
+                                Kubernetes name scoping to be mirrored within StorageOS
+                                for tighter integration. Set VolumeName to any name
+                                to override the default behaviour. Set to "default"
+                                if you are not using namespaces within StorageOS.
+                                Namespaces that do not pre-exist within StorageOS
+                                will be created.
                               type: str
                         vsphere_volume:
                           description:
@@ -2138,30 +4284,38 @@ job_list:
                                 "xfs", "ntfs". Implicitly inferred to be "ext4" if
                                 unspecified.
                               type: str
+                            storage_policy_id:
+                              description:
+                              - Storage Policy Based Management (SPBM) profile ID
+                                associated with the StoragePolicyName.
+                              type: str
+                            storage_policy_name:
+                              description:
+                              - Storage Policy Based Management (SPBM) profile name.
+                              type: str
                             volume_path:
                               description:
                               - Path that identifies vSphere volume vmdk
                               type: str
         status:
           description:
-          - Status is a structure describing current status of a job.
+          - Current status of a job.
           type: complex
           contains:
             active:
               description:
-              - Active is the number of actively running pods.
+              - The number of actively running pods.
               type: int
             completion_time:
               description:
-              - CompletionTime represents time when the job was completed. It is not
-                guaranteed to be set in happens-before order across separate operations.
-                It is represented in RFC3339 form and is in UTC.
+              - Represents time when the job was completed. It is not guaranteed to
+                be set in happens-before order across separate operations. It is represented
+                in RFC3339 form and is in UTC.
               type: complex
               contains: {}
             conditions:
               description:
-              - Conditions represent the latest available observations of an object's
-                current state.
+              - The latest available observations of an object's current state.
               type: list
               contains:
                 last_probe_time:
@@ -2192,18 +4346,18 @@ job_list:
                   type: str
             failed:
               description:
-              - Failed is the number of pods which reached Phase Failed.
+              - The number of pods which reached phase Failed.
               type: int
             start_time:
               description:
-              - StartTime represents time when the job was acknowledged by the Job
-                Manager. It is not guaranteed to be set in happens-before order across
-                separate operations. It is represented in RFC3339 form and is in UTC.
+              - Represents time when the job was acknowledged by the job controller.
+                It is not guaranteed to be set in happens-before order across separate
+                operations. It is represented in RFC3339 form and is in UTC.
               type: complex
               contains: {}
             succeeded:
               description:
-              - Succeeded is the number of pods which reached Phase Succeeded.
+              - The number of pods which reached phase Succeeded.
               type: int
     kind:
       description:
@@ -2213,7 +4367,7 @@ job_list:
       type: str
     metadata:
       description:
-      - Standard list metadata
+      - Standard list metadata.
       type: complex
       contains:
         resource_version:

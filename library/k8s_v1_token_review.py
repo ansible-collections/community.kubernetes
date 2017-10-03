@@ -3,11 +3,11 @@
 from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
-module: k8s_v1beta1_scale
-short_description: Kubernetes Scale
+module: k8s_v1_token_review
+short_description: Kubernetes TokenReview
 description:
-- Manage the lifecycle of a scale object. Supports check mode, and attempts to to
-  be idempotent.
+- Manage the lifecycle of a token_review object. Supports check mode, and attempts
+  to to be idempotent.
 version_added: 2.3.0
 author: OpenShift (@openshift)
 options:
@@ -71,12 +71,11 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
-  spec_replicas:
+  spec_token:
     description:
-    - desired number of instances for the scaled object.
+    - Token is the opaque bearer token.
     aliases:
-    - replicas
-    type: int
+    - token
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.
@@ -89,7 +88,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -99,7 +98,7 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-scale:
+token_review:
   type: complex
   returned: on success
   contains:
@@ -116,8 +115,7 @@ scale:
         be updated. In CamelCase.
       type: str
     metadata:
-      description:
-      - Standard object metadata;
+      description: []
       type: complex
       contains:
         annotations:
@@ -196,6 +194,150 @@ scale:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -231,6 +373,14 @@ scale:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -269,42 +419,58 @@ scale:
           type: str
     spec:
       description:
-      - defines the behavior of the scale.
+      - Spec holds information about the request being evaluated
       type: complex
       contains:
-        replicas:
+        token:
           description:
-          - desired number of instances for the scaled object.
-          type: int
+          - Token is the opaque bearer token.
+          type: str
     status:
       description:
-      - current status of the scale.
+      - Status is filled in by the server and indicates whether the request can be
+        authenticated.
       type: complex
       contains:
-        replicas:
+        authenticated:
           description:
-          - actual number of observed instances of the scaled object.
-          type: int
-        selector:
+          - Authenticated indicates that the token was associated with a known user.
+          type: bool
+        error:
           description:
-          - label query over pods that should match the replicas count.
-          type: complex
-          contains: str, str
-        target_selector:
-          description:
-          - label selector for pods that should match the replicas count. This is
-            a serializated version of both map-based and more expressive set-based
-            selectors. This is done to avoid introspection in the clients. The string
-            will be in the same format as the query-param syntax. If the target type
-            only supports map-based selectors, both this field and map-based selector
-            field are populated.
+          - Error indicates that the token couldn't be checked
           type: str
+        user:
+          description:
+          - User is the UserInfo associated with the provided token.
+          type: complex
+          contains:
+            extra:
+              description:
+              - Any additional information provided by the authenticator.
+              type: complex
+              contains: str, list[str]
+            groups:
+              description:
+              - The names of groups this user is a part of.
+              type: list
+              contains: str
+            uid:
+              description:
+              - A unique value that identifies this user across time. If this user
+                is deleted and another user by the same name is added, they will have
+                different UIDs.
+              type: str
+            username:
+              description:
+              - The name that uniquely identifies this user among all active users.
+              type: str
 '''
 
 
 def main():
     try:
-        module = KubernetesAnsibleModule('scale', 'V1beta1')
+        module = KubernetesAnsibleModule('token_review', 'V1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

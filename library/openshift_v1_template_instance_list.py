@@ -3,11 +3,11 @@
 from ansible.module_utils.openshift_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
 
 DOCUMENTATION = '''
-module: openshift_v1_policy_binding_list
-short_description: OpenShift PolicyBindingList
+module: openshift_v1_template_instance_list
+short_description: OpenShift TemplateInstanceList
 description:
-- Retrieve a list of policy_bindings. List operations provide a snapshot read of the
-  underlying objects, returning a resource_version representing a consistent version
+- Retrieve a list of template_instances. List operations provide a snapshot read of
+  the underlying objects, returning a resource_version representing a consistent version
   of the listed objects.
 version_added: 2.3.0
 author: OpenShift (@openshift)
@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- openshift == 0.3.1
 '''
 
 EXAMPLES = '''
@@ -99,7 +95,7 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-policy_binding_list:
+template_instance_list:
   type: complex
   returned: when I(state) = C(present)
   contains:
@@ -111,7 +107,7 @@ policy_binding_list:
       type: str
     items:
       description:
-      - Items is a list of PolicyBindings
+      - items is a list of Templateinstances
       type: list
       contains:
         api_version:
@@ -126,15 +122,9 @@ policy_binding_list:
             Servers may infer this from the endpoint the client submits requests to.
             Cannot be updated. In CamelCase.
           type: str
-        last_modified:
-          description:
-          - LastModified is the last time that any part of the PolicyBinding was created,
-            updated, or deleted
-          type: complex
-          contains: {}
         metadata:
           description:
-          - Standard object's metadata.
+          - Standard object metadata.
           type: complex
           contains:
             annotations:
@@ -216,6 +206,153 @@ policy_binding_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -252,6 +389,14 @@ policy_binding_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -291,61 +436,50 @@ policy_binding_list:
                 not allowed to change on PUT operations. Populated by the system.
                 Read-only.
               type: str
-        policy_ref:
+        spec:
           description:
-          - PolicyRef is a reference to the Policy that contains all the Roles that
-            this PolicyBinding's RoleBindings may reference
+          - spec describes the desired state of this TemplateInstance.
           type: complex
           contains:
-            api_version:
+            requester:
               description:
-              - API version of the referent.
-              type: str
-            field_path:
+              - requester holds the identity of the agent requesting the template
+                instantiation.
+              type: complex
+              contains:
+                extra:
+                  description:
+                  - extra holds additional information provided by the authenticator.
+                  type: complex
+                  contains: str, list[str]
+                groups:
+                  description:
+                  - groups represent the groups this user is a part of.
+                  type: list
+                  contains: str
+                uid:
+                  description:
+                  - uid is a unique value that identifies this user across time; if
+                    this user is deleted and another user by the same name is added,
+                    they will have different UIDs.
+                  type: str
+                username:
+                  description:
+                  - username uniquely identifies this user among all active users.
+                  type: str
+            secret:
               description:
-              - 'If referring to a piece of an object instead of an entire object,
-                this string should contain a valid JSON/Go field access statement,
-                such as desiredState.manifest.containers[2]. For example, if the object
-                reference is to a container within a pod, this would take on a value
-                like: "spec.containers{name}" (where "name" refers to the name of
-                the container that triggered the event) or if no container name is
-                specified "spec.containers[2]" (container with index 2 in this pod).
-                This syntax is chosen only to have some well-defined way of referencing
-                a part of an object.'
-              type: str
-            kind:
+              - secret is a reference to a Secret object containing the necessary
+                template parameters.
+              type: complex
+              contains:
+                name:
+                  description:
+                  - Name of the referent.
+                  type: str
+            template:
               description:
-              - Kind of the referent.
-              type: str
-            name:
-              description:
-              - Name of the referent.
-              type: str
-            namespace:
-              description:
-              - Namespace of the referent.
-              type: str
-            resource_version:
-              description:
-              - Specific resourceVersion to which this reference is made, if any.
-              type: str
-            uid:
-              description:
-              - UID of the referent.
-              type: str
-        role_bindings:
-          description:
-          - RoleBindings holds all the RoleBindings held by this PolicyBinding, mapped
-            by RoleBinding.Name
-          type: list
-          contains:
-            name:
-              description:
-              - Name is the name of the role binding
-              type: str
-            role_binding:
-              description:
-              - RoleBinding is the role binding being named
+              - template is a full copy of the template for instantiation.
               type: complex
               contains:
                 api_version:
@@ -354,18 +488,26 @@ policy_binding_list:
                     of an object. Servers should convert recognized schemas to the
                     latest internal value, and may reject unrecognized values.
                   type: str
-                group_names:
-                  description:
-                  - GroupNames holds all the groups directly bound to the role. This
-                    field should only be specified when supporting legacy clients
-                    and servers. See Subjects for further details.
-                  type: list
-                  contains: str
                 kind:
                   description:
                   - Kind is a string value representing the REST resource this object
                     represents. Servers may infer this from the endpoint the client
                     submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                labels:
+                  description:
+                  - labels is a optional set of labels that are applied to every object
+                    during the Template to Config transformation.
+                  type: complex
+                  contains: str, str
+                message:
+                  description:
+                  - message is an optional instructional message that will be displayed
+                    when this template is instantiated. This field should inform the
+                    user how to utilize the newly created resources. Parameter substitution
+                    will be performed on the message before being displayed so that
+                    generated credentials and other parameters can be included in
+                    the output.
                   type: str
                 metadata:
                   description:
@@ -458,6 +600,162 @@ policy_binding_list:
                       - A sequence number representing a specific generation of the
                         desired state. Populated by the system. Read-only.
                       type: int
+                    initializers:
+                      description:
+                      - An initializer is a controller which enforces some system
+                        invariant at object creation time. This field is a list of
+                        initializers that have not yet acted on this object. If nil
+                        or empty, this object has been completely initialized. Otherwise,
+                        the object is considered uninitialized and is hidden (in list/watch
+                        and get calls) from clients that haven't explicitly asked
+                        to observe uninitialized objects. When an object is created,
+                        the system will populate this list with the current set of
+                        initializers. Only privileged users may set or modify this
+                        list. Once it is empty, it may not be modified further by
+                        any user.
+                      type: complex
+                      contains:
+                        pending:
+                          description:
+                          - Pending is a list of initializers that must execute in
+                            order before this object is visible. When the last pending
+                            initializer is removed, and no failing result is set,
+                            the initializers struct will be set to nil and the object
+                            is considered as initialized and visible to all clients.
+                          type: list
+                          contains:
+                            name:
+                              description:
+                              - name of the process that is responsible for initializing
+                                this object.
+                              type: str
+                        result:
+                          description:
+                          - If result is set with the Failure field, the object will
+                            be persisted to storage and then deleted, ensuring that
+                            other clients can observe the deletion.
+                          type: complex
+                          contains:
+                            api_version:
+                              description:
+                              - APIVersion defines the versioned schema of this representation
+                                of an object. Servers should convert recognized schemas
+                                to the latest internal value, and may reject unrecognized
+                                values.
+                              type: str
+                            code:
+                              description:
+                              - Suggested HTTP return code for this status, 0 if not
+                                set.
+                              type: int
+                            details:
+                              description:
+                              - Extended data associated with the reason. Each reason
+                                may define its own extended details. This field is
+                                optional and the data returned is not guaranteed to
+                                conform to any schema except that defined by the reason
+                                type.
+                              type: complex
+                              contains:
+                                causes:
+                                  description:
+                                  - The Causes array includes more details associated
+                                    with the StatusReason failure. Not all StatusReasons
+                                    may provide detailed causes.
+                                  type: list
+                                  contains:
+                                    field:
+                                      description:
+                                      - 'The field of the resource that has caused
+                                        this error, as named by its JSON serialization.
+                                        May include dot and postfix notation for nested
+                                        attributes. Arrays are zero-indexed. Fields
+                                        may appear more than once in an array of causes
+                                        due to fields having multiple errors. Optional.
+                                        Examples: "name" - the field "name" on the
+                                        current resource "items[0].name" - the field
+                                        "name" on the first array entry in "items"'
+                                      type: str
+                                    message:
+                                      description:
+                                      - A human-readable description of the cause
+                                        of the error. This field may be presented
+                                        as-is to a reader.
+                                      type: str
+                                    reason:
+                                      description:
+                                      - A machine-readable description of the cause
+                                        of the error. If this value is empty there
+                                        is no information available.
+                                      type: str
+                                group:
+                                  description:
+                                  - The group attribute of the resource associated
+                                    with the status StatusReason.
+                                  type: str
+                                kind:
+                                  description:
+                                  - The kind attribute of the resource associated
+                                    with the status StatusReason. On some operations
+                                    may differ from the requested resource Kind.
+                                  type: str
+                                name:
+                                  description:
+                                  - The name attribute of the resource associated
+                                    with the status StatusReason (when there is a
+                                    single name which can be described).
+                                  type: str
+                                retry_after_seconds:
+                                  description:
+                                  - If specified, the time in seconds before the operation
+                                    should be retried.
+                                  type: int
+                                uid:
+                                  description:
+                                  - UID of the resource. (when there is a single resource
+                                    which can be described).
+                                  type: str
+                            kind:
+                              description:
+                              - Kind is a string value representing the REST resource
+                                this object represents. Servers may infer this from
+                                the endpoint the client submits requests to. Cannot
+                                be updated. In CamelCase.
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the status of this
+                                operation.
+                              type: str
+                            metadata:
+                              description:
+                              - Standard list metadata.
+                              type: complex
+                              contains:
+                                resource_version:
+                                  description:
+                                  - String that identifies the server's internal version
+                                    of this object that can be used by clients to
+                                    determine when objects have changed. Value must
+                                    be treated as opaque by clients and passed unmodified
+                                    back to the server. Populated by the system. Read-only.
+                                  type: str
+                                self_link:
+                                  description:
+                                  - SelfLink is a URL representing this object. Populated
+                                    by the system. Read-only.
+                                  type: str
+                            reason:
+                              description:
+                              - A machine-readable description of why this operation
+                                is in the "Failure" status. If this value is empty
+                                there is no information available. A Reason clarifies
+                                an HTTP status code but does not override it.
+                              type: str
+                            status:
+                              description:
+                              - 'Status of the operation. One of: "Success" or "Failure".'
+                              type: str
                     labels:
                       description:
                       - Map of string keys and values that can be used to organize
@@ -496,6 +794,15 @@ policy_binding_list:
                           description:
                           - API version of the referent.
                           type: str
+                        block_owner_deletion:
+                          description:
+                          - If true, AND if the owner has the "foregroundDeletion"
+                            finalizer, then the owner cannot be deleted from the key-value
+                            store until this reference is removed. Defaults to false.
+                            To set this field, a user needs "delete" permission of
+                            the owner, otherwise 422 (Unprocessable Entity) will be
+                            returned.
+                          type: bool
                         controller:
                           description:
                           - If true, this reference points to the managing controller.
@@ -536,12 +843,114 @@ policy_binding_list:
                         of a resource and is not allowed to change on PUT operations.
                         Populated by the system. Read-only.
                       type: str
-                role_ref:
+                objects:
                   description:
-                  - RoleRef can only reference the current namespace and the global
-                    namespace. If the RoleRef cannot be resolved, the Authorizer must
-                    return an error. Since Policy is a singleton, this is sufficient
-                    knowledge to locate a role.
+                  - objects is an array of resources to include in this template.
+                    If a namespace value is hardcoded in the object, it will be removed
+                    during template instantiation, however if the namespace value
+                    is, or contains, a ${PARAMETER_REFERENCE}, the resolved value
+                    after parameter substitution will be respected and the object
+                    will be created in that namespace.
+                  type: list
+                  contains:
+                    raw:
+                      description:
+                      - Raw is the underlying serialization of this object.
+                      type: str
+                parameters:
+                  description:
+                  - parameters is an optional array of Parameters used during the
+                    Template to Config transformation.
+                  type: list
+                  contains:
+                    _from:
+                      description:
+                      - From is an input value for the generator. Optional.
+                      type: str
+                    description:
+                      description:
+                      - Description of a parameter. Optional.
+                      type: str
+                    display_name:
+                      description:
+                      - "Optional: The name that will show in UI instead of parameter\
+                        \ 'Name'"
+                      type: str
+                    generate:
+                      description:
+                      - 'generate specifies the generator to be used to generate random
+                        string from an input value specified by From field. The result
+                        string is stored into Value field. If empty, no generator
+                        is being used, leaving the result Value untouched. Optional.
+                        The only supported generator is "expression", which accepts
+                        a "from" value in the form of a simple regular expression
+                        containing the range expression "[a-zA-Z0-9]", and the length
+                        expression "a{length}". Examples: from | value -----------------------------
+                        "test[0-9]{1}x" | "test7x" "[0-1]{8}" | "01001100" "0x[A-F0-9]{4}"
+                        | "0xB3AF" "[a-zA-Z0-9]{8}" | "hW4yQU5i"'
+                      type: str
+                    name:
+                      description:
+                      - Name must be set and it can be referenced in Template Items
+                        using ${PARAMETER_NAME}. Required.
+                      type: str
+                    required:
+                      description:
+                      - 'Optional: Indicates the parameter must have a value. Defaults
+                        to false.'
+                      type: bool
+                    value:
+                      description:
+                      - Value holds the Parameter data. If specified, the generator
+                        will be ignored. The value replaces all occurrences of the
+                        Parameter ${Name} expression during the Template to Config
+                        transformation. Optional.
+                      type: str
+        status:
+          description:
+          - status describes the current state of this TemplateInstance.
+          type: complex
+          contains:
+            conditions:
+              description:
+              - conditions represent the latest available observations of a TemplateInstance's
+                current state.
+              type: list
+              contains:
+                last_transition_time:
+                  description:
+                  - LastTransitionTime is the last time a condition status transitioned
+                    from one state to another.
+                  type: complex
+                  contains: {}
+                message:
+                  description:
+                  - Message is a human readable description of the details of the
+                    last transition, complementing reason.
+                  type: str
+                reason:
+                  description:
+                  - Reason is a brief machine readable explanation for the condition's
+                    last transition.
+                  type: str
+                status:
+                  description:
+                  - Status of the condition, one of True, False or Unknown.
+                  type: str
+                type:
+                  description:
+                  - Type of the condition, currently Ready or InstantiateFailure.
+                  type: str
+            objects:
+              description:
+              - Objects references the objects created by the TemplateInstance.
+              type: list
+              contains:
+                ref:
+                  description:
+                  - ref is a reference to the created object. When used under .spec,
+                    only name and namespace are used; these can contain references
+                    to parameters which will be substituted following the usual rules.
                   type: complex
                   contains:
                     api_version:
@@ -582,62 +991,6 @@ policy_binding_list:
                       description:
                       - UID of the referent.
                       type: str
-                subjects:
-                  description:
-                  - Subjects hold object references to authorize with this rule. This
-                    field is ignored if UserNames or GroupNames are specified to support
-                    legacy clients and servers. Thus newer clients that do not need
-                    to support backwards compatibility should send only fully qualified
-                    Subjects and should omit the UserNames and GroupNames fields.
-                    Clients that need to support backwards compatibility can use this
-                    field to build the UserNames and GroupNames.
-                  type: list
-                  contains:
-                    api_version:
-                      description:
-                      - API version of the referent.
-                      type: str
-                    field_path:
-                      description:
-                      - 'If referring to a piece of an object instead of an entire
-                        object, this string should contain a valid JSON/Go field access
-                        statement, such as desiredState.manifest.containers[2]. For
-                        example, if the object reference is to a container within
-                        a pod, this would take on a value like: "spec.containers{name}"
-                        (where "name" refers to the name of the container that triggered
-                        the event) or if no container name is specified "spec.containers[2]"
-                        (container with index 2 in this pod). This syntax is chosen
-                        only to have some well-defined way of referencing a part of
-                        an object.'
-                      type: str
-                    kind:
-                      description:
-                      - Kind of the referent.
-                      type: str
-                    name:
-                      description:
-                      - Name of the referent.
-                      type: str
-                    namespace:
-                      description:
-                      - Namespace of the referent.
-                      type: str
-                    resource_version:
-                      description:
-                      - Specific resourceVersion to which this reference is made,
-                        if any.
-                      type: str
-                    uid:
-                      description:
-                      - UID of the referent.
-                      type: str
-                user_names:
-                  description:
-                  - UserNames holds all the usernames directly bound to the role.
-                    This field should only be specified when supporting legacy clients
-                    and servers. See Subjects for further details.
-                  type: list
-                  contains: str
     kind:
       description:
       - Kind is a string value representing the REST resource this object represents.
@@ -646,7 +999,7 @@ policy_binding_list:
       type: str
     metadata:
       description:
-      - Standard object's metadata.
+      - Standard object metadata.
       type: complex
       contains:
         resource_version:
@@ -665,7 +1018,7 @@ policy_binding_list:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('policy_binding_list', 'V1')
+        module = OpenShiftAnsibleModule('template_instance_list', 'V1')
     except OpenShiftAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

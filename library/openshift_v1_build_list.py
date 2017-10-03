@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- openshift == 0.3.1
 '''
 
 EXAMPLES = '''
@@ -210,6 +206,153 @@ build_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -246,6 +389,14 @@ build_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -428,7 +579,7 @@ build_list:
                   description:
                   - Limits describes the maximum amount of compute resources allowed.
                   type: complex
-                  contains: str, ResourceQuantity
+                  contains: str, str
                 requests:
                   description:
                   - Requests describes the minimum amount of compute resources required.
@@ -436,7 +587,7 @@ build_list:
                     if that is explicitly specified, otherwise to an implementation-defined
                     value.
                   type: complex
-                  contains: str, ResourceQuantity
+                  contains: str, str
             revision:
               description:
               - revision is the information from the source for a specific repo snapshot.
@@ -631,7 +782,10 @@ build_list:
                         source_path:
                           description:
                           - sourcePath is the absolute path of the file or directory
-                            inside the image to copy to the build directory.
+                            inside the image to copy to the build directory. If the
+                            source path ends in /. then the content of the directory
+                            will be copied, but the directory itself will not be created
+                            at the destination.
                           type: str
                     pull_secret:
                       description:
@@ -751,7 +905,7 @@ build_list:
                     env:
                       description:
                       - env contains additional environment variables you want to
-                        pass into a builder container. ValueFrom is not supported.
+                        pass into a builder container.
                       type: list
                       contains:
                         name:
@@ -788,11 +942,17 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap or it's key must
+                                    be defined
+                                  type: bool
                             field_ref:
                               description:
                               - 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
-                                spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP.'
                               type: complex
                               contains:
                                 api_version:
@@ -821,8 +981,7 @@ build_list:
                                   description:
                                   - Specifies the output format of the exposed resources,
                                     defaults to "1"
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 resource:
                                   description:
                                   - 'Required: resource to select'
@@ -841,6 +1000,11 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret or it's key must be
+                                    defined
+                                  type: bool
                     expose_docker_socket:
                       description:
                       - exposeDockerSocket will allow running Docker commands (and
@@ -973,11 +1137,17 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap or it's key must
+                                    be defined
+                                  type: bool
                             field_ref:
                               description:
                               - 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
-                                spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP.'
                               type: complex
                               contains:
                                 api_version:
@@ -1006,8 +1176,7 @@ build_list:
                                   description:
                                   - Specifies the output format of the exposed resources,
                                     defaults to "1"
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 resource:
                                   description:
                                   - 'Required: resource to select'
@@ -1026,6 +1195,11 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret or it's key must be
+                                    defined
+                                  type: bool
                     dockerfile_path:
                       description:
                       - dockerfilePath is the path of the Dockerfile that will be
@@ -1035,7 +1209,7 @@ build_list:
                     env:
                       description:
                       - env contains additional environment variables you want to
-                        pass into a builder container. ValueFrom is not supported.
+                        pass into a builder container.
                       type: list
                       contains:
                         name:
@@ -1072,11 +1246,17 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap or it's key must
+                                    be defined
+                                  type: bool
                             field_ref:
                               description:
                               - 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
-                                spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP.'
                               type: complex
                               contains:
                                 api_version:
@@ -1105,8 +1285,7 @@ build_list:
                                   description:
                                   - Specifies the output format of the exposed resources,
                                     defaults to "1"
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 resource:
                                   description:
                                   - 'Required: resource to select'
@@ -1125,6 +1304,11 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret or it's key must be
+                                    defined
+                                  type: bool
                     force_pull:
                       description:
                       - forcePull describes if the builder should pull the images
@@ -1168,7 +1352,7 @@ build_list:
                     env:
                       description:
                       - env contains additional environment variables you want to
-                        pass into a build pipeline. ValueFrom is not supported.
+                        pass into a build pipeline.
                       type: list
                       contains:
                         name:
@@ -1205,11 +1389,17 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap or it's key must
+                                    be defined
+                                  type: bool
                             field_ref:
                               description:
                               - 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
-                                spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP.'
                               type: complex
                               contains:
                                 api_version:
@@ -1238,8 +1428,7 @@ build_list:
                                   description:
                                   - Specifies the output format of the exposed resources,
                                     defaults to "1"
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 resource:
                                   description:
                                   - 'Required: resource to select'
@@ -1258,6 +1447,11 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret or it's key must be
+                                    defined
+                                  type: bool
                     jenkinsfile:
                       description:
                       - Jenkinsfile defines the optional raw contents of a Jenkinsfile
@@ -1323,7 +1517,7 @@ build_list:
                     env:
                       description:
                       - env contains additional environment variables you want to
-                        pass into a builder container. ValueFrom is not supported.
+                        pass into a builder container.
                       type: list
                       contains:
                         name:
@@ -1360,11 +1554,17 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the ConfigMap or it's key must
+                                    be defined
+                                  type: bool
                             field_ref:
                               description:
                               - 'Selects a field of the pod: supports metadata.name,
                                 metadata.namespace, metadata.labels, metadata.annotations,
-                                spec.nodeName, spec.serviceAccountName, status.podIP.'
+                                spec.nodeName, spec.serviceAccountName, status.hostIP,
+                                status.podIP.'
                               type: complex
                               contains:
                                 api_version:
@@ -1393,8 +1593,7 @@ build_list:
                                   description:
                                   - Specifies the output format of the exposed resources,
                                     defaults to "1"
-                                  type: complex
-                                  contains: {}
+                                  type: str
                                 resource:
                                   description:
                                   - 'Required: resource to select'
@@ -1413,6 +1612,11 @@ build_list:
                                   description:
                                   - Name of the referent.
                                   type: str
+                                optional:
+                                  description:
+                                  - Specify whether the Secret or it's key must be
+                                    defined
+                                  type: bool
                     force_pull:
                       description:
                       - forcePull describes if the builder should pull the images
@@ -1454,7 +1658,10 @@ build_list:
                         source_path:
                           description:
                           - sourcePath is the absolute path of the file or directory
-                            inside the image to copy to the build directory.
+                            inside the image to copy to the build directory. If the
+                            source path ends in /. then the content of the directory
+                            will be copied, but the directory itself will not be created
+                            at the destination.
                           type: str
                     runtime_image:
                       description:
@@ -1519,6 +1726,65 @@ build_list:
                 to the build configuration and contains information about those triggers.
               type: list
               contains:
+                bitbucket_web_hook:
+                  description:
+                  - BitbucketWebHook represents data for a Bitbucket webhook that
+                    fired a specific build.
+                  type: complex
+                  contains:
+                    revision:
+                      description:
+                      - Revision is the git source revision information of the trigger.
+                      type: complex
+                      contains:
+                        git:
+                          description:
+                          - Git contains information about git-based build source
+                          type: complex
+                          contains:
+                            author:
+                              description:
+                              - author is the author of a specific commit
+                              type: complex
+                              contains:
+                                email:
+                                  description:
+                                  - email of the source control user
+                                  type: str
+                                name:
+                                  description:
+                                  - name of the source control user
+                                  type: str
+                            commit:
+                              description:
+                              - commit is the commit hash identifying a specific commit
+                              type: str
+                            committer:
+                              description:
+                              - committer is the committer of a specific commit
+                              type: complex
+                              contains:
+                                email:
+                                  description:
+                                  - email of the source control user
+                                  type: str
+                                name:
+                                  description:
+                                  - name of the source control user
+                                  type: str
+                            message:
+                              description:
+                              - message is the description of a specific commit
+                              type: str
+                        type:
+                          description:
+                          - type of the build source, may be one of 'Source', 'Dockerfile',
+                            'Binary', or 'Images'
+                          type: str
+                    secret:
+                      description:
+                      - Secret is the obfuscated webhook secret that triggered a build.
+                      type: str
                 generic_web_hook:
                   description:
                   - genericWebHook holds data about a builds generic webhook trigger.
@@ -1636,6 +1902,65 @@ build_list:
                     secret:
                       description:
                       - secret is the obfuscated webhook secret that triggered a build.
+                      type: str
+                gitlab_web_hook:
+                  description:
+                  - GitLabWebHook represents data for a GitLab webhook that fired
+                    a specific build.
+                  type: complex
+                  contains:
+                    revision:
+                      description:
+                      - Revision is the git source revision information of the trigger.
+                      type: complex
+                      contains:
+                        git:
+                          description:
+                          - Git contains information about git-based build source
+                          type: complex
+                          contains:
+                            author:
+                              description:
+                              - author is the author of a specific commit
+                              type: complex
+                              contains:
+                                email:
+                                  description:
+                                  - email of the source control user
+                                  type: str
+                                name:
+                                  description:
+                                  - name of the source control user
+                                  type: str
+                            commit:
+                              description:
+                              - commit is the commit hash identifying a specific commit
+                              type: str
+                            committer:
+                              description:
+                              - committer is the committer of a specific commit
+                              type: complex
+                              contains:
+                                email:
+                                  description:
+                                  - email of the source control user
+                                  type: str
+                                name:
+                                  description:
+                                  - name of the source control user
+                                  type: str
+                            message:
+                              description:
+                              - message is the description of a specific commit
+                              type: str
+                        type:
+                          description:
+                          - type of the build source, may be one of 'Source', 'Dockerfile',
+                            'Binary', or 'Images'
+                          type: str
+                    secret:
+                      description:
+                      - Secret is the obfuscated webhook secret that triggered a build.
                       type: str
                 image_change_build:
                   description:
@@ -1760,6 +2085,11 @@ build_list:
               description:
               - duration contains time.Duration object describing build time.
               type: int
+            log_snippet:
+              description:
+              - logSnippet is the last few lines of the build log. This value is only
+                set for builds that failed.
+              type: str
             message:
               description:
               - message is a human-readable message indicating details about why the
@@ -1793,13 +2123,60 @@ build_list:
               type: str
             phase:
               description:
-              - phase is the point in the build lifecycle.
+              - phase is the point in the build lifecycle. Possible values are "New",
+                "Pending", "Running", "Complete", "Failed", "Error", and "Cancelled".
               type: str
             reason:
               description:
               - reason is a brief CamelCase string that describes any failure and
                 is meant for machine parsing and tidy display in the CLI.
               type: str
+            stages:
+              description:
+              - stages contains details about each stage that occurs during the build
+                including start time, duration (in milliseconds), and the steps that
+                occured within each stage.
+              type: list
+              contains:
+                duration_milliseconds:
+                  description:
+                  - 'durationMilliseconds identifies how long the stage took to complete
+                    in milliseconds. Note: the duration of a stage can exceed the
+                    sum of the duration of the steps within the stage as not all actions
+                    are accounted for in explicit build steps.'
+                  type: int
+                name:
+                  description:
+                  - name is a unique identifier for each build stage that occurs.
+                  type: str
+                start_time:
+                  description:
+                  - startTime is a timestamp representing the server time when this
+                    Stage started. It is represented in RFC3339 form and is in UTC.
+                  type: complex
+                  contains: {}
+                steps:
+                  description:
+                  - steps contains details about each step that occurs during a build
+                    stage including start time and duration in milliseconds.
+                  type: list
+                  contains:
+                    duration_milliseconds:
+                      description:
+                      - durationMilliseconds identifies how long the step took to
+                        complete in milliseconds.
+                      type: int
+                    name:
+                      description:
+                      - name is a unique identifier for each build step.
+                      type: str
+                    start_time:
+                      description:
+                      - startTime is a timestamp representing the server time when
+                        this Step started. it is represented in RFC3339 form and is
+                        in UTC.
+                      type: complex
+                      contains: {}
             start_timestamp:
               description:
               - startTimestamp is a timestamp representing the server time when this

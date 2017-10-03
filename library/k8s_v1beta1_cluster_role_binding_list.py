@@ -3,11 +3,11 @@
 from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
-module: k8s_v1beta1_horizontal_pod_autoscaler_list
-short_description: Kubernetes HorizontalPodAutoscalerList
+module: k8s_v1beta1_cluster_role_binding_list
+short_description: Kubernetes ClusterRoleBindingList
 description:
-- Retrieve a list of horizontal_pod_autoscalers. List operations provide a snapshot
-  read of the underlying objects, returning a resource_version representing a consistent
+- Retrieve a list of cluster_role_bindings. List operations provide a snapshot read
+  of the underlying objects, returning a resource_version representing a consistent
   version of the listed objects.
 version_added: 2.3.0
 author: OpenShift (@openshift)
@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -99,7 +95,7 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-horizontal_pod_autoscaler_list:
+cluster_role_binding_list:
   type: complex
   returned: when I(state) = C(present)
   contains:
@@ -111,7 +107,7 @@ horizontal_pod_autoscaler_list:
       type: str
     items:
       description:
-      - list of horizontal pod autoscaler objects.
+      - Items is a list of ClusterRoleBindings
       type: list
       contains:
         api_version:
@@ -128,7 +124,7 @@ horizontal_pod_autoscaler_list:
           type: str
         metadata:
           description:
-          - Standard object metadata.
+          - Standard object's metadata.
           type: complex
           contains:
             annotations:
@@ -210,6 +206,153 @@ horizontal_pod_autoscaler_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -246,6 +389,14 @@ horizontal_pod_autoscaler_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -285,85 +436,51 @@ horizontal_pod_autoscaler_list:
                 not allowed to change on PUT operations. Populated by the system.
                 Read-only.
               type: str
-        spec:
+        role_ref:
           description:
-          - behaviour of autoscaler.
+          - RoleRef can only reference a ClusterRole in the global namespace. If the
+            RoleRef cannot be resolved, the Authorizer must return an error.
           type: complex
           contains:
-            cpu_utilization:
+            api_group:
               description:
-              - target average CPU utilization (represented as a percentage of requested
-                CPU) over all the pods; if not specified it defaults to the target
-                CPU utilization at 80% of the requested resources.
-              type: complex
-              contains:
-                target_percentage:
-                  description:
-                  - fraction of the requested CPU that should be utilized/used, e.g.
-                    70 means that 70% of the requested CPU should be in use.
-                  type: int
-            max_replicas:
+              - APIGroup is the group for the resource being referenced
+              type: str
+            kind:
               description:
-              - upper limit for the number of pods that can be set by the autoscaler;
-                cannot be smaller than MinReplicas.
-              type: int
-            min_replicas:
+              - Kind is the type of resource being referenced
+              type: str
+            name:
               description:
-              - lower limit for the number of pods that can be set by the autoscaler,
-                default 1.
-              type: int
-            scale_ref:
-              description:
-              - reference to Scale subresource; horizontal pod autoscaler will learn
-                the current resource consumption from its status, and will set the
-                desired number of pods by modifying its spec.
-              type: complex
-              contains:
-                api_version:
-                  description:
-                  - API version of the referent
-                  type: str
-                kind:
-                  description:
-                  - Kind of the referent;
-                  type: str
-                name:
-                  description:
-                  - Name of the referent;
-                  type: str
-                subresource:
-                  description:
-                  - Subresource name of the referent
-                  type: str
-        status:
+              - Name is the name of resource being referenced
+              type: str
+        subjects:
           description:
-          - current information about the autoscaler.
-          type: complex
+          - Subjects holds references to the objects the role applies to.
+          type: list
           contains:
-            current_cpu_utilization_percentage:
+            api_group:
               description:
-              - current average CPU utilization over all pods, represented as a percentage
-                of requested CPU, e.g. 70 means that an average pod is using now 70%
-                of its requested CPU.
-              type: int
-            current_replicas:
+              - APIGroup holds the API group of the referenced subject. Defaults to
+                "" for ServiceAccount subjects. Defaults to "rbac.authorization.k8s.io"
+                for User and Group subjects.
+              type: str
+            kind:
               description:
-              - current number of replicas of pods managed by this autoscaler.
-              type: int
-            desired_replicas:
+              - Kind of object being referenced. Values defined by this API group
+                are "User", "Group", and "ServiceAccount". If the Authorizer does
+                not recognized the kind value, the Authorizer should report an error.
+              type: str
+            name:
               description:
-              - desired number of replicas of pods managed by this autoscaler.
-              type: int
-            last_scale_time:
+              - Name of the object being referenced.
+              type: str
+            namespace:
               description:
-              - last time the HorizontalPodAutoscaler scaled the number of pods; used
-                by the autoscaler to control how often the number of pods is changed.
-              type: complex
-              contains: {}
-            observed_generation:
-              description:
-              - most recent generation observed by this autoscaler.
-              type: int
+              - Namespace of the referenced object. If the object kind is non-namespace,
+                such as "User" or "Group", and this value is not empty the Authorizer
+                should report an error.
+              type: str
     kind:
       description:
       - Kind is a string value representing the REST resource this object represents.
@@ -372,7 +489,7 @@ horizontal_pod_autoscaler_list:
       type: str
     metadata:
       description:
-      - Standard list metadata.
+      - Standard object's metadata.
       type: complex
       contains:
         resource_version:
@@ -391,7 +508,7 @@ horizontal_pod_autoscaler_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('horizontal_pod_autoscaler_list', 'V1beta1')
+        module = KubernetesAnsibleModule('cluster_role_binding_list', 'V1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

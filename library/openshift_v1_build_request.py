@@ -89,10 +89,16 @@ options:
     aliases:
     - build_args
     type: list
+  docker_strategy_options_no_cache:
+    description:
+    - noCache overrides the docker-strategy noCache option in the build config
+    aliases:
+    - no_cache
+    type: bool
   env:
     description:
     - env contains additional environment variables you want to pass into a builder
-      container. ValueFrom is not supported.
+      container.
     type: list
   force:
     description:
@@ -175,6 +181,12 @@ options:
       'Images'
     aliases:
     - type
+  source_strategy_options_incremental:
+    description:
+    - incremental overrides the source-strategy incremental option in the build config
+    aliases:
+    - incremental
+    type: bool
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.
@@ -233,7 +245,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- openshift == 0.3.1
 '''
 
 EXAMPLES = '''
@@ -352,11 +364,15 @@ build_request:
                       description:
                       - Name of the referent.
                       type: str
+                    optional:
+                      description:
+                      - Specify whether the ConfigMap or it's key must be defined
+                      type: bool
                 field_ref:
                   description:
                   - 'Selects a field of the pod: supports metadata.name, metadata.namespace,
                     metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName,
-                    status.podIP.'
+                    status.hostIP, status.podIP.'
                   type: complex
                   contains:
                     api_version:
@@ -383,8 +399,7 @@ build_request:
                       description:
                       - Specifies the output format of the exposed resources, defaults
                         to "1"
-                      type: complex
-                      contains: {}
+                      type: str
                     resource:
                       description:
                       - 'Required: resource to select'
@@ -403,10 +418,18 @@ build_request:
                       description:
                       - Name of the referent.
                       type: str
+                    optional:
+                      description:
+                      - Specify whether the Secret or it's key must be defined
+                      type: bool
+        no_cache:
+          description:
+          - noCache overrides the docker-strategy noCache option in the build config
+          type: bool
     env:
       description:
       - env contains additional environment variables you want to pass into a builder
-        container. ValueFrom is not supported.
+        container.
       type: list
       contains:
         name:
@@ -441,11 +464,15 @@ build_request:
                   description:
                   - Name of the referent.
                   type: str
+                optional:
+                  description:
+                  - Specify whether the ConfigMap or it's key must be defined
+                  type: bool
             field_ref:
               description:
               - 'Selects a field of the pod: supports metadata.name, metadata.namespace,
                 metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName,
-                status.podIP.'
+                status.hostIP, status.podIP.'
               type: complex
               contains:
                 api_version:
@@ -472,8 +499,7 @@ build_request:
                   description:
                   - Specifies the output format of the exposed resources, defaults
                     to "1"
-                  type: complex
-                  contains: {}
+                  type: str
                 resource:
                   description:
                   - 'Required: resource to select'
@@ -491,6 +517,10 @@ build_request:
                   description:
                   - Name of the referent.
                   type: str
+                optional:
+                  description:
+                  - Specify whether the Secret or it's key must be defined
+                  type: bool
     kind:
       description:
       - Kind is a string value representing the REST resource this object represents.
@@ -584,6 +614,150 @@ build_request:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -619,6 +793,14 @@ build_request:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -704,12 +886,82 @@ build_request:
           - type of the build source, may be one of 'Source', 'Dockerfile', 'Binary',
             or 'Images'
           type: str
+    source_strategy_options:
+      description:
+      - SourceStrategyOptions contains additional source-strategy specific options
+        for the build
+      type: complex
+      contains:
+        incremental:
+          description:
+          - incremental overrides the source-strategy incremental option in the build
+            config
+          type: bool
     triggered_by:
       description:
       - triggeredBy describes which triggers started the most recent update to the
         build configuration and contains information about those triggers.
       type: list
       contains:
+        bitbucket_web_hook:
+          description:
+          - BitbucketWebHook represents data for a Bitbucket webhook that fired a
+            specific build.
+          type: complex
+          contains:
+            revision:
+              description:
+              - Revision is the git source revision information of the trigger.
+              type: complex
+              contains:
+                git:
+                  description:
+                  - Git contains information about git-based build source
+                  type: complex
+                  contains:
+                    author:
+                      description:
+                      - author is the author of a specific commit
+                      type: complex
+                      contains:
+                        email:
+                          description:
+                          - email of the source control user
+                          type: str
+                        name:
+                          description:
+                          - name of the source control user
+                          type: str
+                    commit:
+                      description:
+                      - commit is the commit hash identifying a specific commit
+                      type: str
+                    committer:
+                      description:
+                      - committer is the committer of a specific commit
+                      type: complex
+                      contains:
+                        email:
+                          description:
+                          - email of the source control user
+                          type: str
+                        name:
+                          description:
+                          - name of the source control user
+                          type: str
+                    message:
+                      description:
+                      - message is the description of a specific commit
+                      type: str
+                type:
+                  description:
+                  - type of the build source, may be one of 'Source', 'Dockerfile',
+                    'Binary', or 'Images'
+                  type: str
+            secret:
+              description:
+              - Secret is the obfuscated webhook secret that triggered a build.
+              type: str
         generic_web_hook:
           description:
           - genericWebHook holds data about a builds generic webhook trigger.
@@ -827,6 +1079,65 @@ build_request:
             secret:
               description:
               - secret is the obfuscated webhook secret that triggered a build.
+              type: str
+        gitlab_web_hook:
+          description:
+          - GitLabWebHook represents data for a GitLab webhook that fired a specific
+            build.
+          type: complex
+          contains:
+            revision:
+              description:
+              - Revision is the git source revision information of the trigger.
+              type: complex
+              contains:
+                git:
+                  description:
+                  - Git contains information about git-based build source
+                  type: complex
+                  contains:
+                    author:
+                      description:
+                      - author is the author of a specific commit
+                      type: complex
+                      contains:
+                        email:
+                          description:
+                          - email of the source control user
+                          type: str
+                        name:
+                          description:
+                          - name of the source control user
+                          type: str
+                    commit:
+                      description:
+                      - commit is the commit hash identifying a specific commit
+                      type: str
+                    committer:
+                      description:
+                      - committer is the committer of a specific commit
+                      type: complex
+                      contains:
+                        email:
+                          description:
+                          - email of the source control user
+                          type: str
+                        name:
+                          description:
+                          - name of the source control user
+                          type: str
+                    message:
+                      description:
+                      - message is the description of a specific commit
+                      type: str
+                type:
+                  description:
+                  - type of the build source, may be one of 'Source', 'Dockerfile',
+                    'Binary', or 'Images'
+                  type: str
+            secret:
+              description:
+              - Secret is the obfuscated webhook secret that triggered a build.
               type: str
         image_change_build:
           description:

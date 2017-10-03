@@ -79,13 +79,11 @@ options:
   spec_ingress:
     description:
     - List of ingress rules to be applied to the selected pods. Traffic is allowed
-      to a pod if namespace.networkPolicy.ingress.isolation is undefined and cluster
-      policy allows it, OR if the traffic source is the pod's local node, OR if the
-      traffic matches at least one ingress rule across all of the NetworkPolicy objects
-      whose podSelector matches the pod. If this field is empty then this NetworkPolicy
-      does not affect ingress isolation. If this field is present and contains at
-      least one rule, this policy allows any traffic which matches at least one of
-      the ingress rules in this list.
+      to a pod if there are no NetworkPolicies selecting the pod OR if the traffic
+      source is the pod's local node, OR if the traffic matches at least one ingress
+      rule across all of the NetworkPolicy objects whose podSelector matches the pod.
+      If this field is empty then this NetworkPolicy does not allow any traffic (and
+      serves solely to ensure that the pods it selects are isolated by default).
     aliases:
     - ingress
     type: list
@@ -136,7 +134,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -243,6 +241,150 @@ network_policy:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -278,6 +420,14 @@ network_policy:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -322,23 +472,21 @@ network_policy:
         ingress:
           description:
           - List of ingress rules to be applied to the selected pods. Traffic is allowed
-            to a pod if namespace.networkPolicy.ingress.isolation is undefined and
-            cluster policy allows it, OR if the traffic source is the pod's local
-            node, OR if the traffic matches at least one ingress rule across all of
-            the NetworkPolicy objects whose podSelector matches the pod. If this field
-            is empty then this NetworkPolicy does not affect ingress isolation. If
-            this field is present and contains at least one rule, this policy allows
-            any traffic which matches at least one of the ingress rules in this list.
+            to a pod if there are no NetworkPolicies selecting the pod OR if the traffic
+            source is the pod's local node, OR if the traffic matches at least one
+            ingress rule across all of the NetworkPolicy objects whose podSelector
+            matches the pod. If this field is empty then this NetworkPolicy does not
+            allow any traffic (and serves solely to ensure that the pods it selects
+            are isolated by default).
           type: list
           contains:
             _from:
               description:
               - List of sources which should be able to access the pods selected for
                 this rule. Items in this list are combined using a logical OR operation.
-                If this field is not provided, this rule matches all sources (traffic
-                not restricted by source). If this field is empty, this rule matches
-                no sources (no traffic matches). If this field is present and contains
-                at least on item, this rule allows traffic only if the traffic matches
+                If this field is empty or missing, this rule matches all sources (traffic
+                not restricted by source). If this field is present and contains at
+                least on item, this rule allows traffic only if the traffic matches
                 at least one item in the from list.
               type: list
               contains:
@@ -346,9 +494,8 @@ network_policy:
                   description:
                   - Selects Namespaces using cluster scoped-labels. This matches all
                     pods in all namespaces selected by this label selector. This field
-                    follows standard label selector semantics. If omitted, this selector
-                    selects no namespaces. If present but empty, this selector selects
-                    all namespaces.
+                    follows standard label selector semantics. If present but empty,
+                    this selector selects all namespaces.
                   type: complex
                   contains:
                     match_expressions:
@@ -386,9 +533,8 @@ network_policy:
                 pod_selector:
                   description:
                   - This is a label selector which selects Pods in this namespace.
-                    This field follows standard label selector semantics. If not provided,
-                    this selector selects no pods. If present but empty, this selector
-                    selects all pods in this namespace.
+                    This field follows standard label selector semantics. If present
+                    but empty, this selector selects all pods in this namespace.
                   type: complex
                   contains:
                     match_expressions:
@@ -427,9 +573,8 @@ network_policy:
               description:
               - List of ports which should be made accessible on the pods selected
                 for this rule. Each item in this list is combined using a logical
-                OR. If this field is not provided, this rule matches all ports (traffic
-                not restricted by port). If this field is empty, this rule matches
-                no ports (no traffic matches). If this field is present and contains
+                OR. If this field is empty or missing, this rule matches all ports
+                (traffic not restricted by port). If this field is present and contains
                 at least one item, then this rule allows traffic only if the traffic
                 matches at least one port in the list.
               type: list
@@ -440,8 +585,7 @@ network_policy:
                     be a numerical or named port on a pod. If this field is not provided,
                     this matches all port names and numbers. If present, only traffic
                     on the specified protocol AND port will be matched.
-                  type: complex
-                  contains: {}
+                  type: str
                 protocol:
                   description:
                   - Optional. The protocol (TCP or UDP) which traffic must match.

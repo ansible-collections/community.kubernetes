@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-from ansible.module_utils.openshift_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
+from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
-module: openshift_v1beta1_pod_security_policy
-short_description: OpenShift PodSecurityPolicy
+module: k8s_v1beta1_certificate_signing_request
+short_description: Kubernetes CertificateSigningRequest
 description:
-- Manage the lifecycle of a pod_security_policy object. Supports check mode, and attempts
-  to to be idempotent.
+- Manage the lifecycle of a certificate_signing_request object. Supports check mode,
+  and attempts to to be idempotent.
 version_added: 2.3.0
 author: OpenShift (@openshift)
 options:
@@ -71,144 +71,68 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
-  spec_allowed_capabilities:
+  resource_definition:
     description:
-    - AllowedCapabilities is a list of capabilities that can be requested to add to
-      the container. Capabilities in this field may be added at the pod author's discretion.
-      You must not list a capability in both AllowedCapabilities and RequiredDropCapabilities.
+    - Provide the YAML definition for the object, bypassing any modules parameters
+      intended to define object attributes.
+    type: dict
+  spec_extra:
+    description:
+    - Extra information about the requesting user. See user.Info interface for details.
     aliases:
-    - allowed_capabilities
+    - extra
+    type: dict
+  spec_groups:
+    description:
+    - Group information about the requesting user. See user.Info interface for details.
+    aliases:
+    - groups
     type: list
-  spec_default_add_capabilities:
+  spec_request:
     description:
-    - DefaultAddCapabilities is the default set of capabilities that will be added
-      to the container unless the pod spec specifically drops the capability. You
-      may not list a capabiility in both DefaultAddCapabilities and RequiredDropCapabilities.
+    - Base64-encoded PKCS
     aliases:
-    - default_add_capabilities
+    - request
+  spec_uid:
+    description:
+    - UID information about the requesting user. See user.Info interface for details.
+    aliases:
+    - uid
+  spec_usages:
+    description:
+    - 'allowedUsages specifies a set of usage contexts the key will be valid for.
+      See:'
+    aliases:
+    - usages
     type: list
-  spec_fs_group_ranges:
+  spec_username:
     description:
-    - Ranges are the allowed ranges of fs groups. If you would like to force a single
-      fs group then supply a single range with the same start and end.
+    - Information about the requesting user. See user.Info interface for details.
     aliases:
-    - fs_group_ranges
-    type: list
-  spec_fs_group_rule:
+    - username
+  src:
     description:
-    - Rule is the strategy that will dictate what FSGroup is used in the SecurityContext.
-    aliases:
-    - fs_group_rule
-  spec_host_ipc:
-    description:
-    - hostIPC determines if the policy allows the use of HostIPC in the pod spec.
-    aliases:
-    - host_ipc
-    type: bool
-  spec_host_network:
-    description:
-    - hostNetwork determines if the policy allows the use of HostNetwork in the pod
-      spec.
-    aliases:
-    - host_network
-    type: bool
-  spec_host_pid:
-    description:
-    - hostPID determines if the policy allows the use of HostPID in the pod spec.
-    aliases:
-    - host_pid
-    type: bool
-  spec_host_ports:
-    description:
-    - hostPorts determines which host port ranges are allowed to be exposed.
-    aliases:
-    - host_ports
-    type: list
-  spec_privileged:
-    description:
-    - privileged determines if a pod can request to be run as privileged.
-    aliases:
-    - privileged
-    type: bool
-  spec_read_only_root_filesystem:
-    description:
-    - ReadOnlyRootFilesystem when set to true will force containers to run with a
-      read only root file system. If the container specifically requests to run with
-      a non-read only root file system the PSP should deny the pod. If set to false
-      the container may run with a read only root file system if it wishes but it
-      will not be forced to.
-    aliases:
-    - read_only_root_filesystem
-    type: bool
-  spec_required_drop_capabilities:
-    description:
-    - RequiredDropCapabilities are the capabilities that will be dropped from the
-      container. These are required to be dropped and cannot be added.
-    aliases:
-    - required_drop_capabilities
-    type: list
-  spec_run_as_user_ranges:
-    description:
-    - Ranges are the allowed ranges of uids that may be used.
-    aliases:
-    - run_as_user_ranges
-    type: list
-  spec_run_as_user_rule:
-    description:
-    - Rule is the strategy that will dictate the allowable RunAsUser values that may
-      be set.
-    aliases:
-    - run_as_user_rule
-  spec_se_linux_rule:
-    description:
-    - type is the strategy that will dictate the allowable labels that may be set.
-    aliases:
-    - se_linux_rule
-  spec_se_linux_se_linux_options_level:
-    description:
-    - Level is SELinux level label that applies to the container.
-    aliases:
-    - se_linux_se_options_level
-  spec_se_linux_se_linux_options_role:
-    description:
-    - Role is a SELinux role label that applies to the container.
-    aliases:
-    - se_linux_se_options_role
-  spec_se_linux_se_linux_options_type:
-    description:
-    - Type is a SELinux type label that applies to the container.
-    aliases:
-    - se_linux_se_options_type
-  spec_se_linux_se_linux_options_user:
-    description:
-    - User is a SELinux user label that applies to the container.
-    aliases:
-    - se_linux_se_options_user
-  spec_supplemental_groups_ranges:
-    description:
-    - Ranges are the allowed ranges of supplemental groups. If you would like to force
-      a single supplemental group then supply a single range with the same start and
-      end.
-    aliases:
-    - supplemental_groups_ranges
-    type: list
-  spec_supplemental_groups_rule:
-    description:
-    - Rule is the strategy that will dictate what supplemental groups is used in the
-      SecurityContext.
-    aliases:
-    - supplemental_groups_rule
-  spec_volumes:
-    description:
-    - volumes is a white list of allowed volume plugins. Empty indicates that all
-      plugins may be used.
-    aliases:
-    - volumes
-    type: list
+    - Provide a path to a file containing the YAML definition of the object. Mutually
+      exclusive with I(resource_definition).
+    type: path
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.
     type: path
+  state:
+    description:
+    - Determines if an object should be created, patched, or deleted. When set to
+      C(present), the object will be created, if it does not exist, or patched, if
+      parameter values differ from the existing object's attributes, and deleted,
+      if set to C(absent). A patch operation results in merging lists and updating
+      dictionaries, with lists being merged into a unique set of values. If a list
+      contains a dictionary with a I(name) or I(type) attribute, a strategic merge
+      is performed, where individual elements with a matching I(name_) or I(type)
+      are merged. To force the replacement of lists, set the I(force) option to C(True).
+    default: present
+    choices:
+    - present
+    - absent
   username:
     description:
     - Provide a username for connecting to the API.
@@ -217,7 +141,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 1.0.0-snapshot
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -227,9 +151,9 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-pod_security_policy:
+certificate_signing_request:
   type: complex
-  returned: on success
+  returned: when I(state) = C(present)
   contains:
     api_version:
       description:
@@ -244,8 +168,7 @@ pod_security_policy:
         be updated. In CamelCase.
       type: str
     metadata:
-      description:
-      - Standard object's metadata.
+      description: []
       type: complex
       contains:
         annotations:
@@ -324,6 +247,150 @@ pod_security_policy:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -359,6 +426,14 @@ pod_security_policy:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -397,197 +472,85 @@ pod_security_policy:
           type: str
     spec:
       description:
-      - spec defines the policy enforced.
+      - The certificate request itself and any additional information.
       type: complex
       contains:
-        allowed_capabilities:
+        extra:
           description:
-          - AllowedCapabilities is a list of capabilities that can be requested to
-            add to the container. Capabilities in this field may be added at the pod
-            author's discretion. You must not list a capability in both AllowedCapabilities
-            and RequiredDropCapabilities.
+          - Extra information about the requesting user. See user.Info interface for
+            details.
+          type: complex
+          contains: str, list[str]
+        groups:
+          description:
+          - Group information about the requesting user. See user.Info interface for
+            details.
           type: list
           contains: str
-        default_add_capabilities:
+        request:
           description:
-          - DefaultAddCapabilities is the default set of capabilities that will be
-            added to the container unless the pod spec specifically drops the capability.
-            You may not list a capabiility in both DefaultAddCapabilities and RequiredDropCapabilities.
+          - Base64-encoded PKCS
+          type: str
+        uid:
+          description:
+          - UID information about the requesting user. See user.Info interface for
+            details.
+          type: str
+        usages:
+          description:
+          - 'allowedUsages specifies a set of usage contexts the key will be valid
+            for. See:'
           type: list
           contains: str
-        fs_group:
+        username:
           description:
-          - FSGroup is the strategy that will dictate what fs group is used by the
-            SecurityContext.
-          type: complex
-          contains:
-            ranges:
-              description:
-              - Ranges are the allowed ranges of fs groups. If you would like to force
-                a single fs group then supply a single range with the same start and
-                end.
-              type: list
-              contains:
-                max:
-                  description:
-                  - Max is the end of the range, inclusive.
-                  type: int
-                min:
-                  description:
-                  - Min is the start of the range, inclusive.
-                  type: int
-            rule:
-              description:
-              - Rule is the strategy that will dictate what FSGroup is used in the
-                SecurityContext.
-              type: str
-        host_ipc:
+          - Information about the requesting user. See user.Info interface for details.
+          type: str
+    status:
+      description:
+      - Derived information about the request.
+      type: complex
+      contains:
+        certificate:
           description:
-          - hostIPC determines if the policy allows the use of HostIPC in the pod
-            spec.
-          type: bool
-        host_network:
+          - If request was approved, the controller will place the issued certificate
+            here.
+          type: str
+        conditions:
           description:
-          - hostNetwork determines if the policy allows the use of HostNetwork in
-            the pod spec.
-          type: bool
-        host_pid:
-          description:
-          - hostPID determines if the policy allows the use of HostPID in the pod
-            spec.
-          type: bool
-        host_ports:
-          description:
-          - hostPorts determines which host port ranges are allowed to be exposed.
+          - Conditions applied to the request, such as approval or denial.
           type: list
           contains:
-            max:
+            last_update_time:
               description:
-              - max is the end of the range, inclusive.
-              type: int
-            min:
-              description:
-              - min is the start of the range, inclusive.
-              type: int
-        privileged:
-          description:
-          - privileged determines if a pod can request to be run as privileged.
-          type: bool
-        read_only_root_filesystem:
-          description:
-          - ReadOnlyRootFilesystem when set to true will force containers to run with
-            a read only root file system. If the container specifically requests to
-            run with a non-read only root file system the PSP should deny the pod.
-            If set to false the container may run with a read only root file system
-            if it wishes but it will not be forced to.
-          type: bool
-        required_drop_capabilities:
-          description:
-          - RequiredDropCapabilities are the capabilities that will be dropped from
-            the container. These are required to be dropped and cannot be added.
-          type: list
-          contains: str
-        run_as_user:
-          description:
-          - runAsUser is the strategy that will dictate the allowable RunAsUser values
-            that may be set.
-          type: complex
-          contains:
-            ranges:
-              description:
-              - Ranges are the allowed ranges of uids that may be used.
-              type: list
-              contains:
-                max:
-                  description:
-                  - Max is the end of the range, inclusive.
-                  type: int
-                min:
-                  description:
-                  - Min is the start of the range, inclusive.
-                  type: int
-            rule:
-              description:
-              - Rule is the strategy that will dictate the allowable RunAsUser values
-                that may be set.
-              type: str
-        se_linux:
-          description:
-          - seLinux is the strategy that will dictate the allowable labels that may
-            be set.
-          type: complex
-          contains:
-            rule:
-              description:
-              - type is the strategy that will dictate the allowable labels that may
-                be set.
-              type: str
-            se_linux_options:
-              description:
-              - seLinuxOptions required to run as; required for MustRunAs
+              - timestamp for the last update to this condition
               type: complex
-              contains:
-                level:
-                  description:
-                  - Level is SELinux level label that applies to the container.
-                  type: str
-                role:
-                  description:
-                  - Role is a SELinux role label that applies to the container.
-                  type: str
-                type:
-                  description:
-                  - Type is a SELinux type label that applies to the container.
-                  type: str
-                user:
-                  description:
-                  - User is a SELinux user label that applies to the container.
-                  type: str
-        supplemental_groups:
-          description:
-          - SupplementalGroups is the strategy that will dictate what supplemental
-            groups are used by the SecurityContext.
-          type: complex
-          contains:
-            ranges:
+              contains: {}
+            message:
               description:
-              - Ranges are the allowed ranges of supplemental groups. If you would
-                like to force a single supplemental group then supply a single range
-                with the same start and end.
-              type: list
-              contains:
-                max:
-                  description:
-                  - Max is the end of the range, inclusive.
-                  type: int
-                min:
-                  description:
-                  - Min is the start of the range, inclusive.
-                  type: int
-            rule:
-              description:
-              - Rule is the strategy that will dictate what supplemental groups is
-                used in the SecurityContext.
+              - human readable message with details about the request state
               type: str
-        volumes:
-          description:
-          - volumes is a white list of allowed volume plugins. Empty indicates that
-            all plugins may be used.
-          type: list
-          contains: str
+            reason:
+              description:
+              - brief reason for the request state
+              type: str
+            type:
+              description:
+              - request approval state, currently Approved or Denied.
+              type: str
 '''
 
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('pod_security_policy', 'V1beta1')
-    except OpenShiftAnsibleException as exc:
+        module = KubernetesAnsibleModule('certificate_signing_request', 'V1beta1')
+    except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)
 
     try:
         module.execute_module()
-    except OpenShiftAnsibleException as exc:
+    except KubernetesAnsibleException as exc:
         module.fail_json(msg="Module failed!", error=str(exc))
 
 

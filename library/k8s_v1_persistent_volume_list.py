@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -210,6 +206,153 @@ persistent_volume_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -246,6 +389,14 @@ persistent_volume_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -349,6 +500,13 @@ persistent_volume_list:
                     by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly
                     inferred to be "ext4" if unspecified.
                   type: str
+                kind:
+                  description:
+                  - 'Expected values Shared: mulitple blob disks per storage account
+                    Dedicated: single blob disk per storage account Managed: azure
+                    managed data disk (only in managed availability set). defaults
+                    to shared'
+                  type: str
                 read_only:
                   description:
                   - Defaults to false (read/write). ReadOnly here will force the ReadOnly
@@ -378,7 +536,7 @@ persistent_volume_list:
               description:
               - A description of the persistent volume's resources and capacity.
               type: complex
-              contains: str, ResourceQuantity
+              contains: str, str
             cephfs:
               description:
               - CephFS represents a Ceph FS mount on the host that shares a pod's
@@ -633,6 +791,14 @@ persistent_volume_list:
                 host machine and then exposed to the pod. Provisioned by an admin.
               type: complex
               contains:
+                chap_auth_discovery:
+                  description:
+                  - whether support iSCSI Discovery CHAP authentication
+                  type: bool
+                chap_auth_session:
+                  description:
+                  - whether support iSCSI Session CHAP authentication
+                  type: bool
                 fs_type:
                   description:
                   - 'Filesystem type of the volume that you want to mount. Tip: Ensure
@@ -653,16 +819,43 @@ persistent_volume_list:
                   description:
                   - iSCSI target lun number.
                   type: int
+                portals:
+                  description:
+                  - iSCSI target portal List. The portal is either an IP or ip_addr:port
+                    if the port is other than default (typically TCP ports 860 and
+                    3260).
+                  type: list
+                  contains: str
                 read_only:
                   description:
                   - ReadOnly here will force the ReadOnly setting in VolumeMounts.
                     Defaults to false.
                   type: bool
+                secret_ref:
+                  description:
+                  - CHAP secret for iSCSI target and initiator authentication
+                  type: complex
+                  contains:
+                    name:
+                      description:
+                      - Name of the referent.
+                      type: str
                 target_portal:
                   description:
                   - iSCSI target portal. The portal is either an IP or ip_addr:port
                     if the port is other than default (typically TCP ports 860 and
                     3260).
+                  type: str
+            local:
+              description:
+              - Local represents directly-attached storage with node affinity
+              type: complex
+              contains:
+                path:
+                  description:
+                  - The full path to the volume on the node For alpha, this path must
+                    be a directory Once block as a source is supported, then this
+                    path can point to a block device
                   type: str
             nfs:
               description:
@@ -703,6 +896,27 @@ persistent_volume_list:
                 pd_id:
                   description:
                   - ID that identifies Photon Controller persistent disk
+                  type: str
+            portworx_volume:
+              description:
+              - PortworxVolume represents a portworx volume attached and mounted on
+                kubelets host machine
+              type: complex
+              contains:
+                fs_type:
+                  description:
+                  - FSType represents the filesystem type to mount Must be a filesystem
+                    type supported by the host operating system. Ex. "ext4", "xfs".
+                    Implicitly inferred to be "ext4" if unspecified.
+                  type: str
+                read_only:
+                  description:
+                  - Defaults to false (read/write). ReadOnly here will force the ReadOnly
+                    setting in VolumeMounts.
+                  type: bool
+                volume_id:
+                  description:
+                  - VolumeID uniquely identifies a Portworx volume
                   type: str
             quobyte:
               description:
@@ -784,6 +998,148 @@ persistent_volume_list:
                   description:
                   - The rados user name. Default is admin.
                   type: str
+            scale_io:
+              description:
+              - ScaleIO represents a ScaleIO persistent volume attached and mounted
+                on Kubernetes nodes.
+              type: complex
+              contains:
+                fs_type:
+                  description:
+                  - Filesystem type to mount. Must be a filesystem type supported
+                    by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly
+                    inferred to be "ext4" if unspecified.
+                  type: str
+                gateway:
+                  description:
+                  - The host address of the ScaleIO API Gateway.
+                  type: str
+                protection_domain:
+                  description:
+                  - The name of the Protection Domain for the configured storage (defaults
+                    to "default").
+                  type: str
+                read_only:
+                  description:
+                  - Defaults to false (read/write). ReadOnly here will force the ReadOnly
+                    setting in VolumeMounts.
+                  type: bool
+                secret_ref:
+                  description:
+                  - SecretRef references to the secret for ScaleIO user and other
+                    sensitive information. If this is not provided, Login operation
+                    will fail.
+                  type: complex
+                  contains:
+                    name:
+                      description:
+                      - Name of the referent.
+                      type: str
+                ssl_enabled:
+                  description:
+                  - Flag to enable/disable SSL communication with Gateway, default
+                    false
+                  type: bool
+                storage_mode:
+                  description:
+                  - Indicates whether the storage for a volume should be thick or
+                    thin (defaults to "thin").
+                  type: str
+                storage_pool:
+                  description:
+                  - The Storage Pool associated with the protection domain (defaults
+                    to "default").
+                  type: str
+                system:
+                  description:
+                  - The name of the storage system as configured in ScaleIO.
+                  type: str
+                volume_name:
+                  description:
+                  - The name of a volume already created in the ScaleIO system that
+                    is associated with this volume source.
+                  type: str
+            storage_class_name:
+              description:
+              - Name of StorageClass to which this persistent volume belongs. Empty
+                value means that this volume does not belong to any StorageClass.
+              type: str
+            storageos:
+              description:
+              - StorageOS represents a StorageOS volume that is attached to the kubelet's
+                host machine and mounted into the pod
+              type: complex
+              contains:
+                fs_type:
+                  description:
+                  - Filesystem type to mount. Must be a filesystem type supported
+                    by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly
+                    inferred to be "ext4" if unspecified.
+                  type: str
+                read_only:
+                  description:
+                  - Defaults to false (read/write). ReadOnly here will force the ReadOnly
+                    setting in VolumeMounts.
+                  type: bool
+                secret_ref:
+                  description:
+                  - SecretRef specifies the secret to use for obtaining the StorageOS
+                    API credentials. If not specified, default values will be attempted.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - API version of the referent.
+                      type: str
+                    field_path:
+                      description:
+                      - 'If referring to a piece of an object instead of an entire
+                        object, this string should contain a valid JSON/Go field access
+                        statement, such as desiredState.manifest.containers[2]. For
+                        example, if the object reference is to a container within
+                        a pod, this would take on a value like: "spec.containers{name}"
+                        (where "name" refers to the name of the container that triggered
+                        the event) or if no container name is specified "spec.containers[2]"
+                        (container with index 2 in this pod). This syntax is chosen
+                        only to have some well-defined way of referencing a part of
+                        an object.'
+                      type: str
+                    kind:
+                      description:
+                      - Kind of the referent.
+                      type: str
+                    name:
+                      description:
+                      - Name of the referent.
+                      type: str
+                    namespace:
+                      description:
+                      - Namespace of the referent.
+                      type: str
+                    resource_version:
+                      description:
+                      - Specific resourceVersion to which this reference is made,
+                        if any.
+                      type: str
+                    uid:
+                      description:
+                      - UID of the referent.
+                      type: str
+                volume_name:
+                  description:
+                  - VolumeName is the human-readable name of the StorageOS volume.
+                    Volume names are only unique within a namespace.
+                  type: str
+                volume_namespace:
+                  description:
+                  - VolumeNamespace specifies the scope of the volume within StorageOS.
+                    If no namespace is specified then the Pod's namespace will be
+                    used. This allows the Kubernetes name scoping to be mirrored within
+                    StorageOS for tighter integration. Set VolumeName to any name
+                    to override the default behaviour. Set to "default" if you are
+                    not using namespaces within StorageOS. Namespaces that do not
+                    pre-exist within StorageOS will be created.
+                  type: str
             vsphere_volume:
               description:
               - VsphereVolume represents a vSphere volume attached and mounted on
@@ -795,6 +1151,15 @@ persistent_volume_list:
                   - Filesystem type to mount. Must be a filesystem type supported
                     by the host operating system. Ex. "ext4", "xfs", "ntfs". Implicitly
                     inferred to be "ext4" if unspecified.
+                  type: str
+                storage_policy_id:
+                  description:
+                  - Storage Policy Based Management (SPBM) profile ID associated with
+                    the StoragePolicyName.
+                  type: str
+                storage_policy_name:
+                  description:
+                  - Storage Policy Based Management (SPBM) profile name.
                   type: str
                 volume_path:
                   description:

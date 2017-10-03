@@ -3,10 +3,10 @@
 from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
-module: k8s_v1beta1_horizontal_pod_autoscaler
-short_description: Kubernetes HorizontalPodAutoscaler
+module: k8s_v1_self_subject_access_review
+short_description: Kubernetes SelfSubjectAccessReview
 description:
-- Manage the lifecycle of a horizontal_pod_autoscaler object. Supports check mode,
+- Manage the lifecycle of a self_subject_access_review object. Supports check mode,
   and attempts to to be idempotent.
 version_added: 2.3.0
 author: OpenShift (@openshift)
@@ -71,75 +71,61 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
-  resource_definition:
+  spec_non_resource_attributes_path:
     description:
-    - Provide the YAML definition for the object, bypassing any modules parameters
-      intended to define object attributes.
-    type: dict
-  spec_cpu_utilization_target_percentage:
-    description:
-    - fraction of the requested CPU that should be utilized/used, e.g. 70 means that
-      70% of the requested CPU should be in use.
+    - Path is the URL path of the request
     aliases:
-    - cpu_utilization_target_percentage
-    type: int
-  spec_max_replicas:
+    - non_resource_attributes_path
+  spec_non_resource_attributes_verb:
     description:
-    - upper limit for the number of pods that can be set by the autoscaler; cannot
-      be smaller than MinReplicas.
+    - Verb is the standard HTTP verb
     aliases:
-    - max_replicas
-    type: int
-  spec_min_replicas:
+    - non_resource_attributes_verb
+  spec_resource_attributes_group:
     description:
-    - lower limit for the number of pods that can be set by the autoscaler, default
-      1.
+    - Group is the API Group of the Resource. "*" means all.
     aliases:
-    - min_replicas
-    type: int
-  spec_scale_ref_api_version:
+    - resource_attributes_group
+  spec_resource_attributes_name:
     description:
-    - API version of the referent
+    - Name is the name of the resource being requested for a "get" or deleted for
+      a "delete". "" (empty) means all.
     aliases:
-    - scale_ref_api_version
-  spec_scale_ref_kind:
+    - resource_attributes_name
+  spec_resource_attributes_namespace:
     description:
-    - Kind of the referent;
+    - Namespace is the namespace of the action being requested. Currently, there is
+      no distinction between no namespace and all namespaces "" (empty) is defaulted
+      for LocalSubjectAccessReviews "" (empty) is empty for cluster-scoped resources
+      "" (empty) means "all" for namespace scoped resources from a SubjectAccessReview
+      or SelfSubjectAccessReview
     aliases:
-    - scale_ref_kind
-  spec_scale_ref_name:
+    - resource_attributes_namespace
+  spec_resource_attributes_resource:
     description:
-    - Name of the referent;
+    - Resource is one of the existing resource types. "*" means all.
     aliases:
-    - scale_ref_name
-  spec_scale_ref_subresource:
+    - resource_attributes_resource
+  spec_resource_attributes_subresource:
     description:
-    - Subresource name of the referent
+    - Subresource is one of the existing resource types. "" means none.
     aliases:
-    - scale_ref_subresource
-  src:
+    - resource_attributes_subresource
+  spec_resource_attributes_verb:
     description:
-    - Provide a path to a file containing the YAML definition of the object. Mutually
-      exclusive with I(resource_definition).
-    type: path
+    - 'Verb is a kubernetes resource API verb, like: get, list, watch, create, update,
+      delete, proxy. "*" means all.'
+    aliases:
+    - resource_attributes_verb
+  spec_resource_attributes_version:
+    description:
+    - Version is the API Version of the Resource. "*" means all.
+    aliases:
+    - resource_attributes_version
   ssl_ca_cert:
     description:
     - Path to a CA certificate used to authenticate with the API.
     type: path
-  state:
-    description:
-    - Determines if an object should be created, patched, or deleted. When set to
-      C(present), the object will be created, if it does not exist, or patched, if
-      parameter values differ from the existing object's attributes, and deleted,
-      if set to C(absent). A patch operation results in merging lists and updating
-      dictionaries, with lists being merged into a unique set of values. If a list
-      contains a dictionary with a I(name) or I(type) attribute, a strategic merge
-      is performed, where individual elements with a matching I(name_) or I(type)
-      are merged. To force the replacement of lists, set the I(force) option to C(True).
-    default: present
-    choices:
-    - present
-    - absent
   username:
     description:
     - Provide a username for connecting to the API.
@@ -148,7 +134,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -158,9 +144,9 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-horizontal_pod_autoscaler:
+self_subject_access_review:
   type: complex
-  returned: when I(state) = C(present)
+  returned: on success
   contains:
     api_version:
       description:
@@ -175,8 +161,7 @@ horizontal_pod_autoscaler:
         be updated. In CamelCase.
       type: str
     metadata:
-      description:
-      - Standard object metadata.
+      description: []
       type: complex
       contains:
         annotations:
@@ -255,6 +240,150 @@ horizontal_pod_autoscaler:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -290,6 +419,14 @@ horizontal_pod_autoscaler:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -328,89 +465,92 @@ horizontal_pod_autoscaler:
           type: str
     spec:
       description:
-      - behaviour of autoscaler.
+      - Spec holds information about the request being evaluated. user and groups
+        must be empty
       type: complex
       contains:
-        cpu_utilization:
+        non_resource_attributes:
           description:
-          - target average CPU utilization (represented as a percentage of requested
-            CPU) over all the pods; if not specified it defaults to the target CPU
-            utilization at 80% of the requested resources.
+          - NonResourceAttributes describes information for a non-resource access
+            request
           type: complex
           contains:
-            target_percentage:
+            path:
               description:
-              - fraction of the requested CPU that should be utilized/used, e.g. 70
-                means that 70% of the requested CPU should be in use.
-              type: int
-        max_replicas:
-          description:
-          - upper limit for the number of pods that can be set by the autoscaler;
-            cannot be smaller than MinReplicas.
-          type: int
-        min_replicas:
-          description:
-          - lower limit for the number of pods that can be set by the autoscaler,
-            default 1.
-          type: int
-        scale_ref:
-          description:
-          - reference to Scale subresource; horizontal pod autoscaler will learn the
-            current resource consumption from its status, and will set the desired
-            number of pods by modifying its spec.
-          type: complex
-          contains:
-            api_version:
-              description:
-              - API version of the referent
+              - Path is the URL path of the request
               type: str
-            kind:
+            verb:
               description:
-              - Kind of the referent;
+              - Verb is the standard HTTP verb
+              type: str
+        resource_attributes:
+          description:
+          - ResourceAuthorizationAttributes describes information for a resource access
+            request
+          type: complex
+          contains:
+            group:
+              description:
+              - Group is the API Group of the Resource. "*" means all.
               type: str
             name:
               description:
-              - Name of the referent;
+              - Name is the name of the resource being requested for a "get" or deleted
+                for a "delete". "" (empty) means all.
+              type: str
+            namespace:
+              description:
+              - Namespace is the namespace of the action being requested. Currently,
+                there is no distinction between no namespace and all namespaces ""
+                (empty) is defaulted for LocalSubjectAccessReviews "" (empty) is empty
+                for cluster-scoped resources "" (empty) means "all" for namespace
+                scoped resources from a SubjectAccessReview or SelfSubjectAccessReview
+              type: str
+            resource:
+              description:
+              - Resource is one of the existing resource types. "*" means all.
               type: str
             subresource:
               description:
-              - Subresource name of the referent
+              - Subresource is one of the existing resource types. "" means none.
+              type: str
+            verb:
+              description:
+              - 'Verb is a kubernetes resource API verb, like: get, list, watch, create,
+                update, delete, proxy. "*" means all.'
+              type: str
+            version:
+              description:
+              - Version is the API Version of the Resource. "*" means all.
               type: str
     status:
       description:
-      - current information about the autoscaler.
+      - Status is filled in by the server and indicates whether the request is allowed
+        or not
       type: complex
       contains:
-        current_cpu_utilization_percentage:
+        allowed:
           description:
-          - current average CPU utilization over all pods, represented as a percentage
-            of requested CPU, e.g. 70 means that an average pod is using now 70% of
-            its requested CPU.
-          type: int
-        current_replicas:
+          - Allowed is required. True if the action would be allowed, false otherwise.
+          type: bool
+        evaluation_error:
           description:
-          - current number of replicas of pods managed by this autoscaler.
-          type: int
-        desired_replicas:
+          - EvaluationError is an indication that some error occurred during the authorization
+            check. It is entirely possible to get an error and be able to continue
+            determine authorization status in spite of it. For instance, RBAC can
+            be missing a role, but enough roles are still present and bound to reason
+            about the request.
+          type: str
+        reason:
           description:
-          - desired number of replicas of pods managed by this autoscaler.
-          type: int
-        last_scale_time:
-          description:
-          - last time the HorizontalPodAutoscaler scaled the number of pods; used
-            by the autoscaler to control how often the number of pods is changed.
-          type: complex
-          contains: {}
-        observed_generation:
-          description:
-          - most recent generation observed by this autoscaler.
-          type: int
+          - Reason is optional. It indicates why a request was allowed or denied.
+          type: str
 '''
 
 
 def main():
     try:
-        module = KubernetesAnsibleModule('horizontal_pod_autoscaler', 'V1beta1')
+        module = KubernetesAnsibleModule('self_subject_access_review', 'V1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

@@ -3,10 +3,10 @@
 from ansible.module_utils.k8s_common import KubernetesAnsibleModule, KubernetesAnsibleException
 
 DOCUMENTATION = '''
-module: k8s_v1alpha1_certificate_signing_request
-short_description: Kubernetes CertificateSigningRequest
+module: k8s_v1alpha1_initializer_configuration
+short_description: Kubernetes InitializerConfiguration
 description:
-- Manage the lifecycle of a certificate_signing_request object. Supports check mode,
+- Manage the lifecycle of a initializer_configuration object. Supports check mode,
   and attempts to to be idempotent.
 version_added: 2.3.0
 author: OpenShift (@openshift)
@@ -41,6 +41,13 @@ options:
   host:
     description:
     - Provide a URL for acessing the Kubernetes API.
+  initializers:
+    description:
+    - Initializers is a list of resources and their default initializers Order-sensitive.
+      When merging multiple InitializerConfigurations, we sort the initializers from
+      different InitializerConfigurations by the name of the InitializerConfigurations;
+      the order of the initializers from the same InitializerConfiguration is preserved.
+    type: list
   key_file:
     description:
     - Path to a key file used to authenticate with the API.
@@ -76,24 +83,6 @@ options:
     - Provide the YAML definition for the object, bypassing any modules parameters
       intended to define object attributes.
     type: dict
-  spec_groups:
-    aliases:
-    - groups
-    type: list
-  spec_request:
-    description:
-    - Base64-encoded PKCS
-    aliases:
-    - request
-  spec_uid:
-    aliases:
-    - uid
-  spec_username:
-    description:
-    - Information about the requesting user (if relevant) See user.Info interface
-      for details
-    aliases:
-    - username
   src:
     description:
     - Provide a path to a file containing the YAML definition of the object. Mutually
@@ -125,7 +114,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -135,7 +124,7 @@ RETURN = '''
 api_version:
   type: string
   description: Requested API version
-certificate_signing_request:
+initializer_configuration:
   type: complex
   returned: when I(state) = C(present)
   contains:
@@ -145,6 +134,61 @@ certificate_signing_request:
         Servers should convert recognized schemas to the latest internal value, and
         may reject unrecognized values.
       type: str
+    initializers:
+      description:
+      - Initializers is a list of resources and their default initializers Order-sensitive.
+        When merging multiple InitializerConfigurations, we sort the initializers
+        from different InitializerConfigurations by the name of the InitializerConfigurations;
+        the order of the initializers from the same InitializerConfiguration is preserved.
+      type: list
+      contains:
+        failure_policy:
+          description:
+          - FailurePolicy defines what happens if the responsible initializer controller
+            fails to takes action. Allowed values are Ignore, or Fail. If "Ignore"
+            is set, initializer is removed from the initializers list of an object
+            if the timeout is reached; If "Fail" is set, admissionregistration returns
+            timeout error if the timeout is reached.
+          type: str
+        name:
+          description:
+          - Name is the identifier of the initializer. It will be added to the object
+            that needs to be initialized. Name should be fully qualified, e.g., alwayspullimages.kubernetes.io,
+            where "alwayspullimages" is the name of the webhook, and kubernetes.io
+            is the name of the organization. Required
+          type: str
+        rules:
+          description:
+          - Rules describes what resources/subresources the initializer cares about.
+            The initializer cares about an operation if it matches _any_ Rule. Rule.Resources
+            must not include subresources.
+          type: list
+          contains:
+            api_groups:
+              description:
+              - APIGroups is the API groups the resources belong to. '*' is all groups.
+                If '*' is present, the length of the slice must be one. Required.
+              type: list
+              contains: str
+            api_versions:
+              description:
+              - APIVersions is the API versions the resources belong to. '*' is all
+                versions. If '*' is present, the length of the slice must be one.
+                Required.
+              type: list
+              contains: str
+            resources:
+              description:
+              - "Resources is a list of resources this rule applies to. For example:\
+                \ 'pods' means pods. 'pods/log' means the log subresource of pods.\
+                \ '*' means all resources, but not subresources. 'pods/*' means all\
+                \ subresources of pods. '*/scale' means all scale subresources. '*/*'\
+                \ means all resources and their subresources. If wildcard is present,\
+                \ the validation rule will ensure resources do not overlap with each\
+                \ other. Depending on the enclosing object, subresources might not\
+                \ be allowed. Required."
+              type: list
+              contains: str
     kind:
       description:
       - Kind is a string value representing the REST resource this object represents.
@@ -152,7 +196,8 @@ certificate_signing_request:
         be updated. In CamelCase.
       type: str
     metadata:
-      description: []
+      description:
+      - Standard object metadata;
       type: complex
       contains:
         annotations:
@@ -231,6 +276,150 @@ certificate_signing_request:
           - A sequence number representing a specific generation of the desired state.
             Populated by the system. Read-only.
           type: int
+        initializers:
+          description:
+          - An initializer is a controller which enforces some system invariant at
+            object creation time. This field is a list of initializers that have not
+            yet acted on this object. If nil or empty, this object has been completely
+            initialized. Otherwise, the object is considered uninitialized and is
+            hidden (in list/watch and get calls) from clients that haven't explicitly
+            asked to observe uninitialized objects. When an object is created, the
+            system will populate this list with the current set of initializers. Only
+            privileged users may set or modify this list. Once it is empty, it may
+            not be modified further by any user.
+          type: complex
+          contains:
+            pending:
+              description:
+              - Pending is a list of initializers that must execute in order before
+                this object is visible. When the last pending initializer is removed,
+                and no failing result is set, the initializers struct will be set
+                to nil and the object is considered as initialized and visible to
+                all clients.
+              type: list
+              contains:
+                name:
+                  description:
+                  - name of the process that is responsible for initializing this
+                    object.
+                  type: str
+            result:
+              description:
+              - If result is set with the Failure field, the object will be persisted
+                to storage and then deleted, ensuring that other clients can observe
+                the deletion.
+              type: complex
+              contains:
+                api_version:
+                  description:
+                  - APIVersion defines the versioned schema of this representation
+                    of an object. Servers should convert recognized schemas to the
+                    latest internal value, and may reject unrecognized values.
+                  type: str
+                code:
+                  description:
+                  - Suggested HTTP return code for this status, 0 if not set.
+                  type: int
+                details:
+                  description:
+                  - Extended data associated with the reason. Each reason may define
+                    its own extended details. This field is optional and the data
+                    returned is not guaranteed to conform to any schema except that
+                    defined by the reason type.
+                  type: complex
+                  contains:
+                    causes:
+                      description:
+                      - The Causes array includes more details associated with the
+                        StatusReason failure. Not all StatusReasons may provide detailed
+                        causes.
+                      type: list
+                      contains:
+                        field:
+                          description:
+                          - 'The field of the resource that has caused this error,
+                            as named by its JSON serialization. May include dot and
+                            postfix notation for nested attributes. Arrays are zero-indexed.
+                            Fields may appear more than once in an array of causes
+                            due to fields having multiple errors. Optional. Examples:
+                            "name" - the field "name" on the current resource "items[0].name"
+                            - the field "name" on the first array entry in "items"'
+                          type: str
+                        message:
+                          description:
+                          - A human-readable description of the cause of the error.
+                            This field may be presented as-is to a reader.
+                          type: str
+                        reason:
+                          description:
+                          - A machine-readable description of the cause of the error.
+                            If this value is empty there is no information available.
+                          type: str
+                    group:
+                      description:
+                      - The group attribute of the resource associated with the status
+                        StatusReason.
+                      type: str
+                    kind:
+                      description:
+                      - The kind attribute of the resource associated with the status
+                        StatusReason. On some operations may differ from the requested
+                        resource Kind.
+                      type: str
+                    name:
+                      description:
+                      - The name attribute of the resource associated with the status
+                        StatusReason (when there is a single name which can be described).
+                      type: str
+                    retry_after_seconds:
+                      description:
+                      - If specified, the time in seconds before the operation should
+                        be retried.
+                      type: int
+                    uid:
+                      description:
+                      - UID of the resource. (when there is a single resource which
+                        can be described).
+                      type: str
+                kind:
+                  description:
+                  - Kind is a string value representing the REST resource this object
+                    represents. Servers may infer this from the endpoint the client
+                    submits requests to. Cannot be updated. In CamelCase.
+                  type: str
+                message:
+                  description:
+                  - A human-readable description of the status of this operation.
+                  type: str
+                metadata:
+                  description:
+                  - Standard list metadata.
+                  type: complex
+                  contains:
+                    resource_version:
+                      description:
+                      - String that identifies the server's internal version of this
+                        object that can be used by clients to determine when objects
+                        have changed. Value must be treated as opaque by clients and
+                        passed unmodified back to the server. Populated by the system.
+                        Read-only.
+                      type: str
+                    self_link:
+                      description:
+                      - SelfLink is a URL representing this object. Populated by the
+                        system. Read-only.
+                      type: str
+                reason:
+                  description:
+                  - A machine-readable description of why this operation is in the
+                    "Failure" status. If this value is empty there is no information
+                    available. A Reason clarifies an HTTP status code but does not
+                    override it.
+                  type: str
+                status:
+                  description:
+                  - 'Status of the operation. One of: "Success" or "Failure".'
+                  type: str
         labels:
           description:
           - Map of string keys and values that can be used to organize and categorize
@@ -266,6 +455,14 @@ certificate_signing_request:
               description:
               - API version of the referent.
               type: str
+            block_owner_deletion:
+              description:
+              - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                then the owner cannot be deleted from the key-value store until this
+                reference is removed. Defaults to false. To set this field, a user
+                needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                Entity) will be returned.
+              type: bool
             controller:
               description:
               - If true, this reference points to the managing controller.
@@ -302,65 +499,12 @@ certificate_signing_request:
             generated by the server on successful creation of a resource and is not
             allowed to change on PUT operations. Populated by the system. Read-only.
           type: str
-    spec:
-      description:
-      - The certificate request itself and any additional information.
-      type: complex
-      contains:
-        groups:
-          description: []
-          type: list
-          contains: str
-        request:
-          description:
-          - Base64-encoded PKCS
-          type: str
-        uid:
-          description: []
-          type: str
-        username:
-          description:
-          - Information about the requesting user (if relevant) See user.Info interface
-            for details
-          type: str
-    status:
-      description:
-      - Derived information about the request.
-      type: complex
-      contains:
-        certificate:
-          description:
-          - If request was approved, the controller will place the issued certificate
-            here.
-          type: str
-        conditions:
-          description:
-          - Conditions applied to the request, such as approval or denial.
-          type: list
-          contains:
-            last_update_time:
-              description:
-              - timestamp for the last update to this condition
-              type: complex
-              contains: {}
-            message:
-              description:
-              - human readable message with details about the request state
-              type: str
-            reason:
-              description:
-              - brief reason for the request state
-              type: str
-            type:
-              description:
-              - request approval state, currently Approved or Denied.
-              type: str
 '''
 
 
 def main():
     try:
-        module = KubernetesAnsibleModule('certificate_signing_request', 'V1alpha1')
+        module = KubernetesAnsibleModule('initializer_configuration', 'V1alpha1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

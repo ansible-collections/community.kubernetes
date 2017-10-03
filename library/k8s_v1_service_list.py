@@ -46,10 +46,6 @@ options:
       options are provided, the openshift client will attempt to load the default
       configuration file from I(~/.kube/config.json).
     type: path
-  namespace:
-    description:
-    - Namespaces provide a scope for names. Names of resources need to be unique within
-      a namespace, but not across namespaces. Provide the namespace for the object.
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
@@ -89,7 +85,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 1.0.0
+- kubernetes == 3.0.0
 '''
 
 EXAMPLES = '''
@@ -210,6 +206,153 @@ service_list:
               - A sequence number representing a specific generation of the desired
                 state. Populated by the system. Read-only.
               type: int
+            initializers:
+              description:
+              - An initializer is a controller which enforces some system invariant
+                at object creation time. This field is a list of initializers that
+                have not yet acted on this object. If nil or empty, this object has
+                been completely initialized. Otherwise, the object is considered uninitialized
+                and is hidden (in list/watch and get calls) from clients that haven't
+                explicitly asked to observe uninitialized objects. When an object
+                is created, the system will populate this list with the current set
+                of initializers. Only privileged users may set or modify this list.
+                Once it is empty, it may not be modified further by any user.
+              type: complex
+              contains:
+                pending:
+                  description:
+                  - Pending is a list of initializers that must execute in order before
+                    this object is visible. When the last pending initializer is removed,
+                    and no failing result is set, the initializers struct will be
+                    set to nil and the object is considered as initialized and visible
+                    to all clients.
+                  type: list
+                  contains:
+                    name:
+                      description:
+                      - name of the process that is responsible for initializing this
+                        object.
+                      type: str
+                result:
+                  description:
+                  - If result is set with the Failure field, the object will be persisted
+                    to storage and then deleted, ensuring that other clients can observe
+                    the deletion.
+                  type: complex
+                  contains:
+                    api_version:
+                      description:
+                      - APIVersion defines the versioned schema of this representation
+                        of an object. Servers should convert recognized schemas to
+                        the latest internal value, and may reject unrecognized values.
+                      type: str
+                    code:
+                      description:
+                      - Suggested HTTP return code for this status, 0 if not set.
+                      type: int
+                    details:
+                      description:
+                      - Extended data associated with the reason. Each reason may
+                        define its own extended details. This field is optional and
+                        the data returned is not guaranteed to conform to any schema
+                        except that defined by the reason type.
+                      type: complex
+                      contains:
+                        causes:
+                          description:
+                          - The Causes array includes more details associated with
+                            the StatusReason failure. Not all StatusReasons may provide
+                            detailed causes.
+                          type: list
+                          contains:
+                            field:
+                              description:
+                              - 'The field of the resource that has caused this error,
+                                as named by its JSON serialization. May include dot
+                                and postfix notation for nested attributes. Arrays
+                                are zero-indexed. Fields may appear more than once
+                                in an array of causes due to fields having multiple
+                                errors. Optional. Examples: "name" - the field "name"
+                                on the current resource "items[0].name" - the field
+                                "name" on the first array entry in "items"'
+                              type: str
+                            message:
+                              description:
+                              - A human-readable description of the cause of the error.
+                                This field may be presented as-is to a reader.
+                              type: str
+                            reason:
+                              description:
+                              - A machine-readable description of the cause of the
+                                error. If this value is empty there is no information
+                                available.
+                              type: str
+                        group:
+                          description:
+                          - The group attribute of the resource associated with the
+                            status StatusReason.
+                          type: str
+                        kind:
+                          description:
+                          - The kind attribute of the resource associated with the
+                            status StatusReason. On some operations may differ from
+                            the requested resource Kind.
+                          type: str
+                        name:
+                          description:
+                          - The name attribute of the resource associated with the
+                            status StatusReason (when there is a single name which
+                            can be described).
+                          type: str
+                        retry_after_seconds:
+                          description:
+                          - If specified, the time in seconds before the operation
+                            should be retried.
+                          type: int
+                        uid:
+                          description:
+                          - UID of the resource. (when there is a single resource
+                            which can be described).
+                          type: str
+                    kind:
+                      description:
+                      - Kind is a string value representing the REST resource this
+                        object represents. Servers may infer this from the endpoint
+                        the client submits requests to. Cannot be updated. In CamelCase.
+                      type: str
+                    message:
+                      description:
+                      - A human-readable description of the status of this operation.
+                      type: str
+                    metadata:
+                      description:
+                      - Standard list metadata.
+                      type: complex
+                      contains:
+                        resource_version:
+                          description:
+                          - String that identifies the server's internal version of
+                            this object that can be used by clients to determine when
+                            objects have changed. Value must be treated as opaque
+                            by clients and passed unmodified back to the server. Populated
+                            by the system. Read-only.
+                          type: str
+                        self_link:
+                          description:
+                          - SelfLink is a URL representing this object. Populated
+                            by the system. Read-only.
+                          type: str
+                    reason:
+                      description:
+                      - A machine-readable description of why this operation is in
+                        the "Failure" status. If this value is empty there is no information
+                        available. A Reason clarifies an HTTP status code but does
+                        not override it.
+                      type: str
+                    status:
+                      description:
+                      - 'Status of the operation. One of: "Success" or "Failure".'
+                      type: str
             labels:
               description:
               - Map of string keys and values that can be used to organize and categorize
@@ -246,6 +389,14 @@ service_list:
                   description:
                   - API version of the referent.
                   type: str
+                block_owner_deletion:
+                  description:
+                  - If true, AND if the owner has the "foregroundDeletion" finalizer,
+                    then the owner cannot be deleted from the key-value store until
+                    this reference is removed. Defaults to false. To set this field,
+                    a user needs "delete" permission of the owner, otherwise 422 (Unprocessable
+                    Entity) will be returned.
+                  type: bool
                 controller:
                   description:
                   - If true, this reference points to the managing controller.
@@ -287,7 +438,7 @@ service_list:
               type: str
         spec:
           description:
-          - Spec defines the behavior of a service. http://releases.k8s.io/HEAD/docs/devel/api-conventions.md
+          - Spec defines the behavior of a service.
           type: complex
           contains:
             cluster_ip:
@@ -301,24 +452,13 @@ service_list:
                 is not required. Only applies to types ClusterIP, NodePort, and LoadBalancer.
                 Ignored if type is ExternalName.
               type: str
-            deprecated_public_i_ps:
-              description:
-              - deprecatedPublicIPs is deprecated and replaced by the externalIPs
-                field with almost the exact same semantics. This field is retained
-                in the v1 API for compatibility until at least 8/20/2016. It will
-                be removed from any new API revisions. If both deprecatedPublicIPs
-                *and* externalIPs are set, deprecatedPublicIPs is used.
-              type: list
-              contains: str
             external_i_ps:
               description:
               - externalIPs is a list of IP addresses for which nodes in the cluster
                 will also accept traffic for this service. These IPs are not managed
                 by Kubernetes. The user is responsible for ensuring that traffic arrives
                 at a node with this IP. A common example is external load-balancers
-                that are not part of the Kubernetes system. A previous form of this
-                functionality exists as the deprecatedPublicIPs field. When using
-                this field, callers should also clear the deprecatedPublicIPs field.
+                that are not part of the Kubernetes system.
               type: list
               contains: str
             external_name:
@@ -327,6 +467,23 @@ service_list:
                 will return as a CNAME record for this service. No proxying will be
                 involved. Must be a valid DNS name and requires Type to be ExternalName.
               type: str
+            external_traffic_policy:
+              description:
+              - externalTrafficPolicy denotes if this Service desires to route external
+                traffic to node-local or cluster-wide endpoints. "Local" preserves
+                the client source IP and avoids a second hop for LoadBalancer and
+                Nodeport type services, but risks potentially imbalanced traffic spreading.
+                "Cluster" obscures the client source IP and may cause a second hop
+                to another node, but should have good overall load-spreading.
+              type: str
+            health_check_node_port:
+              description:
+              - healthCheckNodePort specifies the healthcheck nodePort for the service.
+                If not specified, HealthCheckNodePort is created by the service api
+                backend with the allocated nodePort. Will use user-specified nodePort
+                value if specified by the client. Only effects when Type is set to
+                LoadBalancer and ExternalTrafficPolicy is set to Local.
+              type: int
             load_balancer_ip:
               description:
               - 'Only applies to Service Type: LoadBalancer LoadBalancer will get
@@ -381,8 +538,7 @@ service_list:
                     specified, the value of the 'port' field is used (an identity
                     map). This field is ignored for services with clusterIP=None,
                     and should be omitted or set equal to the 'port' field.
-                  type: complex
-                  contains: {}
+                  type: str
             selector:
               description:
               - Route service traffic to pods with label keys and values matching
