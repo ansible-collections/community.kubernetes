@@ -1,6 +1,6 @@
 Name:           ansible-kubernetes-modules
 Version:        0.3.1
-Release:        0%{?dist}
+Release:        2%{?dist}
 Summary:        Ansible role containing pre-release K8s modules 
 License:        ASL 2.0
 URL:            https://github.com/ansible/%{name}
@@ -28,5 +28,11 @@ mv * %{buildroot}%{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 %{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 
 %changelog
+* Fri Oct 06 2017 Jason Montleon <jmontleo@redhat.com> 0.3.1-2
+- new package built with tito
+
+* Fri Oct 06 2017 Jason Montleon <jmontleo@redhat.com>
+- new package built with tito
+
 * Fri May 12 2017 Jason Montleon <jmontleo@redhat.com> - 0.0.1-1
 - initial package
