@@ -462,7 +462,7 @@ third_party_resource:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('third_party_resource', 'V1beta1')
+        module = KubernetesAnsibleModule('third_party_resource', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

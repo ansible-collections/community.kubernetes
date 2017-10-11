@@ -272,7 +272,7 @@ options:
       allow all volumes you may use "*". To allow no volumes, set to ["none"].
     type: list
 requirements:
-- openshift == 0.3.1
+- openshift == 0.3.3
 '''
 
 EXAMPLES = '''
@@ -813,7 +813,7 @@ security_context_constraints:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('security_context_constraints', 'V1')
+        module = OpenShiftAnsibleModule('security_context_constraints', 'v1')
     except OpenShiftAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

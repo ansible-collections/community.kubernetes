@@ -558,7 +558,7 @@ persistent_volume_claim_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('persistent_volume_claim_list', 'V1')
+        module = KubernetesAnsibleModule('persistent_volume_claim_list', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

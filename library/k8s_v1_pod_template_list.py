@@ -4150,7 +4150,7 @@ pod_template_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('pod_template_list', 'V1')
+        module = KubernetesAnsibleModule('pod_template_list', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

@@ -674,7 +674,7 @@ node_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('node_list', 'V1')
+        module = KubernetesAnsibleModule('node_list', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

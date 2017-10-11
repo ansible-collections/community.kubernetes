@@ -453,7 +453,7 @@ config_map:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('config_map', 'V1')
+        module = KubernetesAnsibleModule('config_map', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

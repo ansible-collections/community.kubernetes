@@ -492,7 +492,7 @@ limit_range:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('limit_range', 'V1')
+        module = KubernetesAnsibleModule('limit_range', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

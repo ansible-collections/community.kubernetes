@@ -488,7 +488,7 @@ role:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('role', 'V1alpha1')
+        module = KubernetesAnsibleModule('role', 'v1alpha1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

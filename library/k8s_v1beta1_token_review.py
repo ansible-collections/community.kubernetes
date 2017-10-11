@@ -470,7 +470,7 @@ token_review:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('token_review', 'V1beta1')
+        module = KubernetesAnsibleModule('token_review', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

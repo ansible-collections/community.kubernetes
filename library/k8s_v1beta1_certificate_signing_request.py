@@ -543,7 +543,7 @@ certificate_signing_request:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('certificate_signing_request', 'V1beta1')
+        module = KubernetesAnsibleModule('certificate_signing_request', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

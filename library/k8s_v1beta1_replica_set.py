@@ -4605,7 +4605,7 @@ replica_set:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('replica_set', 'V1beta1')
+        module = KubernetesAnsibleModule('replica_set', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

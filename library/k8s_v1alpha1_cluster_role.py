@@ -488,7 +488,7 @@ cluster_role:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('cluster_role', 'V1alpha1')
+        module = KubernetesAnsibleModule('cluster_role', 'v1alpha1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

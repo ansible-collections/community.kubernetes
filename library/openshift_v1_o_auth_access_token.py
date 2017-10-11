@@ -133,7 +133,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.3.1
+- openshift == 0.3.3
 '''
 
 EXAMPLES = '''
@@ -501,7 +501,7 @@ o_auth_access_token:
 
 def main():
     try:
-        module = OpenShiftAnsibleModule('o_auth_access_token', 'V1')
+        module = OpenShiftAnsibleModule('o_auth_access_token', 'v1')
     except OpenShiftAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

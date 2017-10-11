@@ -506,7 +506,7 @@ cluster_role_binding:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('cluster_role_binding', 'V1alpha1')
+        module = KubernetesAnsibleModule('cluster_role_binding', 'v1alpha1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

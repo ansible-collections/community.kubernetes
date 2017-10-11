@@ -5033,7 +5033,7 @@ cron_job_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('cron_job_list', 'V2alpha1')
+        module = KubernetesAnsibleModule('cron_job_list', 'v2alpha1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

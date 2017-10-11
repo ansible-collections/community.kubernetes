@@ -571,7 +571,7 @@ pod_disruption_budget:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('pod_disruption_budget', 'V1beta1')
+        module = KubernetesAnsibleModule('pod_disruption_budget', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

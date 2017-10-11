@@ -499,7 +499,7 @@ binding:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('binding', 'V1')
+        module = KubernetesAnsibleModule('binding', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

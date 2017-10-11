@@ -473,7 +473,7 @@ storage_class_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('storage_class_list', 'V1beta1')
+        module = KubernetesAnsibleModule('storage_class_list', 'v1beta1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

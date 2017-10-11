@@ -4559,7 +4559,7 @@ replication_controller:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('replication_controller', 'V1')
+        module = KubernetesAnsibleModule('replication_controller', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

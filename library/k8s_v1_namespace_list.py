@@ -483,7 +483,7 @@ namespace_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('namespace_list', 'V1')
+        module = KubernetesAnsibleModule('namespace_list', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

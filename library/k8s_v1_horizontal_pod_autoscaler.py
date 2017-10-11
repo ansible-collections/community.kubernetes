@@ -556,7 +556,7 @@ horizontal_pod_autoscaler:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('horizontal_pod_autoscaler', 'V1')
+        module = KubernetesAnsibleModule('horizontal_pod_autoscaler', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

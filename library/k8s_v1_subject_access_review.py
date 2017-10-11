@@ -584,7 +584,7 @@ subject_access_review:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('subject_access_review', 'V1')
+        module = KubernetesAnsibleModule('subject_access_review', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)

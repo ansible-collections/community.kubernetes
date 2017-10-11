@@ -523,7 +523,7 @@ service_account_list:
 
 def main():
     try:
-        module = KubernetesAnsibleModule('service_account_list', 'V1')
+        module = KubernetesAnsibleModule('service_account_list', 'v1')
     except KubernetesAnsibleException as exc:
         # The helper failed to init, so there is no module object. All we can do is raise the error.
         raise Exception(exc.message)
