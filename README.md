@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ansible/ansible-kubernetes-modules.svg?branch=master)](https://travis-ci.org/ansible/ansible-kubernetes-modules)
+
 # ansible-kubernetes-modules
 
 Provides access to the latest release of the K8s modules. 
