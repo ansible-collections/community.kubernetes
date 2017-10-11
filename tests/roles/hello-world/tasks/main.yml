@@ -3,6 +3,9 @@
     name: hello 
     state: absent
     debug: yes
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: delete_project 
 
 - debug: var=delete_project
@@ -14,6 +17,9 @@
     display_name: Hello World 
     description: Hello.
     debug: yes
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_project
 
 - debug: var=create_project
@@ -32,6 +38,9 @@
     labels:
       app: hello 
     debug: yes
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_service 
 
 - debug: var=create_service
@@ -61,6 +70,9 @@
     selector:
        app: hello
     strategy_type: Rolling
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_deployment
 
 - debug: var=create_deployment
@@ -75,6 +87,9 @@
     to_weight: 100
     port_target_port: web-tcp
     tls_termination: edge
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_route
 
 - debug: var=create_route

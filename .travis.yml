@@ -13,17 +13,27 @@ addons:
 
 install:
   # Install ansible
-  - pip install ansible
+  - pip install https://github.com/ansible/ansible/archive/devel.tar.gz
 
   # Check ansible version
   - ansible --version
 
+  - pip install . -e
+
   # Create ansible.cfg with correct roles_path
   - printf '[defaults]\nroles_path=../' >ansible.cfg
 
+  # Start OpenShift
+  - docker run --publish 8443:8443 -d --name openshift openshift/origin:v3.6.0 start master --listen https://0.0.0.0:8443
+
+  # Wait for the container state to be running
+  - sleep 15 
+
+  # Fetch a copy of the kube config file
+  - docker exec -it openshift cat /var/lib/origin/openshift.local.config/master/admin.kubeconfig >konfig.json
+
 script:
-  # Basic role syntax check
-  - ansible-playbook tests/test.yml -i tests/inventory --syntax-check
+  - ansible-playbook tests/test.yml -i tests/inventory
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
