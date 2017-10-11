@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from ansible.module_utils.openshift_common import OpenShiftAnsibleModule, OpenShiftAnsibleException
 

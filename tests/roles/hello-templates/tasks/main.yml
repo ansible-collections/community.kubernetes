@@ -4,6 +4,9 @@
     display_name: Resource Defn 
     description: Load resources 
     debug: no
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_project
 
 - debug: var=create_project
@@ -37,6 +40,9 @@
         sessionAffinity: None
       status:
         loadBalancer: {} 
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: create_service 
 
 - debug: var=create_service
@@ -46,6 +52,9 @@
     state: present
     debug: yes
     src: "{{ role_path }}/files/deployment.yml"
+    kubeconfig: '{{ os_kubeconfig }}'
+    host: '{{ os_host }}'
+    verify_ssl: '{{ os_verify_ssl }}'
   register: deployment_create
   
 - debug: var=deployment_create
