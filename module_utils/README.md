@@ -1,3 +1,3 @@
-The `k8_common.py` module is not currently available in an official release of Ansible. It is part of Ansible, and you'll find it on the `devel` branch, so at some point it will make it into a release. Until then, it's included here in order for convenience.
+The `k8_common.py` and `openshift_common.py` modules are not currently available in an official release of Ansible. They are part of Ansible, as you'll find them in the `devel` branch. At some point they will make it into an official release. Until then, they're included here for convenience.
 
-If you have uncovered a problem with it, or would like to make a change, please open issue and submit pull requess at the [Ansible repo](https://github.com/ansible/ansible).
+If you have uncovered a problem, or would like to make a change, please open an issue and submit pull requess at the [Ansible repo](https://github.com/ansible/ansible).

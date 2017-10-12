@@ -1,23 +1,13 @@
 ---
-- hosts: all 
+- name: Load the modules 
+  hosts: localhost 
+  connection: local
   gather_facts: no
-
   vars:
-    kubeconfig: ../konfig.json 
-    host: localhost:8443
-    verify_ssl: False
- 
+    os_kubeconfig: konfig.json 
+    os_host: localhost:8443
+    os_verify_ssl: False
   roles:
     - role: ansible-kubernetes-modules
-      install_python_requirements: no 
-
-    - role: hello-world
-      os_kubeconfig: '{{ kubeconfig }}'
-      os_host: '{{ host }}'
-      os_verify_ssl: '{{ verify_ssl }}'
-
-#    - role: hello-templates
-#      kubeconfig: '{{ kubeconfig }}'
-#      host: '{{ host }}'
-#      verify_ssl: '{{ verify_ssl }}'
-
+    - role: hello-world 
+    - role: hello-templates
