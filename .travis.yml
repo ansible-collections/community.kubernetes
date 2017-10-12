@@ -23,12 +23,10 @@ install:
   # Fetch a copy of the kube config file
   - docker exec -it openshift cat /var/lib/origin/openshift.local.config/master/admin.kubeconfig >tests/konfig.json
 
-  # Install the current commit to tests/roles. 
-  - ansible-galaxy install -p tests/roles git+https://github.com/${TRAVIS_REPO_SLUG}.git,${TRAVIS_COMMIT}
+  - printf '[defaults]\nroles_path=../' >ansible.cfg
 
 script:
-  - cd tests
-  - ansible-playbook -vvv -i inventory test.yml
+  - ansible-playbook -vvv -i inventory tests/test.yml
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
