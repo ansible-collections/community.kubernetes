@@ -26,7 +26,7 @@ install:
   - printf '[defaults]\nroles_path=../' >ansible.cfg
 
 script:
-  - ansible-playbook -vvv -i inventory tests/test.yml
+  - ansible-playbook -vvv tests/test.yml
 
 notifications:
   webhooks: https://galaxy.ansible.com/api/v1/notifications/
