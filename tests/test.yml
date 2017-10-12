@@ -1,7 +1,6 @@
 ---
 - name: Load the modules 
-  hosts: localhost 
-  connection: local
+  hosts: all 
   gather_facts: no
   vars:
     os_kubeconfig: konfig.json 
