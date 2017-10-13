@@ -1,6 +1,6 @@
 Name:           ansible-kubernetes-modules
 Version:        0.3.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Ansible role containing pre-release K8s modules 
 License:        ASL 2.0
 URL:            https://github.com/ansible/%{name}
@@ -9,7 +9,8 @@ Source0:        https://github.com/ansible/%{name}/archive/v%{version}/%{name}-%
 BuildArch:      noarch
 
 Requires: ansible >= 2.3.0.0
-Requires: python-openshift = %{version}
+Requires: python-openshift >= 0.3
+Requires: python-openshift <  0.4
 
 %description
 %{summary}
@@ -29,6 +30,9 @@ mv * %{buildroot}%{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 %{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 
 %changelog
+* Fri Oct 13 2017 Jason Montleon <jmontleo@redhat.com> 0.3.1-4
+- Bump version 
+
 * Fri Oct 13 2017 Jason Montleon <jmontleo@redhat.com> 0.3.1-3
 - add python-openshift rpm dependency (jmontleo@redhat.com)
 - Travis file cleanup (#13) (chousekn@redhat.com)
