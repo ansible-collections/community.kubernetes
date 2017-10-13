@@ -9,6 +9,7 @@ Source0:        https://github.com/ansible/%{name}/archive/v%{version}/%{name}-%
 BuildArch:      noarch
 
 Requires: ansible >= 2.3.0.0
+Requires: python-openshift = %{version}
 
 %description
 %{summary}
