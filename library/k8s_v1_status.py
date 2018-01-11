@@ -57,7 +57,9 @@ options:
     - name
   details_retry_after_seconds:
     description:
-    - If specified, the time in seconds before the operation should be retried.
+    - If specified, the time in seconds before the operation should be retried. Some
+      errors may indicate the client must take an alternate action - for those errors
+      this field may indicate how long to wait before taking the alternate action.
     aliases:
     - retry_after_seconds
     type: int
@@ -108,7 +110,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- kubernetes == 3.0.0
+- kubernetes == 4.0.0
 '''
 
 EXAMPLES = '''
@@ -116,8 +118,8 @@ EXAMPLES = '''
 
 RETURN = '''
 api_version:
-  type: string
   description: Requested API version
+  type: string
 status:
   type: complex
   returned: on success
@@ -138,54 +140,6 @@ status:
         details. This field is optional and the data returned is not guaranteed to
         conform to any schema except that defined by the reason type.
       type: complex
-      contains:
-        causes:
-          description:
-          - The Causes array includes more details associated with the StatusReason
-            failure. Not all StatusReasons may provide detailed causes.
-          type: list
-          contains:
-            field:
-              description:
-              - 'The field of the resource that has caused this error, as named by
-                its JSON serialization. May include dot and postfix notation for nested
-                attributes. Arrays are zero-indexed. Fields may appear more than once
-                in an array of causes due to fields having multiple errors. Optional.
-                Examples: "name" - the field "name" on the current resource "items[0].name"
-                - the field "name" on the first array entry in "items"'
-              type: str
-            message:
-              description:
-              - A human-readable description of the cause of the error. This field
-                may be presented as-is to a reader.
-              type: str
-            reason:
-              description:
-              - A machine-readable description of the cause of the error. If this
-                value is empty there is no information available.
-              type: str
-        group:
-          description:
-          - The group attribute of the resource associated with the status StatusReason.
-          type: str
-        kind:
-          description:
-          - The kind attribute of the resource associated with the status StatusReason.
-            On some operations may differ from the requested resource Kind.
-          type: str
-        name:
-          description:
-          - The name attribute of the resource associated with the status StatusReason
-            (when there is a single name which can be described).
-          type: str
-        retry_after_seconds:
-          description:
-          - If specified, the time in seconds before the operation should be retried.
-          type: int
-        uid:
-          description:
-          - UID of the resource. (when there is a single resource which can be described).
-          type: str
     kind:
       description:
       - Kind is a string value representing the REST resource this object represents.
@@ -200,18 +154,6 @@ status:
       description:
       - Standard list metadata.
       type: complex
-      contains:
-        resource_version:
-          description:
-          - String that identifies the server's internal version of this object that
-            can be used by clients to determine when objects have changed. Value must
-            be treated as opaque by clients and passed unmodified back to the server.
-            Populated by the system. Read-only.
-          type: str
-        self_link:
-          description:
-          - SelfLink is a URL representing this object. Populated by the system. Read-only.
-          type: str
     reason:
       description:
       - A machine-readable description of why this operation is in the "Failure" status.

@@ -80,7 +80,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.3.3
+- openshift == 0.4.0
 '''
 
 EXAMPLES = '''
@@ -88,8 +88,8 @@ EXAMPLES = '''
 
 RETURN = '''
 api_version:
-  type: string
   description: Requested API version
+  type: string
 subject_rules_review:
   type: complex
   returned: on success
@@ -110,87 +110,10 @@ subject_rules_review:
       description:
       - Spec adds information about how to conduct the check
       type: complex
-      contains:
-        groups:
-          description:
-          - Groups is optional. Groups is the list of groups to which the User belongs.
-            At least one of User and Groups must be specified.
-          type: list
-          contains: str
-        scopes:
-          description:
-          - Scopes to use for the evaluation. Empty means "use the unscoped (full)
-            permissions of the user/groups".
-          type: list
-          contains: str
-        user:
-          description:
-          - User is optional. At least one of User and Groups must be specified.
-          type: str
     status:
       description:
       - Status is completed by the server to tell which permissions you have
       type: complex
-      contains:
-        evaluation_error:
-          description:
-          - EvaluationError can appear in combination with Rules. It means some error
-            happened during evaluation that may have prevented additional rules from
-            being populated.
-          type: str
-        rules:
-          description:
-          - Rules is the list of rules (no particular sort) that are allowed for the
-            subject
-          type: list
-          contains:
-            api_groups:
-              description:
-              - APIGroups is the name of the APIGroup that contains the resources.
-                If this field is empty, then both kubernetes and origin API groups
-                are assumed. That means that if an action is requested against one
-                of the enumerated resources in either the kubernetes or the origin
-                API group, the request will be allowed
-              type: list
-              contains: str
-            attribute_restrictions:
-              description:
-              - AttributeRestrictions will vary depending on what the Authorizer/AuthorizationAttributeBuilder
-                pair supports. If the Authorizer does not recognize how to handle
-                the AttributeRestrictions, the Authorizer should report an error.
-              type: complex
-              contains:
-                raw:
-                  description:
-                  - Raw is the underlying serialization of this object.
-                  type: str
-            non_resource_ur_ls:
-              description:
-              - NonResourceURLsSlice is a set of partial urls that a user should have
-                access to. *s are allowed, but only as the full, final step in the
-                path This name is intentionally different than the internal type so
-                that the DefaultConvert works nicely and because the ordering may
-                be different.
-              type: list
-              contains: str
-            resource_names:
-              description:
-              - ResourceNames is an optional white list of names that the rule applies
-                to. An empty set means that everything is allowed.
-              type: list
-              contains: str
-            resources:
-              description:
-              - Resources is a list of resources this rule applies to. ResourceAll
-                represents all resources.
-              type: list
-              contains: str
-            verbs:
-              description:
-              - Verbs is a list of Verbs that apply to ALL the ResourceKinds and AttributeRestrictions
-                contained in this rule. VerbAll represents all kinds.
-              type: list
-              contains: str
 '''
 
 

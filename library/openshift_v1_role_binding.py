@@ -107,13 +107,9 @@ options:
   role_ref_name:
     description:
     - Name of the referent.
-    aliases:
-    - name
   role_ref_namespace:
     description:
     - Namespace of the referent.
-    aliases:
-    - namespace
   role_ref_resource_version:
     description:
     - Specific resourceVersion to which this reference is made, if any.
@@ -170,7 +166,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.3.3
+- openshift == 0.3.4
 '''
 
 EXAMPLES = '''

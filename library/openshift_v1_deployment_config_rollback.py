@@ -52,12 +52,12 @@ options:
   password:
     description:
     - Provide a password for connecting to the API. Use in conjunction with I(username).
-  spec__from_api_version:
+  spec_from_api_version:
     description:
     - API version of the referent.
     aliases:
-    - _from_api_version
-  spec__from_field_path:
+    - from_api_version
+  spec_from_field_path:
     description:
     - 'If referring to a piece of an object instead of an entire object, this string
       should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
@@ -67,32 +67,32 @@ options:
       "spec.containers[2]" (container with index 2 in this pod). This syntax is chosen
       only to have some well-defined way of referencing a part of an object.'
     aliases:
-    - _from_field_path
-  spec__from_kind:
+    - from_field_path
+  spec_from_kind:
     description:
     - Kind of the referent.
     aliases:
-    - _from_kind
-  spec__from_name:
+    - from_kind
+  spec_from_name:
     description:
     - Name of the referent.
     aliases:
-    - _from_name
-  spec__from_namespace:
+    - from_name
+  spec_from_namespace:
     description:
     - Namespace of the referent.
     aliases:
-    - _from_namespace
-  spec__from_resource_version:
+    - from_namespace
+  spec_from_resource_version:
     description:
     - Specific resourceVersion to which this reference is made, if any.
     aliases:
-    - _from_resource_version
-  spec__from_uid:
+    - from_resource_version
+  spec_from_uid:
     description:
     - UID of the referent.
     aliases:
-    - _from_uid
+    - from_uid
   spec_include_replication_meta:
     description:
     - IncludeReplicationMeta specifies whether to include the replica count and selector.
@@ -140,7 +140,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.3.3
+- openshift == 0.4.0
 '''
 
 EXAMPLES = '''
@@ -148,8 +148,8 @@ EXAMPLES = '''
 
 RETURN = '''
 api_version:
-  type: string
   description: Requested API version
+  type: string
 deployment_config_rollback:
   type: complex
   returned: on success
@@ -174,69 +174,6 @@ deployment_config_rollback:
       description:
       - Spec defines the options to rollback generation.
       type: complex
-      contains:
-        _from:
-          description:
-          - From points to a ReplicationController which is a deployment.
-          type: complex
-          contains:
-            api_version:
-              description:
-              - API version of the referent.
-              type: str
-            field_path:
-              description:
-              - 'If referring to a piece of an object instead of an entire object,
-                this string should contain a valid JSON/Go field access statement,
-                such as desiredState.manifest.containers[2]. For example, if the object
-                reference is to a container within a pod, this would take on a value
-                like: "spec.containers{name}" (where "name" refers to the name of
-                the container that triggered the event) or if no container name is
-                specified "spec.containers[2]" (container with index 2 in this pod).
-                This syntax is chosen only to have some well-defined way of referencing
-                a part of an object.'
-              type: str
-            kind:
-              description:
-              - Kind of the referent.
-              type: str
-            name:
-              description:
-              - Name of the referent.
-              type: str
-            namespace:
-              description:
-              - Namespace of the referent.
-              type: str
-            resource_version:
-              description:
-              - Specific resourceVersion to which this reference is made, if any.
-              type: str
-            uid:
-              description:
-              - UID of the referent.
-              type: str
-        include_replication_meta:
-          description:
-          - IncludeReplicationMeta specifies whether to include the replica count
-            and selector.
-          type: bool
-        include_strategy:
-          description:
-          - IncludeStrategy specifies whether to include the deployment Strategy.
-          type: bool
-        include_template:
-          description:
-          - IncludeTemplate specifies whether to include the PodTemplateSpec.
-          type: bool
-        include_triggers:
-          description:
-          - IncludeTriggers specifies whether to include config Triggers.
-          type: bool
-        revision:
-          description:
-          - Revision to rollback to. If set to 0, rollback to the last revision.
-          type: int
     updated_annotations:
       description:
       - UpdatedAnnotations is a set of new annotations that will be added in the deployment
