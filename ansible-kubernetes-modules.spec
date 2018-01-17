@@ -1,7 +1,7 @@
 Name:           ansible-kubernetes-modules
-Version:        0.3.1
+Version:        0.4.0
 Release:        6%{?dist}
-Summary:        Ansible role containing pre-release K8s modules 
+Summary:        Ansible role containing pre-release K8s modules
 License:        ASL 2.0
 URL:            https://github.com/ansible/%{name}
 Source0:        https://github.com/ansible/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
@@ -9,7 +9,7 @@ Source0:        https://github.com/ansible/%{name}/archive/v%{version}/%{name}-%
 BuildArch:      noarch
 
 Requires: ansible >= 2.3.0.0
-Requires: python-openshift >= 0.3
+Requires: python-openshift >= 0.4
 
 %description
 %{summary}
