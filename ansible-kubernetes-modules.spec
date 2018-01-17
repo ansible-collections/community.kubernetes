@@ -1,6 +1,6 @@
 Name:           ansible-kubernetes-modules
 Version:        0.4.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Ansible role containing pre-release K8s modules
 License:        ASL 2.0
 URL:            https://github.com/ansible/%{name}
@@ -29,6 +29,11 @@ mv * %{buildroot}%{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 %{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 
 %changelog
+* Wed Jan 17 2018 David Zager <david.j.zager@gmail.com> 0.4.0-7
+- Bump package version for 4.x (david.j.zager@gmail.com)
+- Update releasers (david.j.zager@gmail.com)
+- update generated modules (#26) (fabian@fabianism.us)
+
 * Mon Oct 16 2017 Jason Montleon <jmontleo@redhat.com> 0.3.1-6
 - Update to latest k8s_common (chousekn@redhat.com)
 
