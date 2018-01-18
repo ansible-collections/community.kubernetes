@@ -14,10 +14,10 @@ addons:
 install:
   # Install prereqs 
   - pip install https://github.com/ansible/ansible/archive/devel.tar.gz
-  - pip install openshift
+  - pip install openshift==0.3.4
 
   # Start OpenShift
-  - docker run --publish 8443:8443 -d --name openshift openshift/origin:v3.6.0 start master --listen https://0.0.0.0:8443
+  - docker run --publish 8443:8443 -d --name openshift openshift/origin:v3.7.1 start master --listen https://0.0.0.0:8443
   - sleep 15 
 
   # Fetch a copy of the kube config file
