@@ -54,8 +54,8 @@ options:
     type: path
   labels:
     description:
-    - labels is a optional set of labels that are applied to every object during the
-      Template to Config transformation.
+    - Map of string keys and values that can be used to organize and categorize (scope
+      and select) objects. May match selectors of replication controllers and services.
     type: dict
   message:
     description:
@@ -128,7 +128,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.4.0
+- openshift == 0.4.0.a1
 '''
 
 EXAMPLES = '''
