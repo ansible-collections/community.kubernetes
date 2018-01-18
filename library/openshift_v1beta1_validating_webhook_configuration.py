@@ -112,7 +112,7 @@ options:
     - Webhooks is a list of webhooks and the affected resources and operations.
     type: list
 requirements:
-- openshift == 0.4.0
+- openshift == 0.4.0.a1
 '''
 
 EXAMPLES = '''

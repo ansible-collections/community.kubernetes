@@ -133,17 +133,6 @@ options:
     aliases:
     - validation_open_apiv3_schema_any_of
     type: list
-  spec_validation_open_apiv3_schema_default_raw:
-    aliases:
-    - validation_open_apiv3_schema_default_raw
-  spec_validation_open_apiv3_schema_definitions:
-    aliases:
-    - validation_open_apiv3_schema_definitions
-    type: dict
-  spec_validation_open_apiv3_schema_dependencies:
-    aliases:
-    - validation_open_apiv3_schema_dependencies
-    type: dict
   spec_validation_open_apiv3_schema_description:
     aliases:
     - validation_open_apiv3_schema_description
@@ -151,37 +140,12 @@ options:
     aliases:
     - validation_open_apiv3_schema_enum
     type: list
-  spec_validation_open_apiv3_schema_example_raw:
-    aliases:
-    - validation_open_apiv3_schema_example_raw
-  spec_validation_open_apiv3_schema_exclusive_maximum:
-    aliases:
-    - validation_open_apiv3_schema_exclusive_maximum
-    type: bool
-  spec_validation_open_apiv3_schema_exclusive_minimum:
-    aliases:
-    - validation_open_apiv3_schema_exclusive_minimum
-    type: bool
-  spec_validation_open_apiv3_schema_external_docs_description:
-    aliases:
-    - validation_open_apiv3_schema_external_docs_description
-  spec_validation_open_apiv3_schema_external_docs_url:
-    aliases:
-    - validation_open_apiv3_schema_external_docs_url
   spec_validation_open_apiv3_schema_format:
     aliases:
     - validation_open_apiv3_schema_format
   spec_validation_open_apiv3_schema_id:
     aliases:
     - validation_open_apiv3_schema_id
-  spec_validation_open_apiv3_schema_items_json_schemas:
-    aliases:
-    - validation_open_apiv3_schema_items_json_schemas
-    type: list
-  spec_validation_open_apiv3_schema_max_items:
-    aliases:
-    - validation_open_apiv3_schema_max_items
-    type: int
   spec_validation_open_apiv3_schema_max_length:
     aliases:
     - validation_open_apiv3_schema_max_length
@@ -190,17 +154,9 @@ options:
     aliases:
     - validation_open_apiv3_schema_max_properties
     type: int
-  spec_validation_open_apiv3_schema_maximum:
-    aliases:
-    - validation_open_apiv3_schema_maximum
-    type: float
   spec_validation_open_apiv3_schema_min_items:
     aliases:
     - validation_open_apiv3_schema_min_items
-    type: int
-  spec_validation_open_apiv3_schema_min_length:
-    aliases:
-    - validation_open_apiv3_schema_min_length
     type: int
   spec_validation_open_apiv3_schema_min_properties:
     aliases:
@@ -214,10 +170,6 @@ options:
     aliases:
     - validation_open_apiv3_schema_multiple_of
     type: float
-  spec_validation_open_apiv3_schema_one_of:
-    aliases:
-    - validation_open_apiv3_schema_one_of
-    type: list
   spec_validation_open_apiv3_schema_pattern:
     aliases:
     - validation_open_apiv3_schema_pattern
@@ -225,20 +177,12 @@ options:
     aliases:
     - validation_open_apiv3_schema_pattern_properties
     type: dict
-  spec_validation_open_apiv3_schema_properties:
-    aliases:
-    - validation_open_apiv3_schema_properties
-    type: dict
-  spec_validation_open_apiv3_schema_ref:
-    aliases:
-    - validation_open_apiv3_schema_ref
-  spec_validation_open_apiv3_schema_required:
-    aliases:
-    - validation_open_apiv3_schema_required
-    type: list
   spec_validation_open_apiv3_schema_schema:
     aliases:
     - validation_open_apiv3_schema_schema
+  spec_validation_open_apiv3_schema_title:
+    aliases:
+    - validation_open_apiv3_schema_title
   spec_validation_open_apiv3_schema_type:
     aliases:
     - validation_open_apiv3_schema_type

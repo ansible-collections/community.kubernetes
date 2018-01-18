@@ -114,36 +114,68 @@ options:
     aliases:
     - selector
     type: dict
-  spec_strategy_rolling_update_max_surge:
+  spec_strategy_active_deadline_seconds:
     description:
-    - 'The maximum number of pods that can be scheduled above the desired number of
-      pods. Value can be an absolute number (ex: 5) or a percentage of desired pods
-      (ex: 10%). This can not be 0 if MaxUnavailable is 0. Absolute number is calculated
-      from percentage by rounding up. Defaults to 25%. Example: when this is set to
-      30%, the new RC can be scaled up immediately when the rolling update starts,
-      such that the total number of old and new pods do not exceed 130% of desired
-      pods. Once old pods have been killed, new RC can be scaled up further, ensuring
-      that total number of pods running at any time during the update is atmost 130%
-      of desired pods.'
+    - ActiveDeadlineSeconds is the duration in seconds that the deployer pods for
+      this deployment config may be active on a node before the system actively tries
+      to terminate them.
     aliases:
-    - strategy_rolling_update_max_surge
-    type: object
-  spec_strategy_rolling_update_max_unavailable:
+    - strategy_active_deadline_seconds
+    type: int
+  spec_strategy_annotations:
     description:
-    - 'The maximum number of pods that can be unavailable during the update. Value
-      can be an absolute number (ex: 5) or a percentage of desired pods (ex: 10%).
-      Absolute number is calculated from percentage by rounding down. This can not
-      be 0 if MaxSurge is 0. Defaults to 25%. Example: when this is set to 30%, the
-      old RC can be scaled down to 70% of desired pods immediately when the rolling
-      update starts. Once new pods are ready, old RC can be scaled down further, followed
-      by scaling up the new RC, ensuring that the total number of pods available at
-      all times during the update is at least 70% of desired pods.'
+    - Annotations is a set of key, value pairs added to custom deployer and lifecycle
+      pre/post hook pods.
     aliases:
-    - strategy_rolling_update_max_unavailable
-    type: object
+    - strategy_annotations
+    type: dict
+  spec_strategy_custom_params:
+    description:
+    - When C(spec_strategy_type) is I(Custom), provide a mapping of 'key:value' settings.
+    aliases:
+    - strategy_custom_params
+    type: dict
+  spec_strategy_labels:
+    description:
+    - Labels is a set of key, value pairs added to custom deployer and lifecycle pre/post
+      hook pods.
+    aliases:
+    - strategy_labels
+    type: dict
+  spec_strategy_recreate_params:
+    description:
+    - When C(spec_strategy_type) is I(Recreate), provide a mapping of 'key:value'
+      settings.
+    aliases:
+    - strategy_recreate_params
+    type: dict
+  spec_strategy_resources_limits:
+    description:
+    - Limits describes the maximum amount of compute resources allowed.
+    aliases:
+    - strategy_resources_limits
+    type: dict
+  spec_strategy_resources_requests:
+    description:
+    - Requests describes the minimum amount of compute resources required. If Requests
+      is omitted for a container, it defaults to Limits if that is explicitly specified,
+      otherwise to an implementation-defined value.
+    aliases:
+    - strategy_resources_requests
+    type: dict
+  spec_strategy_rolling_params:
+    description:
+    - When C(spec_strategy_type) is I(Rolling), provide a mapping of 'key:value' settings.
+    aliases:
+    - strategy_rolling_params
+    type: dict
   spec_strategy_type:
     description:
-    - Type of deployment. Can be "Recreate" or "RollingUpdate". Default is RollingUpdate.
+    - Type is the name of a deployment strategy.
+    choices:
+    - Rolling
+    - Custom
+    - Recreate
     aliases:
     - strategy_type
   spec_template_metadata_annotations:
@@ -518,7 +550,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.4.0
+- openshift == 0.4.0.a1
 '''
 
 EXAMPLES = '''

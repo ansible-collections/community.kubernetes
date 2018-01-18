@@ -461,7 +461,7 @@ options:
     - Whether or not to verify the API server's SSL certificates.
     type: bool
 requirements:
-- openshift == 0.4.0
+- openshift == 0.4.0.a1
 '''
 
 EXAMPLES = '''

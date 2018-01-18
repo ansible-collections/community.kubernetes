@@ -263,7 +263,7 @@ options:
       allow all volumes you may use "*". To allow no volumes, set to ["none"].
     type: list
 requirements:
-- openshift == 0.4.0
+- openshift == 0.4.0.a1
 '''
 
 EXAMPLES = '''
