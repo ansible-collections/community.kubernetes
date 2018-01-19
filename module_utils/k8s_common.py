@@ -162,12 +162,12 @@ class KubernetesAnsibleModule(AnsibleModule):
             if self.helper.base_model_name_snake.endswith('list'):
                 # For list modules, execute a GET, and exit
                 k8s_obj = self._read(name, namespace)
-                return_attributes[self.kind] = k8s_obj.to_dict()
+                return_attributes[self.kind] = k8s_obj.to_dict() if k8s_obj else {}
                 self.exit_json(**return_attributes)
             elif self.helper.has_method('create'):
                 # For a rollback, execute a POST, and exit
                 k8s_obj = self._create(namespace)
-                return_attributes[self.kind] = k8s_obj.to_dict()
+                return_attributes[self.kind] = k8s_obj.to_dict() if k8s_obj else {}
                 return_attributes['changed'] = True
                 self.exit_json(**return_attributes)
             else:
@@ -197,7 +197,7 @@ class KubernetesAnsibleModule(AnsibleModule):
         else:
             if not existing:
                 k8s_obj = self._create(namespace)
-                return_attributes[self.kind] = k8s_obj.to_dict()
+                return_attributes[self.kind] = k8s_obj.to_dict() if k8s_obj else {}
                 return_attributes['changed'] = True
                 self.exit_json(**return_attributes)
 
@@ -210,7 +210,7 @@ class KubernetesAnsibleModule(AnsibleModule):
                     except KubernetesException as exc:
                         self.fail_json(msg="Failed to replace object: {}".format(exc.message),
                                        error=exc.value.get('status'))
-                return_attributes[self.kind] = k8s_obj.to_dict()
+                return_attributes[self.kind] = k8s_obj.to_dict() if k8s_obj else {}
                 return_attributes['changed'] = True
                 self.exit_json(**return_attributes)
 
@@ -235,7 +235,7 @@ class KubernetesAnsibleModule(AnsibleModule):
                     k8s_obj = self.helper.patch_object(name, namespace, k8s_obj)
                 except KubernetesException as exc:
                     self.fail_json(msg="Failed to patch object: {}".format(exc.message))
-            return_attributes[self.kind] = k8s_obj.to_dict()
+            return_attributes[self.kind] = k8s_obj.to_dict() if k8s_obj else {}
             return_attributes['changed'] = True
             self.exit_json(**return_attributes)
 
