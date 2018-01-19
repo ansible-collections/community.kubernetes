@@ -1,6 +1,6 @@
 Name:           ansible-kubernetes-modules
 Version:        0.4.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Ansible role containing pre-release K8s modules
 License:        ASL 2.0
 URL:            https://github.com/ansible/%{name}
@@ -29,6 +29,14 @@ mv * %{buildroot}%{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 %{_sysconfdir}/ansible/roles/ansible.kubernetes-modules
 
 %changelog
+* Fri Jan 19 2018 David Zager <david.j.zager@gmail.com> 0.4.0-8
+- when in checkmode _create returns None and cannot have to_dict() called (#27)
+  (trbs@users.noreply.github.com)
+- Show openshift version (chousekn@redhat.com)
+- Unpin openshift (chousekn@redhat.com)
+- regen modules (fabian@fabianism.us)
+- Pin openshift. Trying Origin 3.6.7. (chousekn@redhat.com)
+
 * Wed Jan 17 2018 David Zager <david.j.zager@gmail.com> 0.4.0-7
 - Bump package version for 4.x (david.j.zager@gmail.com)
 - Update releasers (david.j.zager@gmail.com)
