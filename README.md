@@ -1,3 +1,7 @@
+# DEPRECATED
+These modules have been deprecated in favor of the k8s_raw and openshift_raw modules that were added to Ansible 2.5.
+
+
 [![Build Status](https://travis-ci.org/ansible/ansible-kubernetes-modules.svg?branch=master)](https://travis-ci.org/ansible/ansible-kubernetes-modules)
 
 # ansible-kubernetes-modules
