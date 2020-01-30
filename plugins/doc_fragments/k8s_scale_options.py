@@ -17,6 +17,7 @@ options:
     description:
       - The desired number of replicas.
     type: int
+    required: True
   current_replicas:
     description:
       - For Deployment, ReplicaSet, Replication Controller, only scale, if the number of existing replicas
