@@ -1,0 +1,20 @@
+authors: []
+dependencies: {}
+description: Kubernetes Collection for Ansible.
+documentation: ''
+homepage: ''
+issues: https://github.com/ansible-collections/kubernetes/issues
+license_file: LICENSE
+name: kubernetes
+namespace: community
+readme: README.md
+repository: https://github.com/ansible-collections/kubernetes
+tags:
+  - kubernetes
+  - k8s
+  - cloud
+  - infrastructure
+  - openshift
+  - okd
+  - cluster
+version: 0.9.0
