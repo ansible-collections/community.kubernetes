@@ -3,6 +3,29 @@ on:
   - pull_request
 
 jobs:
+
+  sanity:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ["3.6"]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+        with:
+          path: ansible_collections/community/kubernetes
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install ansible-base
+        run: pip install git+https://github.com/ansible-collection-migration/ansible-base.git --disable-pip-version-check
+
+      - name: Run sanity tests on Python ${{ matrix.python_version }}
+        run: ansible-test sanity --docker -v --color --python ${{ matrix.python_version }}
+
   integration:
     runs-on: ubuntu-latest
     strategy:

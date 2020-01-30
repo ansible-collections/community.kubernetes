@@ -1,7 +1,8 @@
-    - python_requirements_info:
-        dependencies:
-          - openshift==0.6.0
-          - kubernetes==6.0.0
+    # TODO: Not available in ansible-base
+    # - python_requirements_info:
+    #     dependencies:
+    #       - openshift==0.6.0
+    #       - kubernetes==6.0.0
 
     # append_hash
     - name: use append_hash with ConfigMap

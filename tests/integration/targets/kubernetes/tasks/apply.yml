@@ -1,8 +1,9 @@
 - block:
-    - python_requirements_info:
-        dependencies:
-          - openshift
-          - kubernetes
+    # TODO: Not available in ansible-base
+    # - python_requirements_info:
+    #     dependencies:
+    #       - openshift
+    #       - kubernetes
 
     - set_fact:
         apply_namespace: apply

@@ -1,8 +1,9 @@
-  - python_requirements_info:
-      dependencies:
-        - openshift
-        - kubernetes
-        - kubernetes-validate
+  # TODO: Not available in ansible-base
+  # - python_requirements_info:
+  #     dependencies:
+  #       - openshift
+  #       - kubernetes
+  #       - kubernetes-validate
 
   - k8s:
       definition:
