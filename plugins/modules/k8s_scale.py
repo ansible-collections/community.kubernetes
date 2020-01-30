@@ -108,17 +108,14 @@ result:
        description: Standard object metadata. Includes name, namespace, annotations, labels, etc.
        returned: success
        type: complex
-       contains: Object metadata
      spec:
        description: Specific attributes of the object. Will vary based on the I(api_version) and I(kind).
        returned: success
        type: complex
-       contains: Specific object attributes
      status:
        description: Current status details for the object.
        returned: success
        type: complex
-       contains: Status details
 '''
 
 from ansible_collections.community.kubernetes.plugins.module_utils.scale import KubernetesAnsibleScaleModule
