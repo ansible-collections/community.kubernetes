@@ -1,6 +1,6 @@
 # Kubernetes Collection for Ansible
 
-![](https://github.com/ansible-collections/kubernetes/workflows/CI/badge.svg?branch=master)
+[![CI](https://github.com/ansible-collections/kubernetes/workflows/CI/badge.svg?branch=master)](https://github.com/ansible-collections/kubernetes/actions)
 
 This repo hosts the `community.kubernetes` Ansible Collection.
 
