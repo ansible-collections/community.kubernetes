@@ -1,5 +1,7 @@
 # Kubernetes Collection for Ansible
 
+![](https://github.com/ansible-collections/kubernetes/workflows/CI/badge.svg?branch=master)
+
 This repo hosts the `community.kubernetes` Ansible Collection.
 
 As this is an independent Collection, it can be released on its own release cadence.
