@@ -43,21 +43,26 @@ options:
     choices:
     - present
     - absent
+    type: str
   host:
     description:
     - Provide a URL for accessing the API server.
     required: true
+    type: str
   username:
     description:
     - Provide a username for authenticating with the API server.
+    type: str
   password:
     description:
     - Provide a password for authenticating with the API server.
+    type: str
   ca_cert:
     description:
     - "Path to a CA certificate file used to verify connection to the API server. The full certificate chain
       must be provided to avoid certificate validation errors."
     aliases: [ ssl_ca_cert ]
+    type: path
   validate_certs:
     description:
     - "Whether or not to verify the API server's SSL certificates."
@@ -67,6 +72,7 @@ options:
   api_key:
     description:
     - When C(state) is set to I(absent), this specifies the token to revoke.
+    type: str
 
 requirements:
   - python >= 2.7

@@ -80,23 +80,27 @@ options:
     description:
     - Number of seconds to sleep between checks.
     default: 5
+    type: int
     version_added: "2.9"
   wait_timeout:
     description:
     - How long in seconds to wait for the resource to end up in the desired state. Ignored if C(wait) is not set.
     default: 120
+    type: int
     version_added: "2.8"
   wait_condition:
     description:
     - Specifies a custom condition on the status to wait for. Ignored if C(wait) is not set or is set to False.
     suboptions:
       type:
+        type: str
         description:
         - The type of condition to wait for. For example, the C(Pod) resource will set the C(Ready) condition (among others)
         - Required if you are specifying a C(wait_condition). If left empty, the C(wait_condition) field will be ignored.
         - The possible types for a condition are specific to each resource type in Kubernetes. See the API documentation of the status field
           for a given resource to see possible choices.
       status:
+        type: str
         description:
         - The value of the status field in your desired condition.
         - For example, if a C(Deployment) is paused, the C(Progressing) C(type) will have the C(Unknown) status.
@@ -104,12 +108,15 @@ options:
         - True
         - False
         - Unknown
+        default: "True"
       reason:
+        type: str
         description:
         - The value of the reason field in your desired condition
         - For example, if a C(Deployment) is paused, The C(Progressing) c(type) will have the C(DeploymentPaused) reason.
         - The possible reasons in a condition are specific to each resource type in Kubernetes. See the API documentation of the status field
           for a given resource to see possible choices.
+    type: dict
     version_added: "2.8"
   validate:
     description:
@@ -122,10 +129,12 @@ options:
         type: bool
       version:
         description: version of Kubernetes to validate against. defaults to Kubernetes server version
+        type: str
       strict:
         description: whether to fail when passing unexpected properties
-        default: no
+        default: True
         type: bool
+    type: dict
     version_added: "2.8"
   append_hash:
     description:
