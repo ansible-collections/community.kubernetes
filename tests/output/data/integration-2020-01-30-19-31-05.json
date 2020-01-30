@@ -1,0 +1,11 @@
+{
+    "clouds": {
+        "openshift": {
+            "platform": "openshift",
+            "setup_seconds": 20,
+            "targets": [
+                "kubernetes"
+            ]
+        }
+    }
+}

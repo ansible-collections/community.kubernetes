@@ -11,13 +11,9 @@ If kubectl is already using the right config file and context, you can
 just do
 
 ```
-cd test/integration/targets/k8s
+cd tests/integration/targets/k8s
 ./runme.sh -vv
 ```
 
 otherwise set one or both of `K8S_AUTH_KUBECONFIG` and `K8S_AUTH_CONTEXT`
 and use the same command
-
-
-
-

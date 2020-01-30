@@ -118,7 +118,7 @@ result:
        type: complex
 '''
 
-from ansible.module_utils.k8s.scale import KubernetesAnsibleScaleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.scale import KubernetesAnsibleScaleModule
 
 
 def main():

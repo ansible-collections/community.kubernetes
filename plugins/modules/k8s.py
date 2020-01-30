@@ -268,7 +268,7 @@ result:
        sample: 48
 '''
 
-from ansible.module_utils.k8s.raw import KubernetesRawModule
+from ansible_collections.community.kubernetes.plugins.module_utils.raw import KubernetesRawModule
 
 
 def main():

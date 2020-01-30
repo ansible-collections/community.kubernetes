@@ -131,7 +131,7 @@ resources:
 '''
 
 
-from ansible.module_utils.k8s.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
 import copy
 
 

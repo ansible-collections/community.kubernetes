@@ -1,0 +1,11 @@
+{
+    "clouds": {
+        "openshift": {
+            "platform": "openshift",
+            "setup_seconds": 19,
+            "targets": [
+                "k8s.k8s"
+            ]
+        }
+    }
+}
