@@ -1,5 +1,5 @@
 - name: create temporary directory
-  tempfile:
+  test_tempfile:
     state: directory
     suffix: .test
   register: remote_tmp_dir
