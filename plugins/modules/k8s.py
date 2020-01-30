@@ -35,10 +35,10 @@ description:
   - Supports check mode.
 
 extends_documentation_fragment:
-  - k8s_state_options
-  - k8s_name_options
-  - k8s_resource_options
-  - k8s_auth_options
+  - community.kubernetes.k8s_state_options
+  - community.kubernetes.k8s_name_options
+  - community.kubernetes.k8s_resource_options
+  - community.kubernetes.k8s_auth_options
 
 notes:
   - If your OpenShift Python library is not 0.9.0 or newer and you are trying to

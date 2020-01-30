@@ -20,7 +20,6 @@ options:
     aliases:
     - definition
     - inline
-    type: list_dict_str
   src:
     description:
     - "Provide a path to a file containing a valid YAML definition of an object or objects to be created or updated. Mutually

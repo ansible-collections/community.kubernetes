@@ -64,7 +64,7 @@ options:
     type: list
 
 extends_documentation_fragment:
-  - k8s_auth_options
+  - community.kubernetes.k8s_auth_options
 
 requirements:
   - "python >= 2.7"
