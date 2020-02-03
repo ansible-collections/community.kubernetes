@@ -112,6 +112,22 @@ You can run the collection's test suites with the commands:
     ansible-test sanity --docker -v --color
     ansible-test integration --docker -v --color
 
+## Publishing New Versions
+
+The current process for publishing new versions of the Kubernetes Collection is manual, and requires a user who has access to the `community.kubernetes` namespace on Ansible Galaxy to publish the build artifact.
+
+  1. Ensure `CHANGELOG.md` contains all the latest changes.
+  2. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
+  3. Tag the version in Git and push to GitHub.
+  4. Run the following commands to build and release the new version on Galaxy:
+
+     ```
+     ansible-galaxy collection build
+     ansible-galaxy collection publish ./community-kubernetes-$VERSION_HERE.tar.gz
+     ```
+
+After the version is published, verify it exists on the [Kubernetes Collection Galaxy page](https://galaxy.ansible.com/community/kubernetes).
+
 ## More Information
 
 For more information about Ansible's Kubernetes integration, join the `#ansible-community` channel on Freenode IRC, and browse the resources in the [Kubernetes Working Group](https://github.com/ansible/community/wiki/Kubernetes) Community wiki page.
