@@ -1,4 +1,12 @@
-authors: []
+authors:
+  - chouseknecht (https://github.com/chouseknecht)
+  - geerlingguy (https://www.jeffgeerling.com/)
+  - maxamillion (https://github.com/maxamillion)
+  - jmontleon (https://github.com/jmontleon)
+  - fabianvf (https://github.com/fabianvf)
+  - willthames (https://github.com/willthames)
+  - mmazur (https://github.com/mmazur)
+  - jamescassell (https://github.com/jamescassell)
 dependencies: {}
 description: Kubernetes Collection for Ansible.
 documentation: ''
