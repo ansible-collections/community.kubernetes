@@ -40,8 +40,14 @@ You can also include it in a `requirements.yml` file and install it via `ansible
 ---
 collections:
   - name: community.kubernetes
-    version: 1.0.0
+    version: 0.9.0
 ```
+
+### Installing the OpenShift Python Library
+
+Content in this collection requires the [OpenShift Python client](https://pypi.org/project/openshift/) to interact with Kubernetes' APIs. You can install it with:
+
+    pip3 install openshift
 
 ### Using modules from the Kubernetes Collection in your playbooks
 
@@ -57,15 +63,39 @@ You can either call modules by their Fully Qualified Collection Namespace (FQCN)
     - community.kubernetes
 
   tasks:
-    - name: Get a list of all pods in the kube-system namespace.
-      k8s_info:
-        kind: Pod
-        namespace: kube-system
-      register: system_pods
+    - name: Ensure the myapp Namespace exists.
+      k8s:
+        api_version: v1
+        kind: Namespace
+        name: myapp
+        state: present
 
-    - name: Display pod information for pods in kube-system namespace.
+    - name: Ensure the myapp Service exists in the myapp Namespace.
+      k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: myapp
+            namespace: myapp
+          spec:
+            type: LoadBalancer
+            ports:
+            - port: 8080
+              targetPort: 8080
+            selector:
+              app: myapp
+
+    - name: Get a list of all Services in the myapp namespace.
+      k8s_info:
+        kind: Service
+        namespace: myapp
+      register: myapp_services
+
+    - name: Display number of Services in the myapp namespace.
       debug:
-        var: system_pods.resources | count
+        var: myapp_services.resources | count
 
 ```
 
