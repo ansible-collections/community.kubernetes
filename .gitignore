@@ -1,5 +1,10 @@
 *.retry
 .idea
 *.log
+
+# Galaxy artifacts.
+*.tar.gz
+
+# Temporary test files.
 tests/output
 tests/integration/cloud-config-*
