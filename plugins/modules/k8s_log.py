@@ -115,6 +115,11 @@ log:
   description:
   - The text log of the object
   returned: success
+log_lines:
+  type: list
+  description:
+  - The log of the object, split on newlines
+  returned: success
 '''
 
 
@@ -173,11 +178,13 @@ class KubernetesLogModule(KubernetesAnsibleModule):
         if self.params.get('container'):
             kwargs['query_params'] = dict(container=self.params['container'])
 
-        self.exit_json(changed=False, log=resource.log.get(
+        log = resource.log.get(
             name=name,
             namespace=self.params.get('namespace'),
             **kwargs
-        ))
+        )
+
+        self.exit_json(changed=False, log=log, log_lines=log.split('\n'))
 
     def extract_selectors(self, instance):
         # Parses selectors on an object based on the specifications documented here:
