@@ -1,0 +1,41 @@
+---
+- vars:
+    ns: k8s-exec
+    pod: sleep-pod
+  block:
+    - name: ensure that k8s-log namespace exists
+      k8s:
+        kind: Namespace
+        name: "{{ ns }}"
+
+    - name: Create a pod
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: "{{ pod }}"
+            namespace: "{{ ns }}"
+          spec:
+            containers:
+              - image: busybox
+                command: ["sleep", "infinity"]
+        wait: yes
+        wait_sleep: 1
+        wait_timeout: 30
+
+    - name: Execute a command
+      k8s_exec:
+        pod: "{{ pod }}"
+        namespace: "{{ ns }}"
+        command: cat /etc/resolv.conf
+      register: output
+
+    - name: Show k8s_exec output
+      debug:
+        var: output
+
+    - name: Assert k8s_exec output is correct
+      assert:
+        that:
+          - "'nameserver' in output.stdout"
