@@ -48,3 +48,6 @@ jobs:
 
       - name: Run integration tests on Python ${{ matrix.python_version }}
         run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
+
+      - name: Upload coverage data
+        run: tests/coverage.sh
