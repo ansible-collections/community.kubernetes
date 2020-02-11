@@ -66,6 +66,7 @@ options:
     - merge
     - strategic-merge
     type: list
+    elements: str
     version_added: "2.7"
   wait:
     description:

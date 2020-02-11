@@ -84,7 +84,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
     def argspec(self):
         argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
         argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
-        argument_spec['merge_type'] = dict(type='list', choices=['json', 'merge', 'strategic-merge'])
+        argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
         argument_spec['wait'] = dict(type='bool', default=False)
         argument_spec['wait_sleep'] = dict(type='int', default=5)
         argument_spec['wait_timeout'] = dict(type='int', default=120)

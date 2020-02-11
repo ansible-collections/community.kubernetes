@@ -73,6 +73,7 @@ options:
     - merge
     - strategic-merge
     type: list
+    elements: str
   name:
     description:
       - Use to specify a Service object name.
@@ -98,6 +99,7 @@ options:
       - A list of ports to expose.
       - U(https://kubernetes.io/docs/concepts/services-networking/service/#multi-port-services)
     type: list
+    elements: dict
   selector:
     description:
       - Label selectors identify objects this Service should apply to.
@@ -188,7 +190,7 @@ SERVICE_ARG_SPEC = {
     },
     'name': {'required': True},
     'namespace': {'required': True},
-    'merge_type': {'type': 'list', 'choices': ['json', 'merge', 'strategic-merge']},
+    'merge_type': {'type': 'list', 'elements': 'str', 'choices': ['json', 'merge', 'strategic-merge']},
     'selector': {'type': 'dict'},
     'type': {
         'type': 'str',
@@ -196,7 +198,7 @@ SERVICE_ARG_SPEC = {
             'NodePort', 'ClusterIP', 'LoadBalancer', 'ExternalName'
         ],
     },
-    'ports': {'type': 'list'},
+    'ports': {'type': 'list', 'elements': 'dict'},
 }
 
 
