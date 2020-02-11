@@ -22,7 +22,7 @@ if find tests/output/coverage/ -mindepth 1 -name '.*' -prune -o -print -quit | g
         bash <(curl -s https://codecov.io/bash) \
             -f "${file}" \
             -F "${flags}" \
-            -t TODO \ # kubernetes
+            -t d6ff3062-7455-4de8-a8cb-55b3b1ddf5b2 \ # kubernetes
             -X coveragepy \
             -X gcov \
             -X fix \
