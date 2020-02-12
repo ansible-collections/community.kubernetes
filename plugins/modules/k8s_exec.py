@@ -100,10 +100,10 @@ class KubernetesExecCommand(KubernetesAnsibleModule):
     @property
     def argspec(self):
         spec = copy.deepcopy(AUTH_ARG_SPEC)
-        spec['namespace'] = {'type': 'str'}
-        spec['pod'] = {'type': 'str'}
-        spec['container'] = {'type': 'str'}
-        spec['command'] = {'type': 'str'}
+        spec['namespace'] = dict(type='str', required=True)
+        spec['pod'] = dict(type='str', required=True)
+        spec['container'] = dict(type='str', required=True)
+        spec['command'] = dict(type='str', required=True)
         return spec
 
 
