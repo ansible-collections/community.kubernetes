@@ -21,7 +21,7 @@ author: "Tristan de Cacqueray (@tristanC)"
 description:
   - Use the Kubernetes Python client to execute command on K8s pods.
 extends_documentation_fragment:
-  - k8s_auth_options
+  - community.kubernetes.k8s_auth_options
 requirements:
   - "python >= 2.7"
   - "openshift == 0.4.3"
