@@ -102,7 +102,7 @@ class KubernetesExecCommand(KubernetesAnsibleModule):
         spec = copy.deepcopy(AUTH_ARG_SPEC)
         spec['namespace'] = dict(type='str', required=True)
         spec['pod'] = dict(type='str', required=True)
-        spec['container'] = dict(type='str', required=True)
+        spec['container'] = dict(type='str')
         spec['command'] = dict(type='str', required=True)
         return spec
 
