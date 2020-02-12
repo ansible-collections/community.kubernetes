@@ -10,7 +10,8 @@
         namespace: "{{ ns }}"
       spec:
         containers:
-          - image: busybox
+          - name: sleeper
+            image: busybox
             command: ["sleep", "infinity"]
 
   block:
