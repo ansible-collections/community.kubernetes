@@ -1,0 +1,23 @@
+---
+- name: Converge
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  collections:
+    - community.kubernetes
+
+  tasks:
+    - name: Testing.
+      k8s_info:
+        namespace: kube-system
+        kind: Pod
+      register: pod_list
+
+    - name: Testing listing.
+      debug:
+        msg: "{{ pod_list.resources | count }}"
+
+    - name: Include Kubernetes integration testing role.
+      include_role:
+        name: kubernetes
