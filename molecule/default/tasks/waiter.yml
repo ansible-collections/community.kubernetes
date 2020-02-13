@@ -262,15 +262,13 @@
           reason: DeploymentPaused
       register: pause_deploy
 
-    - debug: var=pause_deploy
-
     - name: Check that paused deployment wait worked
       assert:
         that:
           - condition.reason == "DeploymentPaused"
           - condition.status == "Unknown"
       vars:
-        condition: '{{ pause_deploy.result.status.conditions | community.general.json_query("[?type==`Progressing`]") | first }}'
+        condition: '{{ pause_deploy.result.status.conditions[1] }}'
 
     - name: Add a service based on the deployment
       k8s:

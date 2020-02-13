@@ -84,12 +84,5 @@ jobs:
           mkdir -p /home/runner/.ansible
           ln -s /home/runner/work/kubernetes /home/runner/.ansible/collections
 
-      # TODO: Once community.general is on public Galaxy, drop the -s.
-      - name: Install community.general role to get json_query filter.
-        run: |
-          cp tests/integration/targets/kubernetes/files/manifest-example/MANIFEST.json MANIFEST.json
-          pip install jmespath
-          ansible-galaxy collection install --no-deps -s https://sivel.eng.ansible.com/api community.general
-
       - name: Run molecule default test scenario
         run: molecule test
