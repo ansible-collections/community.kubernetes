@@ -1,0 +1,32 @@
+---
+driver:
+  name: delegated
+  options:
+    managed: false
+    login_cmd_template: 'docker exec -ti {instance} bash'
+    ansible_connection_options:
+      ansible_connection: docker
+lint:
+  name: yamllint
+  options:
+    config-data:
+      line-length:
+        max: 160
+platforms:
+  - name: instance-kind
+provisioner:
+  name: ansible
+  log: true
+  lint: {}
+  inventory:
+    host_vars:
+      localhost:
+        ansible_python_interpreter: '{{ ansible_playbook_python }}'
+  env:
+    ANSIBLE_FORCE_COLOR: 'true'
+scenario:
+  name: default
+  test_sequence:
+    - syntax
+    - converge
+    - verify

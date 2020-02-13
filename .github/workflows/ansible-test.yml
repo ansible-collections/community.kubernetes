@@ -1,6 +1,6 @@
+---
 name: CI
-on:
-  push:
+'on':
   pull_request:
   schedule:
     - cron: '0 6 * * *'
@@ -53,3 +53,36 @@ jobs:
 
       - name: Upload coverage data
         run: tests/coverage.sh
+
+  molecule:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+          python_version: ['3.7']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v1
+        with:
+          path: ansible_collections/community/kubernetes
+
+      - name: Set up KinD cluster
+        uses: engineerd/setup-kind@v0.3.0
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install molecule and openshift dependencies
+        run: pip install molecule openshift
+
+      - name: Install ansible-base
+        run: pip install git+https://github.com/ansible-collection-migration/ansible-base.git --disable-pip-version-check
+
+      - name: Create default collection path symlink
+        run: |
+          mkdir -p /home/runner/.ansible
+          ln -s /home/runner/work/kubernetes /home/runner/.ansible/collections
+
+      - name: Run molecule default test scenario
+        run: molecule test

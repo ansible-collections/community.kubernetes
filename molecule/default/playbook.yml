@@ -1,0 +1,27 @@
+---
+- name: Converge
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  collections:
+    - community.kubernetes
+
+  vars_files:
+    - vars/main.yml
+
+  tasks:
+    - name: Verify cluster is working.
+      k8s_info:
+        namespace: kube-system
+        kind: Pod
+      register: pod_list
+
+    - name: Verify cluster has more than 5 pods running.
+      assert:
+        that: (pod_list.resources | count) > 5
+
+    - include_tasks: tasks/delete.yml
+    - include_tasks: tasks/apply.yml
+    - include_tasks: tasks/waiter.yml
+    - include_tasks: tasks/full.yml

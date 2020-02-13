@@ -72,23 +72,10 @@
     state: absent
   no_log: yes
 
-# Run full test suite
+# Test openshift
 
-- pip:
-    name:
-      - openshift>=0.9.2
-      - coverage
-    virtualenv: "{{ virtualenv }}"
-    virtualenv_command: "{{ virtualenv_command }}"
-    virtualenv_site_packages: no
+- debug:
+    var: k8s_openshift
 
-- include_tasks: full_test.yml
-  vars:
-    ansible_python_interpreter: "{{ virtualenv_interpreter }}"
-    create_crd_with_apply: no
-    playbook_namespace: ansible-test-k8s-full
-
-- file:
-    path: "{{ virtualenv }}"
-    state: absent
-  no_log: yes
+- include: openshift.yml
+  when: k8s_openshift | bool

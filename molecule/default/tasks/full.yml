@@ -1,13 +1,4 @@
-# TODO: This is the only way I could get the kubeconfig, I don't know why. Running the lookup outside of debug seems to return an empty string
-#- debug: msg={{ lookup('env', 'K8S_AUTH_KUBECONFIG') }}
-#  register: kubeconfig
-
-# Kubernetes resources
-
-- include_tasks: delete.yml
-- include_tasks: apply.yml
-- include_tasks: waiter.yml
-
+---
 - block:
     - name: Create a namespace
       k8s:
@@ -15,31 +6,32 @@
         kind: Namespace
       register: output
 
-    - name: show output
+    - name: Show output
       debug:
         var: output
 
-    - name: Setting validate_certs to true causes a failure
-      k8s:
-        name: testing
-        kind: Namespace
-        validate_certs: yes
-      ignore_errors: yes
-      register: output
+    # TODO: See https://github.com/ansible-collections/kubernetes/issues/24
+    # - name: Setting validate_certs to true causes a failure
+    #   k8s:
+    #     name: testing
+    #     kind: Namespace
+    #     validate_certs: yes
+    #   ignore_errors: yes
+    #   register: output
+    #
+    # - name: assert that validate_certs caused a failure (and therefore was correctly translated to verify_ssl)
+    #   assert:
+    #     that:
+    #       - output is failed
 
-    - name: assert that validate_certs caused a failure (and therefore was correctly translated to verify_ssl)
-      assert:
-        that:
-          - output is failed
-
-    - name: k8s_info works with empty resources
+    - name: Ensure k8s_info works with empty resources
       k8s_info:
         kind: Deployment
         namespace: testing
-        api_version: extensions/v1beta1
+        api_version: apps/v1
       register: k8s_info
 
-    - name: assert that k8s_info is in correct format
+    - name: Assert that k8s_info is in correct format
       assert:
         that:
           - "'resources' in k8s_info"
@@ -68,7 +60,7 @@
               port: 8000
       register: output
 
-    - name: show output
+    - name: Show output
       debug:
         var: output
 
@@ -126,7 +118,7 @@
         state: present
         inline: *pvc
 
-    - name: PVC creation should be idempotent
+    - name: Ensure PVC creation is idempotent
       assert:
         that: not output.changed
 
@@ -134,7 +126,7 @@
       k8s:
         state: present
         inline: &deployment
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: Deployment
           metadata:
             name: elastic
@@ -143,6 +135,11 @@
               service: elastic
             namespace: testing
           spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: galaxy
+                service: elastic
             template:
               metadata:
                 labels:
@@ -160,7 +157,6 @@
                 - name: elastic-volume
                   persistentVolumeClaim:
                     claimName: elastic-volume
-            replicas: 1
             strategy:
               type: RollingUpdate
       register: output
@@ -175,15 +171,9 @@
         inline: *deployment
       register: output
 
-    - name: Deployment creation should be idempotent
+    - name: Ensure Deployment creation is idempotent
       assert:
         that: not output.changed
-
-    - debug:
-        var: k8s_openshift
-
-    - include: openshift.yml
-      when: k8s_openshift | bool
 
     ### Type tests
     - name: Create a namespace from a string
@@ -303,7 +293,8 @@
             metadata:
               name: testing5
 
-    - k8s_info:
+    - name: Get info about terminating resources
+      k8s_info:
         api_version: v1
         kind: Namespace
         name: "{{ item }}"
@@ -312,7 +303,7 @@
         - testing5
       register: k8s_info
 
-    - name: Resources are terminating if still in results
+    - name: Ensure resources are terminating if still in results
       assert:
         that: not item.resources or item.resources[0].status.phase == "Terminating"
       loop: "{{ k8s_info.results }}"
