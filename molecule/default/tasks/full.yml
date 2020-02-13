@@ -6,7 +6,7 @@
         kind: Namespace
       register: output
 
-    - name: show output
+    - name: Show output
       debug:
         var: output
 
@@ -24,14 +24,14 @@
     #     that:
     #       - output is failed
 
-    - name: k8s_info works with empty resources
+    - name: Ensure k8s_info works with empty resources
       k8s_info:
         kind: Deployment
         namespace: testing
         api_version: apps/v1
       register: k8s_info
 
-    - name: assert that k8s_info is in correct format
+    - name: Assert that k8s_info is in correct format
       assert:
         that:
           - "'resources' in k8s_info"
@@ -60,7 +60,7 @@
               port: 8000
       register: output
 
-    - name: show output
+    - name: Show output
       debug:
         var: output
 
@@ -118,7 +118,7 @@
         state: present
         inline: *pvc
 
-    - name: PVC creation should be idempotent
+    - name: Ensure PVC creation is idempotent
       assert:
         that: not output.changed
 
@@ -171,7 +171,7 @@
         inline: *deployment
       register: output
 
-    - name: Deployment creation should be idempotent
+    - name: Ensure Deployment creation is idempotent
       assert:
         that: not output.changed
 
@@ -293,7 +293,8 @@
             metadata:
               name: testing5
 
-    - k8s_info:
+    - name: Get info about terminating resources
+      k8s_info:
         api_version: v1
         kind: Namespace
         name: "{{ item }}"
@@ -302,7 +303,7 @@
         - testing5
       register: k8s_info
 
-    - name: Resources are terminating if still in results
+    - name: Ensure resources are terminating if still in results
       assert:
         that: not item.resources or item.resources[0].status.phase == "Terminating"
       loop: "{{ k8s_info.results }}"
