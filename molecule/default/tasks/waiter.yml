@@ -1,13 +1,9 @@
-- name: ensure that there are actually some nodes
-  k8s_info:
-    kind: Node
-  register: nodes
-
+---
 - block:
     - set_fact:
         wait_namespace: wait
 
-    - name: ensure namespace exists
+    - name: Ensure namespace exists
       k8s:
         definition:
           apiVersion: v1
@@ -15,7 +11,7 @@
           metadata:
             name: "{{ wait_namespace }}"
 
-    - name: add a simple pod
+    - name: Add a simple pod
       k8s:
         definition:
           apiVersion: v1
@@ -34,15 +30,15 @@
       register: wait_pod
       ignore_errors: yes
 
-    - name: assert that pod creation succeeded
+    - name: Assert that pod creation succeeded
       assert:
         that:
           - wait_pod is successful
 
-    - name: add a daemonset
+    - name: Add a daemonset
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: DaemonSet
           metadata:
             name: wait-daemonset
@@ -60,15 +56,15 @@
         k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:1
       register: ds
 
-    - name: check that daemonset wait worked
+    - name: Check that daemonset wait worked
       assert:
         that:
           - ds.result.status.currentNumberScheduled == ds.result.status.desiredNumberScheduled
 
-    - name: update a daemonset in check_mode
+    - name: Update a daemonset in check_mode
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: DaemonSet
           metadata:
             name: wait-daemonset
@@ -88,15 +84,15 @@
         k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:2
       register: update_ds_check_mode
 
-    - name: check that check_mode returned changed
+    - name: Check that check_mode returned changed
       assert:
         that:
           - update_ds_check_mode is changed
 
-    - name: update a daemonset
+    - name: Update a daemonset
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: DaemonSet
           metadata:
             name: wait-daemonset
@@ -116,7 +112,7 @@
         k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:3
       register: ds
 
-    - name: get updated pods
+    - name: Get updated pods
       k8s_info:
         api_version: v1
         kind: Pod
@@ -125,13 +121,13 @@
           - app=wait-ds
       register: updated_ds_pods
 
-    - name: check that daemonset wait worked
+    - name: Check that daemonset wait worked
       assert:
         that:
           - ds.result.status.currentNumberScheduled == ds.result.status.desiredNumberScheduled
           - updated_ds_pods.resources[0].spec.containers[0].image.endswith(":3")
 
-    - name: add a crashing pod
+    - name: Add a crashing pod
       k8s:
         definition:
           apiVersion: v1
@@ -151,12 +147,12 @@
       register: crash_pod
       ignore_errors: yes
 
-    - name: check that task failed
+    - name: Check that task failed
       assert:
         that:
           - crash_pod is failed
 
-    - name: use a non-existent image
+    - name: Use a non-existent image
       k8s:
         definition:
           apiVersion: v1
@@ -174,15 +170,15 @@
       register: no_image_pod
       ignore_errors: yes
 
-    - name: check that task failed
+    - name: Check that task failed
       assert:
         that:
           - no_image_pod is failed
 
-    - name: add a deployment
+    - name: Add a deployment
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: Deployment
           metadata:
             name: wait-deploy
@@ -204,15 +200,15 @@
 
       register: deploy
 
-    - name: check that deployment wait worked
+    - name: Check that deployment wait worked
       assert:
         that:
           - deploy.result.status.availableReplicas == deploy.result.status.replicas
 
-    - name: update a deployment
+    - name: Update a deployment
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: Deployment
           metadata:
             name: wait-deploy
@@ -233,7 +229,7 @@
             protocol: TCP
       register: update_deploy
 
-    - name: get updated pods
+    - name: Get updated pods
       k8s_info:
         api_version: v1
         kind: Pod
@@ -242,16 +238,16 @@
           - app=wait-deploy
       register: updated_deploy_pods
 
-    - name: check that deployment wait worked
+    - name: Check that deployment wait worked
       assert:
         that:
           - deploy.result.status.availableReplicas == deploy.result.status.replicas
           - updated_deploy_pods.resources[0].spec.containers[0].image.endswith(":2")
 
-    - name: pause a deployment
+    - name: Pause a deployment
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: Deployment
           metadata:
             name: wait-deploy
@@ -266,15 +262,15 @@
           reason: DeploymentPaused
       register: pause_deploy
 
-    - name: check that paused deployment wait worked
+    - name: Check that paused deployment wait worked
       assert:
         that:
           - condition.reason == "DeploymentPaused"
           - condition.status == "Unknown"
       vars:
-        condition: '{{ pause_deploy.result.status.conditions | json_query("[?type==`Progressing`]") | first }}'
+        condition: '{{ pause_deploy.result.status.conditions | community.general.json_query("[?type==`Progressing`]") | first }}'
 
-    - name: add a service based on the deployment
+    - name: Add a service based on the deployment
       k8s:
         definition:
           apiVersion: v1
@@ -294,15 +290,15 @@
         k8s_pod_name: wait-deploy
       register: service
 
-    - name: assert that waiting for service works
+    - name: Assert that waiting for service works
       assert:
         that:
           - service is successful
 
-    - name: add a crashing deployment
+    - name: Add a crashing deployment
       k8s:
         definition:
-          apiVersion: extensions/v1beta1
+          apiVersion: apps/v1
           kind: Deployment
           metadata:
             name: wait-crash-deploy
@@ -322,12 +318,12 @@
       register: wait_crash_deploy
       ignore_errors: yes
 
-    - name: check that task failed
+    - name: Check that task failed
       assert:
         that:
           - wait_crash_deploy is failed
 
-    - name: remove Pod with very short timeout
+    - name: Remove Pod with very short timeout
       k8s:
         api_version: v1
         kind: Pod
@@ -340,16 +336,14 @@
       ignore_errors: yes
       register: short_wait_remove_pod
 
-    - name: check that task failed
+    - name: Check that task failed
       assert:
         that:
           - short_wait_remove_pod is failed
 
   always:
-    - name: remove namespace
+    - name: Remove namespace
       k8s:
         kind: Namespace
         name: "{{ wait_namespace }}"
         state: absent
-
-  when: (nodes.resources | length) > 0

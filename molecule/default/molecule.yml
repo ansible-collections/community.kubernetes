@@ -23,12 +23,10 @@ provisioner:
       localhost:
         ansible_python_interpreter: '{{ ansible_playbook_python }}'
   env:
-    ANSIBLE_ROLES_PATH: ${ANSIBLE_ROLES_PATH}:../../tests/integration/targets
+    ANSIBLE_FORCE_COLOR: 'true'
 scenario:
   name: default
   test_sequence:
-    # - lint
     - syntax
     - converge
-    - idempotence
     - verify

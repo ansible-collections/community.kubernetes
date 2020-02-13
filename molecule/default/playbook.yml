@@ -7,17 +7,21 @@
   collections:
     - community.kubernetes
 
+  vars_files:
+    - vars/main.yml
+
   tasks:
-    - name: Testing.
+    - name: Verify cluster is working.
       k8s_info:
         namespace: kube-system
         kind: Pod
       register: pod_list
 
-    - name: Testing listing.
-      debug:
-        msg: "{{ pod_list.resources | count }}"
+    - name: Verify cluster has more than 5 pods running.
+      assert:
+        that: (pod_list.resources | count) > 5
 
-    - name: Include Kubernetes integration testing role.
-      include_role:
-        name: kubernetes
+    - include_tasks: tasks/delete.yml
+    - include_tasks: tasks/apply.yml
+    - include_tasks: tasks/waiter.yml
+    - include_tasks: tasks/full.yml

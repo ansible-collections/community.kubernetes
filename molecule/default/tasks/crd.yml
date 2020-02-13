@@ -1,33 +1,28 @@
-# TODO: This is the only way I could get the kubeconfig, I don't know why. Running the lookup outside of debug seems to return an empty string
-#- debug: msg={{ lookup('env', 'K8S_AUTH_KUBECONFIG') }}
-#  register: kubeconfig
-
-# Kubernetes resources
-
+---
 - block:
     - name: Create a namespace
       k8s:
         name: crd
         kind: Namespace
 
-    - name: install custom resource definitions
+    - name: Install custom resource definitions
       k8s:
-        definition: "{{ lookup('file', role_path + '/files/setup-crd.yml') }}"
+        definition: "{{ lookup('file', kubernetes_role_path + '/files/setup-crd.yml') }}"
 
-    - name: pause 5 seconds to avoid race condition
+    - name: Pause 5 seconds to avoid race condition
       pause:
         seconds: 5
 
     - name: create custom resource definition
       k8s:
-        definition: "{{ lookup('file', role_path + '/files/crd-resource.yml') }}"
+        definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
         namespace: crd
         apply: "{{ create_crd_with_apply | default(omit) }}"
       register: create_crd
 
     - name: patch custom resource definition
       k8s:
-        definition: "{{ lookup('file', role_path + '/files/crd-resource.yml') }}"
+        definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
         namespace: crd
       register: recreate_crd
       ignore_errors: yes
@@ -40,14 +35,14 @@
     - block:
         - name: recreate custom resource definition with merge_type
           k8s:
-            definition: "{{ lookup('file', role_path + '/files/crd-resource.yml') }}"
+            definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
             merge_type: merge
             namespace: crd
           register: recreate_crd_with_merge
 
         - name: recreate custom resource definition with merge_type list
           k8s:
-            definition: "{{ lookup('file', role_path + '/files/crd-resource.yml') }}"
+            definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
             merge_type:
               - strategic-merge
               - merge
@@ -58,7 +53,7 @@
 
     - name: remove crd
       k8s:
-        definition: "{{ lookup('file', role_path + '/files/crd-resource.yml') }}"
+        definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
         namespace: crd
         state: absent
 
