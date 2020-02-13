@@ -89,7 +89,7 @@ jobs:
         run: |
           cp tests/integration/targets/kubernetes/files/manifest-example/MANIFEST.json MANIFEST.json
           pip install jmespath
-          ansible-galaxy collection install -vvv -s https://sivel.eng.ansible.com/api community.general
+          ansible-galaxy collection install --no-deps -s https://sivel.eng.ansible.com/api community.general
 
       - name: Run molecule default test scenario
         run: molecule test
