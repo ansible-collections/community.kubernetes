@@ -262,6 +262,8 @@
           reason: DeploymentPaused
       register: pause_deploy
 
+    - debug: var=pause_deploy
+
     - name: Check that paused deployment wait worked
       assert:
         that:
