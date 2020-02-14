@@ -16,7 +16,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 module: k8s_exec
 short_description: Execute command in Pod
-version_added: "2.10"
+version_added: "1.0.0"
 author: "Tristan de Cacqueray (@tristanC)"
 description:
   - Use the Kubernetes Python client to execute command on K8s pods.
