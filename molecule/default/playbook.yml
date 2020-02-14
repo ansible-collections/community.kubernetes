@@ -25,3 +25,4 @@
     - include_tasks: tasks/apply.yml
     - include_tasks: tasks/waiter.yml
     - include_tasks: tasks/full.yml
+    - include_tasks: tasks/exec.yml
