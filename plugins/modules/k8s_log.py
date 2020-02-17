@@ -67,7 +67,7 @@ options:
     required: no
 
 extends_documentation_fragment:
-  - k8s_auth_options
+  - community.kubernetes.k8s_auth_options
 
 requirements:
   - "python >= 2.7"
@@ -123,8 +123,9 @@ log_lines:
 '''
 
 
-from ansible.module_utils.k8s.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
 import copy
+from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC
 
 
 class KubernetesLogModule(KubernetesAnsibleModule):
