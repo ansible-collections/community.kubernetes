@@ -28,7 +28,8 @@ description:
   - Authenticate using either a config file, certificates, password or token.
   - Supports check mode.
   - Analogous to `kubectl logs` or `oc logs`
-
+extends_documentation_fragment:
+  - community.kubernetes.k8s_auth_options
 options:
   api_version:
     description:
@@ -39,6 +40,7 @@ options:
     aliases:
     - api
     - version
+    type: str
   kind:
     description:
     - Use to specify an object model. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
@@ -46,28 +48,31 @@ options:
     - If using I(label_selector), cannot be overridden
     required: no
     default: Pod
+    type: str
   namespace:
     description:
     - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
       to identify a specfic object.
+    type: str
   name:
     description:
     - Use to specify an object name.  Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
       specific object.
     - Only one of I(name) or I(label_selector) may be provided
+    type: str
   label_selectors:
     description:
     - List of label selectors to use to filter results
     - Only one of I(name) or I(label_selector) may be provided
+    type: list
+    elements: str
   container:
     description:
     - Use to specify the container within a pod to grab the log from.
     - If there is only one container, this will default to that container.
     - If there is more than one container, this option is required.
     required: no
-
-extends_documentation_fragment:
-  - community.kubernetes.k8s_auth_options
+    type: str
 
 requirements:
   - "python >= 2.7"
@@ -145,7 +150,7 @@ class KubernetesLogModule(KubernetesAnsibleModule):
                 name=dict(),
                 namespace=dict(),
                 container=dict(),
-                label_selectors=dict(type='list', default=[]),
+                label_selectors=dict(type='list', elements='str', default=[]),
             )
         )
         return args
