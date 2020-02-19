@@ -1,3 +1,4 @@
+---
 # OpenShift Resources
 - name: Create a project
   k8s:
@@ -33,14 +34,14 @@
             containers:
               - name: elastic
                 volumeMounts:
-                - mountPath: /usr/share/elasticsearch/data
-                  name: elastic-volume
+                  - mountPath: /usr/share/elasticsearch/data
+                    name: elastic-volume
                 command: ['elasticsearch']
                 image: 'ansible/galaxy-elasticsearch:2.4.6'
             volumes:
-            - name: elastic-volume
-              persistentVolumeClaim:
-                claimName: elastic-volume
+              - name: elastic-volume
+                persistentVolumeClaim:
+                  claimName: elastic-volume
         replicas: 1
         strategy:
           type: Rolling

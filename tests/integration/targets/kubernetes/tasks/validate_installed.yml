@@ -1,3 +1,4 @@
+---
 - block:
     - name: Create a namespace
       k8s:

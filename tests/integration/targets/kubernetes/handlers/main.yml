@@ -1,3 +1,4 @@
+---
 - name: delete temporary directory
   file:
     path: "{{ remote_tmp_dir }}"

@@ -24,10 +24,10 @@
                   app: hello-world
               spec:
                 containers:
-                - image: busybox
-                  name: hello-world
-                  command: ['sh']
-                  args: ['-c', 'while true ; do echo "hello world" && sleep 10 ; done']
+                  - image: busybox
+                    name: hello-world
+                    command: ['sh']
+                    args: ['-c', 'while true ; do echo "hello world" && sleep 10 ; done']
                 restartPolicy: Always
 
     - name: retrieve the log by providing the deployment

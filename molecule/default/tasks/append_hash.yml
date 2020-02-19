@@ -1,3 +1,4 @@
+---
 - block:
     - name: Ensure that append_hash namespace exists
       k8s:

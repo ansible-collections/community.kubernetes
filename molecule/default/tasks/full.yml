@@ -54,10 +54,10 @@
               app: galaxy
               service: web
             ports:
-            - protocol: TCP
-              targetPort: 8000
-              name: port-8000-tcp
-              port: 8000
+              - protocol: TCP
+                targetPort: 8000
+                name: port-8000-tcp
+                port: 8000
       register: output
 
     - name: Show output
@@ -107,7 +107,7 @@
               requests:
                 storage: 5Gi
             accessModes:
-            - ReadWriteOnce
+              - ReadWriteOnce
 
     - name: Show output
       debug:
@@ -149,14 +149,14 @@
                 containers:
                   - name: elastic
                     volumeMounts:
-                    - mountPath: /usr/share/elasticsearch/data
-                      name: elastic-volume
+                      - mountPath: /usr/share/elasticsearch/data
+                        name: elastic-volume
                     command: ['elasticsearch']
                     image: 'ansible/galaxy-elasticsearch:2.4.6'
                 volumes:
-                - name: elastic-volume
-                  persistentVolumeClaim:
-                    claimName: elastic-volume
+                  - name: elastic-volume
+                    persistentVolumeClaim:
+                      claimName: elastic-volume
             strategy:
               type: RollingUpdate
       register: output
