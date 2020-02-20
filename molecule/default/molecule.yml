@@ -6,12 +6,8 @@ driver:
     login_cmd_template: 'docker exec -ti {instance} bash'
     ansible_connection_options:
       ansible_connection: docker
-lint:
-  name: yamllint
-  options:
-    config-data:
-      line-length:
-        max: 160
+lint: |
+  yamllint .
 platforms:
   - name: instance-kind
 provisioner:
@@ -27,6 +23,7 @@ provisioner:
 scenario:
   name: default
   test_sequence:
+    - lint
     - syntax
     - converge
     - verify

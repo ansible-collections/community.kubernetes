@@ -88,8 +88,8 @@
           - not pods_delete.resources
 
   always:
-      - name: Remove namespace
-        k8s:
-          kind: Namespace
-          name: "{{ delete_namespace }}"
-          state: absent
+    - name: Remove namespace
+      k8s:
+        kind: Namespace
+        name: "{{ delete_namespace }}"
+        state: absent
