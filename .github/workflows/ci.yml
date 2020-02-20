@@ -76,9 +76,8 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      # TODO: Remove molecule version constraint after 3.0 is released.
       - name: Install molecule and openshift dependencies
-        run: pip install molecule===3.0a9 yamllint openshift
+        run: pip install molecule yamllint openshift
 
       - name: Install ansible-base
         run: pip install git+https://github.com/ansible-collection-migration/ansible-base.git --disable-pip-version-check
