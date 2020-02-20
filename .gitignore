@@ -1,6 +1,7 @@
 *.retry
 .idea
 *.log
+__pycache__/
 
 # Galaxy artifacts.
 *.tar.gz

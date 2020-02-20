@@ -40,6 +40,15 @@ options:
     - definition
     - inline
     type: dict
+  src:
+    description:
+    - "Provide a path to a file containing a valid YAML definition of an object dated. Mutually
+      exclusive with I(resource_definition). NOTE: I(kind), I(api_version), I(resource_name), and I(namespace)
+      will be overwritten by corresponding values found in the configuration read in from the I(src) file."
+    - Reads from the local file system. To read from the Ansible controller's file system, use the file lookup
+      plugin or template lookup plugin, combined with the from_yaml filter, and pass the result to
+      I(resource_definition). See Examples below.
+    type: path
   state:
     description:
     - Determines if an object should be created, patched, or deleted. When set to C(present), an object will be
@@ -105,6 +114,14 @@ options:
       - Label selectors identify objects this Service should apply to.
       - U(https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
     type: dict
+  apply:
+    description:
+    - C(apply) compares the desired resource definition with the previously supplied resource definition,
+      ignoring properties that are automatically generated
+    - C(apply) works better with Services than 'force=yes'
+    - mutually exclusive with C(merge_type)
+    type: bool
+    version_added: "2.9"
 
 requirements:
   - python >= 2.7
@@ -176,6 +193,10 @@ from ansible_collections.community.kubernetes.plugins.module_utils.raw import Ku
 
 
 SERVICE_ARG_SPEC = {
+    'apply': {
+        'type': 'bool',
+        'default': False,
+    },
     'state': {
         'default': 'present',
         'choices': ['present', 'absent'],
@@ -192,6 +213,9 @@ SERVICE_ARG_SPEC = {
     'namespace': {'required': True},
     'merge_type': {'type': 'list', 'elements': 'str', 'choices': ['json', 'merge', 'strategic-merge']},
     'selector': {'type': 'dict'},
+    'src': {
+      'type': 'path',
+    },
     'type': {
         'type': 'str',
         'choices': [
