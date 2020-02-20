@@ -214,7 +214,7 @@ SERVICE_ARG_SPEC = {
     'merge_type': {'type': 'list', 'elements': 'str', 'choices': ['json', 'merge', 'strategic-merge']},
     'selector': {'type': 'dict'},
     'src': {
-      'type': 'path',
+        'type': 'path',
     },
     'type': {
         'type': 'str',
