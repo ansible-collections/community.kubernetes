@@ -7,6 +7,7 @@ driver:
     ansible_connection_options:
       ansible_connection: docker
 lint: |
+  set -e
   yamllint .
 platforms:
   - name: instance-kind
