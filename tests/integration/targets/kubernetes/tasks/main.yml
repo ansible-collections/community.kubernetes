@@ -65,7 +65,6 @@
 - include_tasks: older_openshift_fail.yml
   vars:
     ansible_python_interpreter: "{{ virtualenv_interpreter }}"
-    recreate_crd_default_merge_expectation: recreate_crd is failed
     playbook_namespace: ansible-test-k8s-older-openshift
 
 - file:
