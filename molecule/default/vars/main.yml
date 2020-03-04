@@ -1,6 +1,4 @@
 ---
-recreate_crd_default_merge_expectation: recreate_crd is not failed
-
 k8s_pod_metadata:
   labels:
     app: "{{ k8s_pod_name }}"
