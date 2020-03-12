@@ -87,7 +87,7 @@ DOCUMENTATION = """
         vars:
           - name: ansible_kubectl_context
         env:
-          - name: k8S_AUTH_CONTEXT
+          - name: K8S_AUTH_CONTEXT
       kubectl_host:
         description:
           - URL for accessing the API.
