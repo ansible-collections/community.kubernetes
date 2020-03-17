@@ -1,0 +1,185 @@
+---
+- name: Create helm namespace
+  k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ helm_namespace }}"
+    wait: true
+
+- name: "Install {{ chart_test }} from {{ source }}"
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is installed from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status.status | lower == 'deployed'
+
+- name: Check idempotency
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: Assert idempotency
+  assert:
+    that:
+      - install is not changed
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status.status | lower == 'deployed'
+
+- name: "Add vars to {{ chart_test }} from {{ source }}"
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+    values: "{{ chart_test_values }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new var from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - "install.status['values'].revisionHistoryLimit == 0"
+
+- name: Check idempotency after add vars
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+    values: "{{ chart_test_values }}"
+  register: install
+
+- name: Assert idempotency after add vars
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - "install.status['values'].revisionHistoryLimit == 0"
+
+- name: "Remove Vars to {{ chart_test }} from {{ source }}"
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new var from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status['values'] == {}
+
+- name: Check idempotency after remove vars
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: Assert idempotency after remove vars
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status['values'] == {}
+
+- name: "Upgrade {{ chart_test }} from {{ source }}"
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new version from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
+
+- name: Check idempotency after upgrade
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: Assert idempotency after upgrade
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
+
+- name: "Remove {{ chart_test }} from {{ source }}"
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    state: absent
+    name: test
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is remove from {{ source }}"
+  assert:
+    that:
+      - install is changed
+
+- name: Check idempotency after remove
+  helm_cli:
+    binary_path: "{{ helm_binary}}"
+    state: absent
+    name: test
+    namespace: "{{ helm_namespace }}"
+    tiller_namespace: "{{ tiller_namespace }}"
+  register: install
+
+- name: Assert idempotency
+  assert:
+    that:
+      - install is not changed
+
+- name: Remove helm namespace
+  k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ helm_namespace }}"
+    state: absent
+    wait: true

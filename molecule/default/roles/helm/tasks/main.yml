@@ -1,0 +1,8 @@
+---
+- name: Run tests
+  include_tasks: run_test.yml
+  loop_control:
+    loop_var: helm_version
+  with_items:
+    - "v2.16.0"
+    - "v3.1.2"

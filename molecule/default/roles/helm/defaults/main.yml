@@ -1,0 +1,15 @@
+---
+helm_archive_name: "helm-{{ helm_version }}-{{ ansible_system | lower }}-amd64.tar.gz"
+helm_binary: "/tmp/helm/{{ ansible_system | lower }}-amd64/helm"
+helm_namespace: helm
+
+tiller_namespace: tiller
+tiller_cluster_role: cluster-admin
+
+chart_test: "nginx-ingress"
+chart_test_version: 1.32.0
+chart_test_version_upgrade: 1.33.0
+chart_test_repo: "https://kubernetes-charts.storage.googleapis.com"
+chart_test_git_repo: "http://github.com/helm/charts.git"
+chart_test_values:
+  revisionHistoryLimit: 0

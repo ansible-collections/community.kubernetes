@@ -2,7 +2,6 @@
 - name: Converge
   hosts: localhost
   connection: local
-  gather_facts: false
 
   collections:
     - community.kubernetes
@@ -27,3 +26,6 @@
     - include_tasks: tasks/full.yml
     - include_tasks: tasks/exec.yml
     - include_tasks: tasks/log.yml
+
+  roles:
+    - helm

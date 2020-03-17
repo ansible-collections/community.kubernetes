@@ -1,0 +1,11 @@
+---
+- name: Add chart repo
+  shell: "helm repo add stable {{ chart_test_repo }}"
+
+- name: Install Chart from repository
+  include_tasks: "../tests_chart.yml"
+  vars:
+    source: repository
+    chart_source: "stable/{{ chart_test }}"
+    chart_source_version: "{{ chart_test_version }}"
+    chart_source_version_upgrade: "{{ chart_test_version_upgrade }}"
