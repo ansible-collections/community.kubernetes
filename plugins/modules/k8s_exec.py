@@ -14,18 +14,24 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
                     'supported_by': 'community'}
 
 DOCUMENTATION = '''
+
 module: k8s_exec
+
 short_description: Execute command in Pod
-version_added: "1.0.0"
+
 author: "Tristan de Cacqueray (@tristanC)"
+
 description:
   - Use the Kubernetes Python client to execute command on K8s pods.
+
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
+
 requirements:
   - "python >= 2.7"
   - "openshift == 0.4.3"
   - "PyYAML >= 3.11"
+
 options:
   proxy:
     description:

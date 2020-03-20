@@ -19,8 +19,6 @@ module: k8s_auth
 
 short_description: Authenticate to Kubernetes clusters which require an explicit login step
 
-version_added: "2.8"
-
 author: KubeVirt Team (@kubevirt)
 
 description:

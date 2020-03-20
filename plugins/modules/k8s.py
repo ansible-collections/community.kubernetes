@@ -19,8 +19,6 @@ module: k8s
 
 short_description: Manage Kubernetes (K8s) objects
 
-version_added: "2.6"
-
 author:
     - "Chris Houseknecht (@chouseknecht)"
     - "Fabian von Feilitzsch (@fabianvf)"
@@ -67,7 +65,6 @@ options:
     - strategic-merge
     type: list
     elements: str
-    version_added: "2.7"
   wait:
     description:
     - Whether to wait for certain resource kinds to end up in the desired state. By default the module exits once Kubernetes has
@@ -76,19 +73,16 @@ options:
     - For resource kinds without an implementation, C(wait) returns immediately unless C(wait_condition) is set.
     default: no
     type: bool
-    version_added: "2.8"
   wait_sleep:
     description:
     - Number of seconds to sleep between checks.
     default: 5
     type: int
-    version_added: "2.9"
   wait_timeout:
     description:
     - How long in seconds to wait for the resource to end up in the desired state. Ignored if C(wait) is not set.
     default: 120
     type: int
-    version_added: "2.8"
   wait_condition:
     description:
     - Specifies a custom condition on the status to wait for. Ignored if C(wait) is not set or is set to False.
@@ -114,11 +108,10 @@ options:
         type: str
         description:
         - The value of the reason field in your desired condition
-        - For example, if a C(Deployment) is paused, The C(Progressing) c(type) will have the C(DeploymentPaused) reason.
+        - For example, if a C(Deployment) is paused, The C(Progressing) C(type) will have the C(DeploymentPaused) reason.
         - The possible reasons in a condition are specific to each resource type in Kubernetes. See the API documentation of the status field
           for a given resource to see possible choices.
     type: dict
-    version_added: "2.8"
   validate:
     description:
       - how (if at all) to validate the resource definition against the kubernetes schema.
@@ -135,7 +128,6 @@ options:
         default: True
         type: bool
     type: dict
-    version_added: "2.8"
   append_hash:
     description:
     - Whether to append a hash to a resource name for immutability purposes
@@ -145,7 +137,6 @@ options:
       will only work if the same object is passed with state=absent (alternatively, just use state=absent with the name including
       the generated hash and append_hash=no)
     type: bool
-    version_added: "2.8"
   apply:
     description:
     - C(apply) compares the desired resource definition with the previously supplied resource definition,
@@ -153,7 +144,6 @@ options:
     - C(apply) works better with Services than 'force=yes'
     - mutually exclusive with C(merge_type)
     type: bool
-    version_added: "2.9"
 
 requirements:
   - "python >= 2.7"
@@ -190,11 +180,6 @@ EXAMPLES = '''
           targetPort: 8000
           name: port-8000-tcp
           port: 8000
-
-- name: Create a Service object by reading the definition from a file
-  k8s:
-    state: present
-    src: /testing/service.yml
 
 - name: Remove an existing Service object
   k8s:

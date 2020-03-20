@@ -140,7 +140,7 @@ class K8sInventoryException(Exception):
 
 
 class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleMixin):
-    NAME = 'k8s'
+    NAME = 'community.kubernetes.k8s'
 
     transport = 'kubectl'
 
