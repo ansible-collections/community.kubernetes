@@ -32,8 +32,6 @@ DOCUMENTATION = """
         - Use the kubectl exec command to run tasks in, or put/fetch files to, pods running on the Kubernetes
           container platform.
 
-    version_added: "2.5"
-
     requirements:
       - kubectl (go binary)
 

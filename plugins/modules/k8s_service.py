@@ -19,8 +19,6 @@ module: k8s_service
 
 short_description: Manage Services on Kubernetes
 
-version_added: "2.8"
-
 author: KubeVirt Team (@kubevirt)
 
 description:
@@ -121,7 +119,6 @@ options:
     - C(apply) works better with Services than 'force=yes'
     - mutually exclusive with C(merge_type)
     type: bool
-    version_added: "2.9"
 
 requirements:
   - python >= 2.7

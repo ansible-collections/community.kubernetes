@@ -18,8 +18,6 @@ module: k8s_info
 
 short_description: Describe Kubernetes (K8s) objects
 
-version_added: "2.7"
-
 author:
     - "Will Thames (@willthames)"
 

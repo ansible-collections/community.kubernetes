@@ -19,8 +19,6 @@ module: k8s_scale
 
 short_description: Set a new size for a Deployment, ReplicaSet, Replication Controller, or Job.
 
-version_added: "2.5"
-
 author:
     - "Chris Houseknecht (@chouseknecht)"
     - "Fabian von Feilitzsch (@fabianvf)"

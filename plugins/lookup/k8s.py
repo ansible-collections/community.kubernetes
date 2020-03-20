@@ -20,10 +20,8 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
-DOCUMENTATION = """
+DOCUMENTATION = '''
     lookup: k8s
-
-    version_added: "2.5"
 
     short_description: Query the K8s API
 
@@ -130,7 +128,7 @@ DOCUMENTATION = """
       - "The OpenShift Python client wraps the K8s Python client, providing full access to
         all of the APIS and models available on both platforms. For API version details and
         additional information visit https://github.com/openshift/openshift-restclient-python"
-"""
+'''
 
 EXAMPLES = """
 - name: Fetch a list of namespaces
