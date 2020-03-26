@@ -183,3 +183,4 @@
     name: "{{ helm_namespace }}"
     state: absent
     wait: true
+    wait_timeout: 180
