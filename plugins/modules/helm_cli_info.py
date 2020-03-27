@@ -16,7 +16,6 @@ module: helm_cli_info
 short_description: Get informations from Helm package deployed inside the cluster
 description:
   -  Get informations (values, states, ...) from Helm package deployed inside the cluster
-version_added: "2.10"
 author:
   - Lucas Boisserie (@LucasBoisserie)
 requirements:
@@ -30,38 +29,37 @@ options:
     type: path
   release_name:
     description:
-      - Release name to manage
+      - Release name to manage.
     required: true
     type: str
     aliases: [ name ]
   release_namespace:
     description:
-      - Kubernetes namespace where the chart should be installed
-      - Can't be changed with helm 2
-    default: "default"
-    required: false
+      - Kubernetes namespace where the chart should be installed.
+      - Can't be changed with helm 2.
+    required: true
     type: str
     aliases: [ namespace ]
   tiller_host:
     description:
-      - Address of Tiller
-      - Ignored when is helm 3
+      - Address of Tiller.
+      - Ignored when is helm 3.
     type: str
   tiller_namespace:
     description:
-      - Namespace of Tiller
-      - Ignored when is helm 3
+      - Namespace of Tiller.
+      - Ignored when is helm 3.
     default: "kube-system"
     type: str
 
 #Helm options
   kube_context:
     description:
-      - Helm option to specify which kubeconfig context to use
+      - Helm option to specify which kubeconfig context to use.
     type: str
   kubeconfig_path:
     description:
-      - Helm option to specify kubeconfig path to use
+      - Helm option to specify kubeconfig path to use.
     type: path
     aliases: [ kubeconfig ]
 '''
@@ -120,13 +118,16 @@ status:
       description: Dict of Values used to deploy
 """
 
+import traceback
+
 try:
     import yaml
-    HAS_YAML = True
+    IMP_YAML = True
 except ImportError:
-    HAS_YAML = False
+    IMP_YAML_ERR = traceback.format_exc()
+    IMP_YAML = False
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 module = None
 is_helm_2 = True
@@ -235,7 +236,7 @@ def main():
         argument_spec=dict(
             binary_path=dict(type='path'),
             release_name=dict(type='str', required=True, aliases=['name']),
-            release_namespace=dict(type='str', default='default', aliases=['namespace']),
+            release_namespace=dict(type='str', required=True, aliases=['namespace']),
             tiller_host=dict(type='str'),
             tiller_namespace=dict(type='str', default='kube-system'),
 
@@ -245,8 +246,9 @@ def main():
         ),
         supports_check_mode=True,
     )
-    if not HAS_YAML:
-        module.fail_json(msg="Could not import the yaml python module. Please install `yaml` package.")
+
+    if not IMP_YAML:
+        module.fail_json(msg=missing_required_lib("yaml"), exception=IMP_YAML_ERR)
 
     bin_path = module.params.get('binary_path')
     release_name = module.params.get('release_name')

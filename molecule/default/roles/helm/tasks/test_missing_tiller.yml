@@ -4,6 +4,7 @@
     binary_path: "{{ helm_binary}}"
     name: test
     chart_ref: "{{ chart_test }}"
+    namespace: "{{ helm_namespace }}"
     tiller_namespace: helm
   ignore_errors: yes
   register: missing_tiller

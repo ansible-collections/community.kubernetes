@@ -16,7 +16,6 @@ module: helm_cli
 short_description: Manages Kubernetes packages with the Helm package manager
 description:
   - Install, upgrade, delete packages with the Helm package manager.
-version_added: "2.10"
 author:
   - Lucas Boisserie (@LucasBoisserie)
   - Matthieu Diehr (@d-matt)
@@ -31,73 +30,72 @@ options:
     type: path
   chart_ref:
     description:
-      - chart_reference on chart repository
-      - path to a packaged chart
-      - path to an unpacked chart directory
-      - absolute URL
-      - Required when I(release_state) is set to C(present)
+      - chart_reference on chart repository.
+      - path to a packaged chart.
+      - path to an unpacked chart directory.
+      - absolute URL.
+      - Required when I(release_state) is set to C(present).
     required: false
     type: path
   chart_repo_url:
     description:
-      - Chart repository URL where to locate the requested chart
+      - Chart repository URL where to locate the requested chart.
     required: false
     type: str
   chart_repo_username:
     description:
-      - Chart repository username where to locate the requested chart
-      - Required if I(chart_repo_password) is specified
+      - Chart repository username where to locate the requested chart.
+      - Required if I(chart_repo_password) is specified.
     required: false
     type: str
   chart_repo_password:
     description:
-      - Chart repository password where to locate the requested chart
-      - Required if I(chart_repo_username) is specified
+      - Chart repository password where to locate the requested chart.
+      - Required if I(chart_repo_username) is specified.
     required: false
     type: str
   chart_version:
     description:
-      - Chart version to install. If this is not specified, the latest version is installed
+      - Chart version to install. If this is not specified, the latest version is installed.
     required: false
     type: str
   release_name:
     description:
-      - Release name to manage
+      - Release name to manage.
     required: true
     type: str
     aliases: [ name ]
   release_namespace:
     description:
-      - Kubernetes namespace where the chart should be installed
-      - Can't be changed with helm 2
-    default: "default"
-    required: false
+      - Kubernetes namespace where the chart should be installed.
+      - Can't be changed with helm 2.
+    required: true
     type: str
     aliases: [ namespace ]
   release_state:
     choices: ['present', 'absent']
     description:
-      - Desirated state of release
+      - Desirated state of release.
     required: false
     default: present
     aliases: [ state ]
     type: str
   release_values:
     description:
-        - Value to pass to chart
+        - Value to pass to chart.
     required: false
     default: {}
     aliases: [ values ]
     type: dict
   tiller_host:
     description:
-      - Address of Tiller
-      - Ignored when is helm 3
+      - Address of Tiller.
+      - Ignored when is helm 3.
     type: str
   tiller_namespace:
     description:
-      - Namespace of Tiller
-      - Ignored when is helm 3
+      - Namespace of Tiller.
+      - Ignored when is helm 3.
     default: "kube-system"
     type: str
   update_repo_cache:
@@ -109,36 +107,36 @@ options:
 #Helm options
   disable_hook:
     description:
-      - Helm option to disable hook on install/upgrade/delete
+      - Helm option to disable hook on install/upgrade/delete.
     default: False
     type: bool
   force:
     description:
-      - Helm option to force reinstall, ignore on new install
+      - Helm option to force reinstall, ignore on new install.
     default: False
     type: bool
   kube_context:
     description:
-      - Helm option to specify which kubeconfig context to use
+      - Helm option to specify which kubeconfig context to use.
     type: str
   kubeconfig_path:
     description:
-      - Helm option to specify kubeconfig path to use
+      - Helm option to specify kubeconfig path to use.
     type: path
     aliases: [ kubeconfig ]
   purge:
     description:
-      - Remove the release from the store and make its name free for later use
+      - Remove the release from the store and make its name free for later use.
     default: True
     type: bool
   wait:
     description:
-      - Wait until all Pods, PVCs, Services, and minimum number of Pods of a Deployment are in a ready state before marking the release as successful
+      - Wait until all Pods, PVCs, Services, and minimum number of Pods of a Deployment are in a ready state before marking the release as successful.
     default: False
     type: bool
   wait_timeout:
     description:
-      - Timeout when wait option is enabled (helm2 is a number of seconds, helm3 is a duration)
+      - Timeout when wait option is enabled (helm2 is a number of seconds, helm3 is a duration).
     type: str
 '''
 
@@ -240,13 +238,16 @@ command:
   sample: helm upgrade ...
 """
 
+import traceback
+
 try:
     import yaml
-    HAS_YAML = True
+    IMP_YAML = True
 except ImportError:
-    HAS_YAML = False
+    IMP_YAML_ERR = traceback.format_exc()
+    IMP_YAML = False
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 module = None
 is_helm_2 = True
@@ -296,7 +297,7 @@ def get_values(command, release_name, release_namespace):
 
     # Helm 3 return "null" string when no values are set
     if not is_helm_2 and out.rstrip("\n") == "null":
-        return yaml.safe_load('{}')
+        return {}
     else:
         return yaml.safe_load(out)
 
@@ -399,7 +400,7 @@ def deploy(command, release_name, release_namespace, release_values, chart_name,
         try:
             import tempfile
         except ImportError:
-            module.fail_json(msg="Could not import the tempfile python module. Please install `tempfile` package.")
+            module.fail_json(msg=missing_required_lib("tempfile"), exception=traceback.format_exc())
 
         fd, path = tempfile.mkstemp(suffix='.yml')
         with open(path, 'w') as yaml_file:
@@ -454,7 +455,7 @@ def main():
             chart_repo_password=dict(type='str', no_log=True),
             chart_version=dict(type='str'),
             release_name=dict(type='str', required=True, aliases=['name']),
-            release_namespace=dict(type='str', default='default', aliases=['namespace']),
+            release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
             tiller_host=dict(type='str'),
@@ -481,8 +482,9 @@ def main():
         supports_check_mode=True,
     )
 
-    if not HAS_YAML:
-        module.fail_json(msg="Could not import the yaml python module. Please install `yaml` package.")
+    if not IMP_YAML:
+        module.fail_json(msg=missing_required_lib("yaml"), exception=IMP_YAML_ERR)
+
     changed = False
 
     bin_path = module.params.get('binary_path')
