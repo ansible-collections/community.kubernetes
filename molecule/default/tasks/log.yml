@@ -79,6 +79,43 @@
           - "'hello world' in pod_log.log"
           - item == 'hello world' or item == ''
       with_items: '{{ pod_log.log_lines }}'
+
+    - name: Create a job that calculates pi
+      k8s:
+        state: present
+        wait: yes
+        wait_timeout: 120
+        wait_condition:
+          type: Complete
+          status: 'True'
+        definition:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: pi
+            namespace: k8s-log
+          spec:
+            template:
+              spec:
+                containers:
+                - name: pi
+                  image: perl
+                  command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(20)"]
+                restartPolicy: Never
+            backoffLimit: 4
+
+    - name: retrieve logs from the job
+      k8s_log:
+        api_version: batch/v1
+        kind: Job
+        namespace: k8s-log
+        name: pi
+      register: job_logs
+
+    - name: verify the log was successfully retrieved
+      assert:
+        that: job_logs.log_lines[0] == "3.1415926535897932385"
+
   always:
     - name: ensure that namespace is removed
       k8s:
