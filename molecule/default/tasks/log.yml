@@ -92,15 +92,15 @@
           apiVersion: batch/v1
           kind: Job
           metadata:
-            name: pi
+            name: int-log
             namespace: k8s-log
           spec:
             template:
               spec:
                 containers:
-                  - name: pi
-                    image: perl
-                    command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(20)"]
+                  - name: busybox
+                    image: busybox
+                    command: ["echo", "7"]
                 restartPolicy: Never
             backoffLimit: 4
 
@@ -109,12 +109,12 @@
         api_version: batch/v1
         kind: Job
         namespace: k8s-log
-        name: pi
+        name: int-log
       register: job_logs
 
     - name: verify the log was successfully retrieved
       assert:
-        that: job_logs.log_lines[0] == "3.1415926535897932385"
+        that: job_logs.log_lines[0] == "7"
 
   always:
     - name: ensure that namespace is removed
