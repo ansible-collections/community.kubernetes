@@ -6,6 +6,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+from ansible.module_utils.six import PY2
+
 __metaclass__ = type
 
 
@@ -182,11 +184,12 @@ class KubernetesLogModule(KubernetesAnsibleModule):
         if self.params.get('container'):
             kwargs['query_params'] = dict(container=self.params['container'])
 
-        log = resource.log.get(
+        log = serialize_log(resource.log.get(
             name=name,
             namespace=self.params.get('namespace'),
+            serialize=False,
             **kwargs
-        )
+        ))
 
         self.exit_json(changed=False, log=log, log_lines=log.split('\n'))
 
@@ -226,6 +229,12 @@ class KubernetesLogModule(KubernetesAnsibleModule):
                     self.fail(msg='The k8s_log module does not support the {0} matchExpression operator'.format(operator.lower()))
 
         return selectors
+
+
+def serialize_log(response):
+    if PY2:
+        return response.data
+    return response.data.decode('utf8')
 
 
 def main():
