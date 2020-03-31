@@ -98,9 +98,9 @@
             template:
               spec:
                 containers:
-                - name: pi
-                  image: perl
-                  command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(20)"]
+                  - name: pi
+                    image: perl
+                    command: ["perl", "-Mbignum=bpi", "-wle", "print bpi(20)"]
                 restartPolicy: Never
             backoffLimit: 4
 
