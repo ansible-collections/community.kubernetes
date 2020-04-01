@@ -80,7 +80,7 @@
           - item == 'hello world' or item == ''
       with_items: '{{ pod_log.log_lines }}'
 
-    - name: Create a job that calculates pi
+    - name: Create a job that calculates 7
       k8s:
         state: present
         wait: yes
