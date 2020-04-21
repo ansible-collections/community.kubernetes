@@ -13,15 +13,24 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: helm_cli
+
 short_description: Manages Kubernetes packages with the Helm package manager
-description:
-  - Install, upgrade, delete packages with the Helm package manager.
+
 author:
   - Lucas Boisserie (@LucasBoisserie)
   - Matthieu Diehr (@d-matt)
+
 requirements:
   - "helm (https://github.com/helm/helm/releases)"
   - "yaml (https://pypi.org/project/PyYAML/)"
+
+description:
+  - Install, upgrade, delete packages with the Helm package manager.
+
+notes:
+  - For chart backed by HTTP basic authentication, you need to run `helm repo add` command
+    with ` --username` and `--password` before calling the module
+
 options:
   binary_path:
     description:
@@ -42,18 +51,6 @@ options:
       - Chart repository URL where to locate the requested chart.
     required: false
     type: str
-  chart_repo_username:
-    description:
-      - Chart repository username where to locate the requested chart.
-      - Required if I(chart_repo_password) is specified.
-    required: false
-    type: str
-  chart_repo_password:
-    description:
-      - Chart repository password where to locate the requested chart.
-      - Required if I(chart_repo_username) is specified.
-    required: false
-    type: str
   chart_version:
     description:
       - Chart version to install. If this is not specified, the latest version is installed.
@@ -68,7 +65,6 @@ options:
   release_namespace:
     description:
       - Kubernetes namespace where the chart should be installed.
-      - Can't be changed with helm 2.
     required: true
     type: str
     aliases: [ namespace ]
@@ -87,17 +83,6 @@ options:
     default: {}
     aliases: [ values ]
     type: dict
-  tiller_host:
-    description:
-      - Address of Tiller.
-      - Ignored when is helm 3.
-    type: str
-  tiller_namespace:
-    description:
-      - Namespace of Tiller.
-      - Ignored when is helm 3.
-    default: "kube-system"
-    type: str
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
@@ -141,31 +126,6 @@ options:
 '''
 
 EXAMPLES = '''
-# With Helm 2
-- name: Deploy grafana with params version
-  helm_cli:
-    name: test
-    chart_ref: stable/grafana
-    chart_version: 3.3.8
-    tiller_namespace: helm
-    values:
-      replicas: 2
-
-- name: Load Value from template
-  helm_cli:
-    name: test
-    chart_ref: stable/grafana
-    tiller_namespace: helm
-    values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
-
-- name: Remove test release and waiting suppression ending
-  helm_cli:
-    name: test
-    state: absent
-    tiller_namespace: helm
-    wait: true
-
-# With Helm 3
 - name: Create helm namespace HELM 3 doesn't create it automatically
   k8s:
     api_version: v1
@@ -173,7 +133,11 @@ EXAMPLES = '''
     name: "monitoring"
     wait: true
 
-- name: Deploy latest version of Grafana chart inside monitoring namespace
+# From repository
+- name: Add stable chart repo
+  shell: "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
+
+- name: Deploy latest version of Grafana chart inside monitoring namespace with values
   helm_cli:
     name: test
     chart_ref: stable/grafana
@@ -181,6 +145,37 @@ EXAMPLES = '''
     values:
       replicas: 2
 
+- name: Deploy Grafana chart on 5.0.12 with values loaded from template
+  helm_cli:
+    name: test
+    chart_ref: stable/grafana
+    chart_version: 5.0.12
+    values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
+
+- name: Remove test release and waiting suppression ending
+  helm_cli:
+    name: test
+    state: absent
+    wait: true
+
+# From git
+- name: Git clone stable repo on HEAD
+  git:
+    repo: "http://github.com/helm/charts.git"
+    dest: /tmp/helm_repo
+
+- name: Deploy Grafana chart from local path
+  helm_cli:
+    name: test
+    chart_ref: /tmp/helm_repo/stable/grafana
+    release_namespace: monitoring
+
+# From url
+- name: Deploy Grafana chart on 5.0.12 from url
+  helm_cli:
+    name: test
+    chart_ref: "https://kubernetes-charts.storage.googleapis.com/grafana-5.0.12.tgz"
+    release_namespace: monitoring
 '''
 
 RETURN = """
@@ -250,42 +245,11 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 module = None
-is_helm_2 = True
-
-
-# get Helm Version
-def get_helm_client_version(command):
-    is_helm_2_local = True
-    version_command = command + " version --client --short"
-    rc, out, err = module.run_command(version_command)
-
-    if not out.startswith('Client: v2'):
-        is_helm_2_local = False
-        # Fallback on Helm 3
-        version_command = command + " version --short"
-        rc, out, err = module.run_command(version_command)
-
-        if rc != 0:
-            module.fail_json(
-                msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-                command=version_command
-            )
-
-    elif rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=version_command
-        )
-
-    return is_helm_2_local
 
 
 # Get Values from deployed release
-def get_values(command, release_name, release_namespace):
+def get_values(command, release_name):
     get_command = command + " get values --output=yaml " + release_name
-
-    if not is_helm_2:
-        get_command += " --namespace=" + release_namespace
 
     rc, out, err = module.run_command(get_command)
 
@@ -296,40 +260,24 @@ def get_values(command, release_name, release_namespace):
         )
 
     # Helm 3 return "null" string when no values are set
-    if not is_helm_2 and out.rstrip("\n") == "null":
+    if out.rstrip("\n") == "null":
         return {}
     else:
         return yaml.safe_load(out)
 
 
 # Get Release from all deployed releases
-def get_release(state, release_name, release_namespace):
+def get_release(state, release_name):
     if state is not None:
-        if is_helm_2:
-            for release in state['Releases']:
-                # release = {k.lower(): v for k, v in release.items()} # NOT WORKING wit python 2.6
-                release_lower = dict()
-                for k, v in release.items():
-                    release_lower[k.lower()] = v
-                release = release_lower
-                if release['name'] == release_name and release['namespace'] == release_namespace:
-                    return release
-        else:
-            for release in state:
-                if release['name'] == release_name and release['namespace'] == release_namespace:
-                    return release
+        for release in state:
+            if release['name'] == release_name:
+                return release
     return None
 
 
 # Get Release state from deployed release
-def get_release_status(command, release_name, release_namespace):
-    list_command = command + " list --output=yaml "
-
-    if not is_helm_2:
-        list_command += " --namespace=" + release_namespace
-        list_command += " --filter "
-
-    list_command += release_name
+def get_release_status(command, release_name):
+    list_command = command + " list --output=yaml --filter " + release_name
 
     rc, out, err = module.run_command(list_command)
 
@@ -339,12 +287,12 @@ def get_release_status(command, release_name, release_namespace):
             command=list_command
         )
 
-    release = get_release(yaml.safe_load(out), release_name, release_namespace)
+    release = get_release(yaml.safe_load(out), release_name)
 
     if release is None:  # not install
         return None
 
-    release['values'] = get_values(command, release_name, release_namespace)
+    release['values'] = get_values(command, release_name)
 
     return release
 
@@ -363,10 +311,7 @@ def run_repo_update(command):
 
 # Get chart info
 def fetch_chart_info(command, chart_ref):
-    if is_helm_2:
-        inspect_command = command + " inspect chart " + chart_ref
-    else:
-        inspect_command = command + " show chart " + chart_ref
+    inspect_command = command + " show chart " + chart_ref
 
     rc, out, err = module.run_command(inspect_command)
     if rc != 0:
@@ -379,7 +324,7 @@ def fetch_chart_info(command, chart_ref):
 
 
 # Install/upgrade/rollback release chart
-def deploy(command, release_name, release_namespace, release_values, chart_name, wait, wait_timeout, disable_hook, force):
+def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force):
     deploy_command = command + " upgrade -i"  # install/upgrade
 
     # Always reset values to keep release_values equal to values released
@@ -407,31 +352,14 @@ def deploy(command, release_name, release_namespace, release_values, chart_name,
             yaml.dump(release_values, yaml_file, default_flow_style=False)
         deploy_command += " -f=" + path
 
-    deploy_command += " --namespace=" + release_namespace
-    deploy_command += " " + release_name
-    deploy_command += " " + chart_name
+    deploy_command += " " + release_name + " " + chart_name
 
     return deploy_command
 
 
-# Delete release chart for helm2
-def delete_2(command, release_name, purge, disable_hook):
-    delete_command = command + " delete"
-
-    if purge:
-        delete_command += " --purge"
-
-    if disable_hook:
-        delete_command += " --no-hooks"
-
-    delete_command += " " + release_name
-
-    return delete_command
-
-
-# Delete release chart for helm3
-def delete_3(command, release_name, release_namespace, purge, disable_hook):
-    delete_command = command + " uninstall --namespace=" + release_namespace
+# Delete release chart
+def delete(command, release_name, purge, disable_hook):
+    delete_command = command + " uninstall "
 
     if not purge:
         delete_command += " --keep-history"
@@ -445,21 +373,17 @@ def delete_3(command, release_name, release_namespace, purge, disable_hook):
 
 
 def main():
-    global module, is_helm_2
+    global module
     module = AnsibleModule(
         argument_spec=dict(
             binary_path=dict(type='path'),
             chart_ref=dict(type='path'),
             chart_repo_url=dict(type='str'),
-            chart_repo_username=dict(type='str'),
-            chart_repo_password=dict(type='str', no_log=True),
             chart_version=dict(type='str'),
             release_name=dict(type='str', required=True, aliases=['name']),
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
-            tiller_host=dict(type='str'),
-            tiller_namespace=dict(type='str', default='kube-system'),
             update_repo_cache=dict(type='bool', default=False),
 
             # Helm options
@@ -476,9 +400,6 @@ def main():
             ('release_state', 'absent', ['release_name'])
 
         ],
-        required_together=[
-            ['chart_repo_username', 'chart_repo_password']
-        ],
         supports_check_mode=True,
     )
 
@@ -490,15 +411,11 @@ def main():
     bin_path = module.params.get('binary_path')
     chart_ref = module.params.get('chart_ref')
     chart_repo_url = module.params.get('chart_repo_url')
-    chart_repo_username = module.params.get('chart_repo_username')
-    chart_repo_password = module.params.get('chart_repo_password')
     chart_version = module.params.get('chart_version')
     release_name = module.params.get('release_name')
     release_namespace = module.params.get('release_namespace')
     release_state = module.params.get('release_state')
     release_values = module.params.get('release_values')
-    tiller_host = module.params.get('tiller_host')
-    tiller_namespace = module.params.get('tiller_namespace')
     update_repo_cache = module.params.get('update_repo_cache')
 
     # Helm options
@@ -515,15 +432,6 @@ def main():
     else:
         helm_cmd_common = module.get_bin_path('helm', required=True)
 
-    is_helm_2 = get_helm_client_version(helm_cmd_common)
-
-    # Helm 2 need tiller, Helm 3 and higher doesn't
-    if is_helm_2:
-        if tiller_host is not None:
-            helm_cmd_common += " --host=" + tiller_namespace
-        else:
-            helm_cmd_common += " --tiller-namespace=" + tiller_namespace
-
     if kube_context is not None:
         helm_cmd_common += " --kube-context " + kube_context
 
@@ -533,16 +441,15 @@ def main():
     if update_repo_cache:
         run_repo_update(helm_cmd_common)
 
+    helm_cmd_common += " --namespace=" + release_namespace
+
     # Get real/deployed release status
-    release_status = get_release_status(helm_cmd_common, release_name, release_namespace)
+    release_status = get_release_status(helm_cmd_common, release_name)
 
     # keep helm_cmd_common for get_release_status in module_exit_json
     helm_cmd = helm_cmd_common
     if release_state == "absent" and release_status is not None:
-        if is_helm_2:
-            helm_cmd = delete_2(helm_cmd, release_name, purge, disable_hook)
-        else:
-            helm_cmd = delete_3(helm_cmd, release_name, release_namespace, purge, disable_hook)
+        helm_cmd = delete(helm_cmd, release_name, purge, disable_hook)
         changed = True
     elif release_state == "present":
 
@@ -551,27 +458,18 @@ def main():
 
         if chart_repo_url is not None:
             helm_cmd += " --repo=" + chart_repo_url
-            if chart_repo_username is not None and chart_repo_password is not None:
-                helm_cmd += " --username=" + chart_repo_username
-                helm_cmd += " --password=" + chart_repo_password
 
         # Fetch chart info to have real version and real name for chart_ref from archive, folder or url
         chart_info = fetch_chart_info(helm_cmd, chart_ref)
 
         if release_status is None:  # Not installed
-            helm_cmd = deploy(helm_cmd, release_name, release_namespace, release_values, chart_ref, wait, wait_timeout,
+            helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                               disable_hook, False)
             changed = True
 
-        elif is_helm_2 and release_namespace != release_status['namespace']:
-            module.fail_json(
-                msg="With helm2, Target Namespace can't be changed on deployed chart ! Need to destroy the release "
-                    "and recreate it "
-            )
-
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
-            helm_cmd = deploy(helm_cmd, release_name, release_namespace, release_values, chart_ref, wait, wait_timeout,
+            helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                               disable_hook, force)
             changed = True
 
@@ -589,7 +487,7 @@ def main():
         )
 
     module.exit_json(changed=changed, stdout=out, stderr=err,
-                     status=get_release_status(helm_cmd_common, release_name, release_namespace), command=helm_cmd)
+                     status=get_release_status(helm_cmd_common, release_name), command=helm_cmd)
 
 
 if __name__ == '__main__':

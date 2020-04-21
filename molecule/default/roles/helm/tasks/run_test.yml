@@ -12,14 +12,6 @@
 - name: "Install {{ helm_version }}"
   include_tasks: install.yml
 
-- name: Check if failed when tiller is not installed
-  include_tasks: test_missing_tiller.yml
-  when: "helm_version.startswith('v2')"
-
-- name: Install tiller
-  include_tasks: tiller.yml
-  when: "helm_version.startswith('v2')"
-
 - name: Deploy charts
   include_tasks: "tests_chart/{{ test_chart_type }}.yml"
   loop_control:
@@ -28,12 +20,6 @@
     - from_local_path
     - from_repository
     - from_url
-
-- name: Clean tiller
-  include_tasks: tiller.yml
-  vars:
-    status: absent
-  when: "helm_version.startswith('v2')"
 
 - name: Clean helm install
   file:

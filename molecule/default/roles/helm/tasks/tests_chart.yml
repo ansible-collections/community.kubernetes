@@ -6,6 +6,18 @@
     name: "{{ helm_namespace }}"
     wait: true
 
+- name: Check helm_cli_info empty
+  helm_cli_info:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: empty_info
+
+- name: "Assert that no chart are installed with helm_cli_info"
+  assert:
+    that:
+      - empty_info.status is undefined
+
 - name: "Install {{ chart_test }} from {{ source }}"
   helm_cli:
     binary_path: "{{ helm_binary}}"
@@ -13,7 +25,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: "Assert that {{ chart_test }} chart is installed from {{ source }}"
@@ -23,6 +34,19 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
       - install.status.status | lower == 'deployed'
 
+- name: Check helm_cli_info content
+  helm_cli_info:
+    binary_path: "{{ helm_binary}}"
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: content_info
+
+- name: "Assert that {{ chart_test }} is installed from {{ source }} with helm_cli_info"
+  assert:
+    that:
+      - content_info.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - content_info.status.status | lower == 'deployed'
+
 - name: Check idempotency
   helm_cli:
     binary_path: "{{ helm_binary}}"
@@ -30,7 +54,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: Assert idempotency
@@ -47,7 +70,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
     values: "{{ chart_test_values }}"
   register: install
 
@@ -66,7 +88,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
     values: "{{ chart_test_values }}"
   register: install
 
@@ -85,7 +106,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: "Assert that {{ chart_test }} chart is upgraded with new var from {{ source }}"
@@ -103,7 +123,6 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: Assert idempotency after remove vars
@@ -121,7 +140,6 @@
     chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
     chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: "Assert that {{ chart_test }} chart is upgraded with new version from {{ source }}"
@@ -138,7 +156,6 @@
     chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
     chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: Assert idempotency after upgrade
@@ -154,7 +171,6 @@
     state: absent
     name: test
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: "Assert that {{ chart_test }} chart is remove from {{ source }}"
@@ -168,7 +184,6 @@
     state: absent
     name: test
     namespace: "{{ helm_namespace }}"
-    tiller_namespace: "{{ tiller_namespace }}"
   register: install
 
 - name: Assert idempotency

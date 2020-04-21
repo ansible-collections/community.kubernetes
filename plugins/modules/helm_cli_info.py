@@ -40,17 +40,6 @@ options:
     required: true
     type: str
     aliases: [ namespace ]
-  tiller_host:
-    description:
-      - Address of Tiller.
-      - Ignored when is helm 3.
-    type: str
-  tiller_namespace:
-    description:
-      - Namespace of Tiller.
-      - Ignored when is helm 3.
-    default: "kube-system"
-    type: str
 
 #Helm options
   kube_context:
@@ -65,13 +54,6 @@ options:
 '''
 
 EXAMPLES = '''
-# With Helm 2
-- name: Get grafana deployment
-  helm_cli_info:
-    name: test
-    tiller_namespace: helm
-
-# With Helm 3
 - name: Deploy latest version of Grafana chart inside monitoring namespace
   helm_cli_info:
     name: test
@@ -130,42 +112,11 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 
 module = None
-is_helm_2 = True
-
-
-# get Helm Version
-def get_helm_client_version(command):
-    is_helm_2_local = True
-    version_command = command + " version --client --short"
-    rc, out, err = module.run_command(version_command)
-
-    if not out.startswith('Client: v2'):
-        is_helm_2_local = False
-        # Fallback on Helm 3
-        version_command = command + " version --short"
-        rc, out, err = module.run_command(version_command)
-
-        if rc != 0:
-            module.fail_json(
-                msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-                command=version_command
-            )
-
-    elif rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=version_command
-        )
-
-    return is_helm_2_local
 
 
 # Get Values from deployed release
-def get_values(command, release_name, release_namespace):
+def get_values(command, release_name):
     get_command = command + " get values --output=yaml " + release_name
-
-    if not is_helm_2:
-        get_command += " --namespace=" + release_namespace
 
     rc, out, err = module.run_command(get_command)
 
@@ -176,40 +127,24 @@ def get_values(command, release_name, release_namespace):
         )
 
     # Helm 3 return "null" string when no values are set
-    if not is_helm_2 and out.rstrip("\n") == "null":
-        return yaml.safe_load('{}')
+    if out.rstrip("\n") == "null":
+        return {}
     else:
         return yaml.safe_load(out)
 
 
 # Get Release from all deployed releases
-def get_release(state, release_name, release_namespace):
+def get_release(state, release_name):
     if state is not None:
-        if is_helm_2:
-            for release in state['Releases']:
-                # release = {k.lower(): v for k, v in release.items()} # NOT WORKING wit python 2.6
-                release_lower = dict()
-                for k, v in release.items():
-                    release_lower[k.lower()] = v
-                release = release_lower
-                if release['name'] == release_name and release['namespace'] == release_namespace:
-                    return release
-        else:
-            for release in state:
-                if release['name'] == release_name and release['namespace'] == release_namespace:
-                    return release
+        for release in state:
+            if release['name'] == release_name:
+                return release
     return None
 
 
 # Get Release state from deployed release
-def get_release_status(command, release_name, release_namespace):
-    list_command = command + " list --output=yaml "
-
-    if not is_helm_2:
-        list_command += " --namespace=" + release_namespace
-        list_command += " --filter "
-
-    list_command += release_name
+def get_release_status(command, release_name):
+    list_command = command + " list --output=yaml --filter " + release_name
 
     rc, out, err = module.run_command(list_command)
 
@@ -219,26 +154,24 @@ def get_release_status(command, release_name, release_namespace):
             command=list_command
         )
 
-    release = get_release(yaml.safe_load(out), release_name, release_namespace)
+    release = get_release(yaml.safe_load(out), release_name)
 
     if release is None:  # not install
         return None
 
-    release['values'] = get_values(command, release_name, release_namespace)
+    release['values'] = get_values(command, release_name)
 
     return release
 
 
 def main():
-    global module, is_helm_2
+    global module
 
     module = AnsibleModule(
         argument_spec=dict(
             binary_path=dict(type='path'),
             release_name=dict(type='str', required=True, aliases=['name']),
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
-            tiller_host=dict(type='str'),
-            tiller_namespace=dict(type='str', default='kube-system'),
 
             # Helm options
             kube_context=dict(type='str'),
@@ -253,8 +186,6 @@ def main():
     bin_path = module.params.get('binary_path')
     release_name = module.params.get('release_name')
     release_namespace = module.params.get('release_namespace')
-    tiller_host = module.params.get('tiller_host')
-    tiller_namespace = module.params.get('tiller_namespace')
 
     # Helm options
     kube_context = module.params.get('kube_context')
@@ -265,23 +196,16 @@ def main():
     else:
         helm_cmd_common = module.get_bin_path('helm', required=True)
 
-    is_helm_2 = get_helm_client_version(helm_cmd_common)
-
-    # Helm 2 need tiller, Helm 3 and higher doesn't
-    if is_helm_2:
-        if tiller_host is not None:
-            helm_cmd_common += " --host=" + tiller_namespace
-        else:
-            helm_cmd_common += " --tiller-namespace=" + tiller_namespace
-
     if kube_context is not None:
         helm_cmd_common += " --kube-context " + kube_context
 
     if kubeconfig_path is not None:
         helm_cmd_common += " --kubeconfig " + kubeconfig_path
 
-    # Get real/deployed release status
-    release_status = get_release_status(helm_cmd_common, release_name, release_namespace)
+    helm_cmd_common += " --namespace=" + release_namespace
+
+    release_status = get_release_status(helm_cmd_common, release_name)
+
     if release_status is not None:
         module.exit_json(changed=False, status=release_status)
     else:
