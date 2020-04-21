@@ -79,6 +79,43 @@
           - "'hello world' in pod_log.log"
           - item == 'hello world' or item == ''
       with_items: '{{ pod_log.log_lines }}'
+
+    - name: Create a job that calculates 7
+      k8s:
+        state: present
+        wait: yes
+        wait_timeout: 120
+        wait_condition:
+          type: Complete
+          status: 'True'
+        definition:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: int-log
+            namespace: k8s-log
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: busybox
+                    image: busybox
+                    command: ["echo", "7"]
+                restartPolicy: Never
+            backoffLimit: 4
+
+    - name: retrieve logs from the job
+      k8s_log:
+        api_version: batch/v1
+        kind: Job
+        namespace: k8s-log
+        name: int-log
+      register: job_logs
+
+    - name: verify the log was successfully retrieved
+      assert:
+        that: job_logs.log_lines[0] == "7"
+
   always:
     - name: ensure that namespace is removed
       k8s:
