@@ -6,24 +6,24 @@
     name: "{{ helm_namespace }}"
     wait: true
 
-- name: Check helm_cli_info empty
-  helm_cli_info:
-    binary_path: "{{ helm_binary}}"
+- name: Check helm_info empty
+  helm_info:
+    binary_path: "{{ helm_binary }}"
     name: test
     namespace: "{{ helm_namespace }}"
   register: empty_info
 
-- name: "Assert that no chart are installed with helm_cli_info"
+- name: "Assert that no charts are installed with helm_info"
   assert:
     that:
       - empty_info.status is undefined
 
 - name: "Install {{ chart_test }} from {{ source }}"
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
@@ -34,25 +34,25 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
       - install.status.status | lower == 'deployed'
 
-- name: Check helm_cli_info content
-  helm_cli_info:
-    binary_path: "{{ helm_binary}}"
+- name: Check helm_info content
+  helm_info:
+    binary_path: "{{ helm_binary }}"
     name: test
     namespace: "{{ helm_namespace }}"
   register: content_info
 
-- name: "Assert that {{ chart_test }} is installed from {{ source }} with helm_cli_info"
+- name: "Assert that {{ chart_test }} is installed from {{ source }} with helm_info"
   assert:
     that:
       - content_info.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
       - content_info.status.status | lower == 'deployed'
 
 - name: Check idempotency
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
@@ -64,11 +64,11 @@
       - install.status.status | lower == 'deployed'
 
 - name: "Add vars to {{ chart_test }} from {{ source }}"
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
     values: "{{ chart_test_values }}"
   register: install
@@ -81,12 +81,12 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
       - "install.status['values'].revisionHistoryLimit == 0"
 
-- name: Check idempotency after add vars
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+- name: Check idempotency after adding vars
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
     values: "{{ chart_test_values }}"
   register: install
@@ -100,11 +100,11 @@
       - "install.status['values'].revisionHistoryLimit == 0"
 
 - name: "Remove Vars to {{ chart_test }} from {{ source }}"
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
@@ -116,16 +116,16 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
       - install.status['values'] == {}
 
-- name: Check idempotency after remove vars
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+- name: Check idempotency after removing vars
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source }}"
-    chart_version: "{{ chart_source_version | default(omit)}}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
-- name: Assert idempotency after remove vars
+- name: Assert idempotency after removing vars
   assert:
     that:
       - install is not changed
@@ -134,11 +134,11 @@
       - install.status['values'] == {}
 
 - name: "Upgrade {{ chart_test }} from {{ source }}"
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
-    chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
@@ -150,11 +150,11 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
 
 - name: Check idempotency after upgrade
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     name: test
     chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
-    chart_version: "{{ chart_source_version_upgrade | default(omit)}}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit) }}"
     namespace: "{{ helm_namespace }}"
   register: install
 
@@ -166,21 +166,21 @@
       - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
 
 - name: "Remove {{ chart_test }} from {{ source }}"
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     state: absent
     name: test
     namespace: "{{ helm_namespace }}"
   register: install
 
-- name: "Assert that {{ chart_test }} chart is remove from {{ source }}"
+- name: "Assert that {{ chart_test }} chart is removed from {{ source }}"
   assert:
     that:
       - install is changed
 
 - name: Check idempotency after remove
-  helm_cli:
-    binary_path: "{{ helm_binary}}"
+  helm:
+    binary_path: "{{ helm_binary }}"
     state: absent
     name: test
     namespace: "{{ helm_namespace }}"

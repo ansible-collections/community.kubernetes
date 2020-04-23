@@ -1,12 +1,12 @@
 ---
-- name: Ensure helm is not install
+- name: Ensure helm is not installed
   file:
     path: "{{ item }}"
     state: absent
   with_items:
     - "/tmp/helm"
 
-- name: Check failed if helm is not install
+- name: Check failed if helm is not installed
   include_tasks: test_helm_not_installed.yml
 
 - name: "Install {{ helm_version }}"

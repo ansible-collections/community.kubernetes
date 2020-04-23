@@ -1,6 +1,6 @@
 ---
-- name: Failed test when helm is not install
-  helm_cli:
+- name: Failed test when helm is not installed
+  helm:
     binary_path: "{{ helm_binary}}_fake"
     name: test
     chart_ref: "{{ chart_test }}"

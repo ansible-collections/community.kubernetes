@@ -12,7 +12,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: helm_cli_info
+module: helm_info
 short_description: Get informations from Helm package deployed inside the cluster
 description:
   -  Get informations (values, states, ...) from Helm package deployed inside the cluster
@@ -55,7 +55,7 @@ options:
 
 EXAMPLES = '''
 - name: Deploy latest version of Grafana chart inside monitoring namespace
-  helm_cli_info:
+  helm_info:
     name: test
     release_namespace: monitoring
 '''

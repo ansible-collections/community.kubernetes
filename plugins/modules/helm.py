@@ -12,7 +12,7 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 
 DOCUMENTATION = '''
 ---
-module: helm_cli
+module: helm
 
 short_description: Manages Kubernetes packages with the Helm package manager
 
@@ -138,7 +138,7 @@ EXAMPLES = '''
   shell: "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
 
 - name: Deploy latest version of Grafana chart inside monitoring namespace with values
-  helm_cli:
+  helm:
     name: test
     chart_ref: stable/grafana
     release_namespace: monitoring
@@ -146,14 +146,14 @@ EXAMPLES = '''
       replicas: 2
 
 - name: Deploy Grafana chart on 5.0.12 with values loaded from template
-  helm_cli:
+  helm:
     name: test
     chart_ref: stable/grafana
     chart_version: 5.0.12
     values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
 
 - name: Remove test release and waiting suppression ending
-  helm_cli:
+  helm:
     name: test
     state: absent
     wait: true
@@ -165,14 +165,14 @@ EXAMPLES = '''
     dest: /tmp/helm_repo
 
 - name: Deploy Grafana chart from local path
-  helm_cli:
+  helm:
     name: test
     chart_ref: /tmp/helm_repo/stable/grafana
     release_namespace: monitoring
 
 # From url
 - name: Deploy Grafana chart on 5.0.12 from url
-  helm_cli:
+  helm:
     name: test
     chart_ref: "https://kubernetes-charts.storage.googleapis.com/grafana-5.0.12.tgz"
     release_namespace: monitoring
