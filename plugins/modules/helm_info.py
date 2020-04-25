@@ -13,14 +13,19 @@ ANSIBLE_METADATA = {'metadata_version': '1.1',
 DOCUMENTATION = '''
 ---
 module: helm_info
+
 short_description: Get informations from Helm package deployed inside the cluster
-description:
-  -  Get informations (values, states, ...) from Helm package deployed inside the cluster
+
 author:
   - Lucas Boisserie (@LucasBoisserie)
+
 requirements:
   - "helm (https://github.com/helm/helm/releases)"
   - "yaml (https://pypi.org/project/PyYAML/)"
+
+description:
+  -  Get informations (values, states, ...) from Helm package deployed inside the cluster
+
 options:
   binary_path:
     description:
@@ -36,7 +41,6 @@ options:
   release_namespace:
     description:
       - Kubernetes namespace where the chart should be installed.
-      - Can't be changed with helm 2.
     required: true
     type: str
     aliases: [ namespace ]

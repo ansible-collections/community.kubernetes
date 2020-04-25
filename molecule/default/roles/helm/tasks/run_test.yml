@@ -12,6 +12,9 @@
 - name: "Install {{ helm_version }}"
   include_tasks: install.yml
 
+- name: tests_repository
+  include_tasks: tests_repository.yml
+
 - name: Deploy charts
   include_tasks: "tests_chart/{{ test_chart_type }}.yml"
   loop_control:

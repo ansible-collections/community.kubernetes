@@ -27,10 +27,6 @@ requirements:
 description:
   - Install, upgrade, delete packages with the Helm package manager.
 
-notes:
-  - For chart backed by HTTP basic authentication, you need to run `helm repo add` command
-    with ` --username` and `--password` before calling the module
-
 options:
   binary_path:
     description:
@@ -126,7 +122,7 @@ options:
 '''
 
 EXAMPLES = '''
-- name: Create helm namespace HELM 3 doesn't create it automatically
+- name: Create helm namespace as HELM 3 doesn't create it automatically
   k8s:
     api_version: v1
     kind: Namespace
@@ -135,7 +131,9 @@ EXAMPLES = '''
 
 # From repository
 - name: Add stable chart repo
-  shell: "helm repo add stable https://kubernetes-charts.storage.googleapis.com"
+  helm_repository:
+    name: stable
+    repo_url: "https://kubernetes-charts.storage.googleapis.com"
 
 - name: Deploy latest version of Grafana chart inside monitoring namespace with values
   helm:
@@ -398,7 +396,6 @@ def main():
         required_if=[
             ('release_state', 'present', ['release_name', 'chart_ref']),
             ('release_state', 'absent', ['release_name'])
-
         ],
         supports_check_mode=True,
     )
