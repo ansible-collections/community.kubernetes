@@ -1,6 +1,6 @@
 # Kubernetes Collection for Ansible
 
-[![CI](https://github.com/ansible-collections/kubernetes/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/kubernetes/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/kubernetes)](https://codecov.io/gh/ansible-collections/kubernetes)
+[![CI](https://github.com/ansible-collections/community.kubernetes/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/community.kubernetes/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.kubernetes)](https://codecov.io/gh/ansible-collections/community.kubernetes)
 
 This repo hosts the `community.kubernetes` Ansible Collection.
 
@@ -22,8 +22,8 @@ Click on the name of a plugin or module to view that content's documentation:
   - **Modules**:
     - [k8s](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
     - [k8s_auth](https://docs.ansible.com/ansible/latest/modules/k8s_auth_module.html)
-    - [k8s_exec](https://github.com/ansible-collections/kubernetes/blob/master/plugins/modules/k8s_exec.py)
-    - [k8s_log](https://github.com/ansible-collections/kubernetes/blob/master/plugins/modules/k8s_log.py)
+    - [k8s_exec](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/k8s_exec.py)
+    - [k8s_log](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/k8s_log.py)
     - [k8s_info](https://docs.ansible.com/ansible/latest/modules/k8s_info_module.html)
     - [k8s_scale](https://docs.ansible.com/ansible/latest/modules/k8s_scale_module.html)
     - [k8s_service](https://docs.ansible.com/ansible/latest/modules/k8s_service_module.html)

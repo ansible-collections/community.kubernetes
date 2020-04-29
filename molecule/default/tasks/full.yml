@@ -10,7 +10,7 @@
       debug:
         var: output
 
-    # TODO: See https://github.com/ansible-collections/kubernetes/issues/24
+    # TODO: See https://github.com/ansible-collections/community.kubernetes/issues/24
     # - name: Setting validate_certs to true causes a failure
     #   k8s:
     #     name: testing
