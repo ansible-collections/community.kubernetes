@@ -12,12 +12,12 @@ dependencies: {}
 description: Kubernetes Collection for Ansible.
 documentation: ''
 homepage: ''
-issues: https://github.com/ansible-collections/kubernetes/issues
+issues: https://github.com/ansible-collections/community.kubernetes/issues
 license_file: LICENSE
 name: kubernetes
 namespace: community
 readme: README.md
-repository: https://github.com/ansible-collections/kubernetes
+repository: https://github.com/ansible-collections/community.kubernetes
 tags:
   - kubernetes
   - k8s
