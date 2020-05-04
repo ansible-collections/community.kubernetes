@@ -128,12 +128,14 @@ There are also integration tests in the `molecule` directory which are meant to 
 
 ## Publishing New Versions
 
-The current process for publishing new versions of the Kubernetes Collection is manual, and requires a user who has access to the `community.kubernetes` namespace on Ansible Galaxy to publish the build artifact.
+The current process for publishing new versions of the Kubernetes Collection is manual, and requires a user who has access to the `community.kubernetes` namespace on Ansible Galaxy to publish the build artifact. See [Issue #43](https://github.com/ansible-collections/community.kubernetes/issues/43) for progress in automating this process.
 
+  1. Ensure you're running Ansible from devel, so the [`build_ignore` key](https://github.com/ansible/ansible/issues/67130) in `galaxy.yml` is used.
+  1. Run `git clean -x -d -f` in this repository's directory to clean out any extra files which should not be included.
   1. Ensure `CHANGELOG.md` contains all the latest changes.
-  2. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
-  3. Tag the version in Git and push to GitHub.
-  4. Run the following commands to build and release the new version on Galaxy:
+  1. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
+  1. Tag the version in Git and push to GitHub.
+  1. Run the following commands to build and release the new version on Galaxy:
 
      ```
      ansible-galaxy collection build
