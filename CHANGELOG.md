@@ -1,5 +1,18 @@
 # Kubernetes Collection Changes
 
+## 0.11.0
+
+### New Features
+
+  - PR #61: Add `helm`, `helm_info`, and `helm_repository` modules.
+  - PR #81: Rename repository to `community.kubernetes`.
+
+### Bug Fixes
+
+  - PR #78: Update GitHub Actions workflow for better CI stability.
+  - PR #69: k8s_log no longer attempts to parse log as JSON.
+  - PR #85: Make sure extra files are not included in built collection.
+
 ## 0.10.0
 
 ### New Features
