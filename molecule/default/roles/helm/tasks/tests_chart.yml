@@ -1,0 +1,201 @@
+---
+- name: Create helm namespace
+  k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ helm_namespace }}"
+    wait: true
+
+- name: Check helm_info empty
+  helm_info:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: empty_info
+
+- name: "Assert that no charts are installed with helm_info"
+  assert:
+    that:
+      - empty_info.status is undefined
+
+- name: "Install {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is installed from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status.status | lower == 'deployed'
+
+- name: Check helm_info content
+  helm_info:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: content_info
+
+- name: "Assert that {{ chart_test }} is installed from {{ source }} with helm_info"
+  assert:
+    that:
+      - content_info.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - content_info.status.status | lower == 'deployed'
+
+- name: Check idempotency
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Assert idempotency
+  assert:
+    that:
+      - install is not changed
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status.status | lower == 'deployed'
+
+- name: "Add vars to {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+    values: "{{ chart_test_values }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new var from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - "install.status['values'].revisionHistoryLimit == 0"
+
+- name: Check idempotency after adding vars
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+    values: "{{ chart_test_values }}"
+  register: install
+
+- name: Assert idempotency after add vars
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - "install.status['values'].revisionHistoryLimit == 0"
+
+- name: "Remove Vars to {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new var from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status['values'] == {}
+
+- name: Check idempotency after removing vars
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Assert idempotency after removing vars
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - install.status['values'] == {}
+
+- name: "Upgrade {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is upgraded with new version from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
+
+- name: Check idempotency after upgrade
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source_upgrade | default(chart_source) }}"
+    chart_version: "{{ chart_source_version_upgrade | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Assert idempotency after upgrade
+  assert:
+    that:
+      - install is not changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version_upgrade }}"
+
+- name: "Remove {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    state: absent
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is removed from {{ source }}"
+  assert:
+    that:
+      - install is changed
+
+- name: Check idempotency after remove
+  helm:
+    binary_path: "{{ helm_binary }}"
+    state: absent
+    name: test
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Assert idempotency
+  assert:
+    that:
+      - install is not changed
+
+- name: Remove helm namespace
+  k8s:
+    api_version: v1
+    kind: Namespace
+    name: "{{ helm_namespace }}"
+    state: absent
+    wait: true
+    wait_timeout: 180

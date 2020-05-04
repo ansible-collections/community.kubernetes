@@ -1,0 +1,32 @@
+---
+- name: Ensure helm is not installed
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/tmp/helm"
+
+- name: Check failed if helm is not installed
+  include_tasks: test_helm_not_installed.yml
+
+- name: "Install {{ helm_version }}"
+  include_tasks: install.yml
+
+- name: tests_repository
+  include_tasks: tests_repository.yml
+
+- name: Deploy charts
+  include_tasks: "tests_chart/{{ test_chart_type }}.yml"
+  loop_control:
+    loop_var: test_chart_type
+  with_items:
+    - from_local_path
+    - from_repository
+    - from_url
+
+- name: Clean helm install
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "/tmp/helm/"

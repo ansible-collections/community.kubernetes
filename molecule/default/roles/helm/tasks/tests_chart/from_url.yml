@@ -1,0 +1,7 @@
+---
+- name: Install Chart from URL
+  include_tasks: "../tests_chart.yml"
+  vars:
+    source: url
+    chart_source: "{{ chart_test_repo }}/{{ chart_test }}-{{ chart_test_version }}.tgz"
+    chart_source_upgrade: "{{ chart_test_repo }}/{{ chart_test }}-{{ chart_test_version_upgrade }}.tgz"

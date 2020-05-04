@@ -27,6 +27,9 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s_info](https://docs.ansible.com/ansible/latest/modules/k8s_info_module.html)
     - [k8s_scale](https://docs.ansible.com/ansible/latest/modules/k8s_scale_module.html)
     - [k8s_service](https://docs.ansible.com/ansible/latest/modules/k8s_service_module.html)
+    - [helm](https://docs.ansible.com/ansible/latest/modules/helm_module.html)
+    - [helm_info](https://docs.ansible.com/ansible/latest/modules/helm_info_module.html)
+    - [helm_repository](https://docs.ansible.com/ansible/latest/modules/helm_repository_module.html)
 
 ## Installation and Usage
 

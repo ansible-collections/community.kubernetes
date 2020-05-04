@@ -49,7 +49,7 @@
                 app: "{{ k8s_pod_name }}"
             template: "{{ k8s_pod_template }}"
         wait: yes
-        wait_sleep: 3
+        wait_sleep: 5
         wait_timeout: 180
       vars:
         k8s_pod_name: wait-ds
