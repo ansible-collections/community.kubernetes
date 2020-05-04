@@ -27,9 +27,9 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s_info](https://docs.ansible.com/ansible/latest/modules/k8s_info_module.html)
     - [k8s_scale](https://docs.ansible.com/ansible/latest/modules/k8s_scale_module.html)
     - [k8s_service](https://docs.ansible.com/ansible/latest/modules/k8s_service_module.html)
-    - [helm](https://docs.ansible.com/ansible/latest/modules/helm_module.html)
-    - [helm_info](https://docs.ansible.com/ansible/latest/modules/helm_info_module.html)
-    - [helm_repository](https://docs.ansible.com/ansible/latest/modules/helm_repository_module.html)
+    - [helm](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm.py)
+    - [helm_info](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm_info.py)
+    - [helm_repository](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm_repository.py)
 
 ## Installation and Usage
 
@@ -45,7 +45,7 @@ You can also include it in a `requirements.yml` file and install it via `ansible
 ---
 collections:
   - name: community.kubernetes
-    version: 0.10.0
+    version: 0.11.0
 ```
 
 ### Installing the OpenShift Python Library
