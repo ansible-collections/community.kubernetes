@@ -141,7 +141,7 @@ After the version is published, verify it exists on the [Kubernetes Collection G
 
 ## More Information
 
-For more information about Ansible's Kubernetes integration, join the `#ansible-community` channel on Freenode IRC, and browse the resources in the [Kubernetes Working Group](https://github.com/ansible/community/wiki/Kubernetes) Community wiki page.
+For more information about Ansible's Kubernetes integration, join the `#ansible-kubernetes` channel on Freenode IRC, and browse the resources in the [Kubernetes Working Group](https://github.com/ansible/community/wiki/Kubernetes) Community wiki page.
 
 ## License
 
