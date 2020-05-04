@@ -27,3 +27,6 @@ tags:
   - okd
   - cluster
 version: 0.11.0
+build_ignore:
+  - .DS_Store
+  - '*.tar.gz'
