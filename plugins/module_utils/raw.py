@@ -379,21 +379,16 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                     self.fail_json(msg="Resource replacement timed out", **result)
                 return result
 
-            # Differences exist between the existing obj and requested params
-            if self.check_mode:
-                k8s_obj = dict_merge(existing.to_dict(), definition)
+            # Handle check mode inside of self.patch_resource()
+            if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
+                k8s_obj, error = self.patch_resource(resource, definition, existing, name,
+                                                     namespace)
             else:
-                if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
+                for merge_type in self.params['merge_type'] or ['strategic-merge', 'merge']:
                     k8s_obj, error = self.patch_resource(resource, definition, existing, name,
-                                                         namespace)
-                else:
-                    for merge_type in self.params['merge_type'] or ['strategic-merge', 'merge']:
-                        k8s_obj, error = self.patch_resource(resource, definition, existing, name,
-                                                             namespace, merge_type=merge_type)
-                        if not error:
-                            break
-                if error:
-                    self.fail_json(**error)
+                                                         namespace, merge_type=merge_type)
+                    if not error:
+                        break
 
             success = True
             result['result'] = k8s_obj
@@ -413,6 +408,11 @@ class KubernetesRawModule(KubernetesAnsibleModule):
             params = dict(name=name, namespace=namespace)
             if merge_type:
                 params['content_type'] = 'application/{0}-patch+json'.format(merge_type)
+
+            # Pass dry_run=All to openshift
+            if self.check_mode:
+                params['dry_run'] = 'All'
+
             k8s_obj = resource.patch(definition, **params).to_dict()
             match, diffs = self.diff_objects(existing.to_dict(), k8s_obj)
             error = {}
