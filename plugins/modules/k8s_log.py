@@ -14,6 +14,8 @@ module: k8s_log
 
 short_description: Fetch logs from Kubernetes resources
 
+version_added: "0.10.0"
+
 author:
     - "Fabian von Feilitzsch (@fabianvf)"
 

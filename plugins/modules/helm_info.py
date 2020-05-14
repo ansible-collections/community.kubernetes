@@ -13,6 +13,8 @@ module: helm_info
 
 short_description: Get informations from Helm package deployed inside the cluster
 
+version_added: "0.11.0"
+
 author:
   - Lucas Boisserie (@LucasBoisserie)
 

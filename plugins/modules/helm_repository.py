@@ -13,6 +13,8 @@ module: helm_repository
 
 short_description: Add and remove Helm repository
 
+version_added: "0.11.0"
+
 author:
   - Lucas Boisserie (@LucasBoisserie)
 
