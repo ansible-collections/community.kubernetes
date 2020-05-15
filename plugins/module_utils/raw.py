@@ -299,7 +299,11 @@ class KubernetesRawModule(KubernetesAnsibleModule):
         else:
             if self.apply:
                 if self.check_mode:
-                    ignored, k8s_obj = apply_object(resource, definition)
+                    ignored, patch = apply_object(resource, definition)
+                    if existing:
+                        k8s_obj = dict_merge(existing.to_dict(), patch)
+                    else:
+                        k8s_obj = patch
                 else:
                     try:
                         k8s_obj = resource.apply(definition, namespace=namespace).to_dict()

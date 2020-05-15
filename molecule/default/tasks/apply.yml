@@ -154,6 +154,30 @@
         that:
           - k8s_service_2 is not changed
 
+    - name: Add exactly same service in check mode
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: apply-svc
+            namespace: "{{ apply_namespace }}"
+          spec:
+            selector:
+              app: whatever
+            ports:
+              - name: http
+                port: 8080
+                targetPort: 8080
+        apply: yes
+      register: k8s_service_3
+      check_mode: yes
+
+    - name: Check nothing changed
+      assert:
+        that:
+          - k8s_service_3 is not changed
+
     - name: Change service ports
       k8s:
         definition:
@@ -170,14 +194,14 @@
                 port: 8081
                 targetPort: 8081
         apply: yes
-      register: k8s_service_3
+      register: k8s_service_4
 
     - name: Check ports are correct
       assert:
         that:
-          - k8s_service_3 is changed
-          - k8s_service_3.result.spec.ports | length == 1
-          - k8s_service_3.result.spec.ports[0].port == 8081
+          - k8s_service_4 is changed
+          - k8s_service_4.result.spec.ports | length == 1
+          - k8s_service_4.result.spec.ports[0].port == 8081
 
   always:
     - name: Remove namespace
