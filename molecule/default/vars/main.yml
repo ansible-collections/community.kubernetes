@@ -15,13 +15,16 @@ k8s_pod_spec:
         exec:
           command:
             - /bin/true
-      resources:
-        limits:
-          cpu: "100m"
-          memory: "100Mi"
+      resources: "{{ k8s_pod_resources }}"
       ports: "{{ k8s_pod_ports }}"
 
+
 k8s_pod_service_account: default
+
+k8s_pod_resources:
+  limits:
+    cpu: "100m"
+    memory: "100Mi"
 
 k8s_pod_command: []
 
