@@ -379,16 +379,21 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                     self.fail_json(msg="Resource replacement timed out", **result)
                 return result
 
-            # Handle check mode inside of self.patch_resource()
-            if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
-                k8s_obj, error = self.patch_resource(resource, definition, existing, name,
-                                                     namespace)
+            # Differences exist between the existing obj and requested params
+            if self.check_mode and LooseVersion(self.openshift_version) < LooseVersion("0.11.1"):
+                k8s_obj = dict_merge(existing.to_dict(), definition)
             else:
-                for merge_type in self.params['merge_type'] or ['strategic-merge', 'merge']:
+                if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
                     k8s_obj, error = self.patch_resource(resource, definition, existing, name,
-                                                         namespace, merge_type=merge_type)
-                    if not error:
-                        break
+                                                         namespace)
+                else:
+                    for merge_type in self.params['merge_type'] or ['strategic-merge', 'merge']:
+                        k8s_obj, error = self.patch_resource(resource, definition, existing, name,
+                                                             namespace, merge_type=merge_type)
+                        if not error:
+                            break
+                if error:
+                    self.fail_json(**error)
 
             success = True
             result['result'] = k8s_obj
