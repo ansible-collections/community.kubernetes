@@ -403,6 +403,162 @@
         that:
           - deploy_after_serviceaccount_removal is failed
 
+    - name: Insert new service port
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: apply-svc
+            namespace: "{{ apply_namespace }}"
+          spec:
+            selector:
+              app: whatever
+            ports:
+              - name: mesh
+                port: 8080
+                targetPort: 8080
+              - name: http
+                port: 8081
+                targetPort: 8081
+        apply: yes
+      register: k8s_service_4
+
+    - name: Check ports are correct
+      assert:
+        that:
+          - k8s_service_4 is changed
+          - k8s_service_4.result.spec.ports | length == 2
+          - k8s_service_4.result.spec.ports[0].port == 8080
+          - k8s_service_4.result.spec.ports[1].port == 8081
+
+    - name: Remove new service port (check mode)
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: apply-svc
+            namespace: "{{ apply_namespace }}"
+          spec:
+            selector:
+              app: whatever
+            ports:
+              - name: http
+                port: 8081
+                targetPort: 8081
+        apply: yes
+      check_mode: yes
+      register: k8s_service_check
+
+    - name: Check ports are correct
+      assert:
+        that:
+          - k8s_service_check is changed
+          - k8s_service_check.result.spec.ports | length == 1
+          - k8s_service_check.result.spec.ports[0].port == 8081
+
+    - name: Remove new service port
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: apply-svc
+            namespace: "{{ apply_namespace }}"
+          spec:
+            selector:
+              app: whatever
+            ports:
+              - name: http
+                port: 8081
+                targetPort: 8081
+        apply: yes
+      register: k8s_service_5
+
+    - name: Check ports are correct
+      assert:
+        that:
+          - k8s_service_5 is changed
+          - k8s_service_5.result.spec.ports | length == 1
+          - k8s_service_5.result.spec.ports[0].port == 8081
+
+    - name: Add a serviceaccount
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: apply-deploy
+            namespace: "{{ apply_namespace }}"
+
+    - name: Add a deployment
+      k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: apply-deploy
+            namespace: "{{ apply_namespace }}"
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: "{{ k8s_pod_name }}"
+            template: "{{ k8s_pod_template }}"
+        wait: yes
+        apply: yes
+      vars:
+        k8s_pod_name: apply-deploy
+        k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-green
+        k8s_pod_service_account: apply-deploy
+        k8s_pod_ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+
+    - name: Remove the serviceaccount
+      k8s:
+        state: absent
+        definition:
+          apiVersion: v1
+          kind: ServiceAccount
+          metadata:
+            name: apply-deploy
+            namespace: "{{ apply_namespace }}"
+
+    - name: Update the earlier deployment
+      k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: apply-deploy
+            namespace: "{{ apply_namespace }}"
+          spec:
+            replicas: 2
+            selector:
+              matchLabels:
+                app: "{{ k8s_pod_name }}"
+            template: "{{ k8s_pod_template }}"
+        wait: yes
+        apply: yes
+      vars:
+        k8s_pod_name: apply-deploy
+        k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-purple
+        k8s_pod_service_account: apply-deploy
+        k8s_pod_ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+      register: deploy_after_serviceaccount_removal
+      ignore_errors: yes
+
+    - name: Ensure that updating deployment after service account removal failed
+      assert:
+        that:
+          - deploy_after_serviceaccount_removal is failed
+
   always:
     - name: Remove namespace
       k8s:

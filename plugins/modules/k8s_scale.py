@@ -111,6 +111,11 @@ result:
        description: Current status details for the object.
        returned: success
        type: complex
+     duration:
+       description: elapsed time of task in seconds
+       returned: when C(wait) is true
+       type: int
+       sample: 48
 '''
 
 from ansible_collections.community.kubernetes.plugins.module_utils.scale import KubernetesAnsibleScaleModule
