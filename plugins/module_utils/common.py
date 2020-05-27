@@ -26,7 +26,6 @@ import traceback
 
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
-from ansible.module_utils.common.dict_transformations import recursive_diff
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
 
@@ -56,6 +55,11 @@ try:
     urllib3.disable_warnings()
 except ImportError:
     pass
+
+try:
+    from openshift.dynamic.apply import recursive_diff
+except ImportError:
+    from ansible.module_utils.common.dict_transformations import recursive_diff
 
 
 def list_dict_str(value):
