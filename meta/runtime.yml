@@ -1,0 +1,12 @@
+action_groups:
+  k8s:
+  - k8s
+  - k8s_auth
+  - k8s_facts
+  - k8s_info
+  - k8s_scale
+  - k8s_service
+
+action_groups_redirection:
+  k8s:
+    redirect: k8s
