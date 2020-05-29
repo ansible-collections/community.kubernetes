@@ -119,6 +119,8 @@
         namespace: "{{ wait_namespace }}"
         label_selectors:
           - app=wait-ds
+        field_selectors:
+          - status.phase=Running
       register: updated_ds_pods
 
     - name: Check that daemonset wait worked
@@ -242,13 +244,17 @@
         namespace: "{{ wait_namespace }}"
         label_selectors:
           - app=wait-deploy
+        field_selectors:
+          - status.phase=Running
       register: updated_deploy_pods
+      until: "{{ updated_deploy_pods.resources[0].spec.containers[0].image.endswith(':2') }}"
+      retries: 6
+      delay: 5
 
     - name: Check that deployment wait worked
       assert:
         that:
           - deploy.result.status.availableReplicas == deploy.result.status.replicas
-          - updated_deploy_pods.resources[0].spec.containers[0].image.endswith(":2")
 
     - name: Pause a deployment
       k8s:

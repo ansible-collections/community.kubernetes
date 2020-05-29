@@ -21,6 +21,7 @@
         that: (pod_list.resources | count) > 5
 
     - include_tasks: tasks/delete.yml
+    - include_tasks: tasks/scale.yml
     - include_tasks: tasks/apply.yml
     - include_tasks: tasks/waiter.yml
     - include_tasks: tasks/full.yml

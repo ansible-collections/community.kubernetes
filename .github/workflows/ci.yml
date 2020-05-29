@@ -76,7 +76,7 @@ jobs:
           path: ansible_collections/community/kubernetes
 
       - name: Set up KinD cluster
-        uses: engineerd/setup-kind@v0.3.0
+        uses: engineerd/setup-kind@v0.4.0
 
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v1
