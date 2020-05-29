@@ -55,12 +55,6 @@
         wait: yes
       register: scale_down
 
-    # It looks like the Deployment is updated to have the desired state *before* the pods are terminated
-    # Wait a couple of seconds to allow the pods to at least get to Terminating state
-    - name: Avoid race condition
-      pause:
-        seconds: 2
-
     - name: Get pods in scale-deploy
       k8s_info:
         kind: Pod
@@ -70,6 +64,9 @@
         field_selectors:
           - status.phase=Running
       register: scale_down_deploy_pods
+      until: "{{ scale_down_deploy_pods.resources | length == 0 }}"
+      retries: 6
+      delay: 5
 
     - name: Ensure that scale down took effect
       assert:
@@ -77,7 +74,6 @@
           - scale_down is changed
           - '"duration" in scale_down'
           - scale_down.diff
-          - scale_down_deploy_pods.resources | length == 0
 
     - name: Reapply the earlier deployment
       k8s:
