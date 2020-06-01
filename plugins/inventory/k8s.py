@@ -97,7 +97,7 @@ EXAMPLES = '''
 plugin: k8s
 connections:
   - host: https://192.168.64.4:8443
-    token: xxxxxxxxxxxxxxxx
+    api_key: xxxxxxxxxxxxxxxx
     validate_certs: false
 
 # Use default config (~/.kube/config) file and active context, and return objects for a specific namespace
