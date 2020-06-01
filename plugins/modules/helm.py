@@ -244,27 +244,37 @@ from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 module = None
 
 
-# Get Values from deployed release
-def get_values(command, release_name):
-    get_command = command + " get values --output=yaml " + release_name
-
-    rc, out, err = module.run_command(get_command)
-
+def exec_command(command):
+    rc, out, err = module.run_command(command)
     if rc != 0:
         module.fail_json(
             msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=get_command
+            stdout=out,
+            stderr=err,
+            command=command,
         )
+    return rc, out, err
 
+
+def get_values(command, release_name):
+    """
+    Get Values from deployed release
+    """
+
+    get_command = command + " get values --output=yaml " + release_name
+
+    rc, out, err = exec_command(get_command)
     # Helm 3 return "null" string when no values are set
     if out.rstrip("\n") == "null":
         return {}
-    else:
-        return yaml.safe_load(out)
+    return yaml.safe_load(out)
 
 
-# Get Release from all deployed releases
 def get_release(state, release_name):
+    """
+    Get Release from all deployed releases
+    """
+
     if state is not None:
         for release in state:
             if release['name'] == release_name:
@@ -272,17 +282,14 @@ def get_release(state, release_name):
     return None
 
 
-# Get Release state from deployed release
 def get_release_status(command, release_name):
+    """
+    Get Release state from deployed release
+    """
+
     list_command = command + " list --output=yaml --filter " + release_name
 
-    rc, out, err = module.run_command(list_command)
-
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=list_command
-        )
+    rc, out, err = exec_command(list_command)
 
     release = get_release(yaml.safe_load(out), release_name)
 
@@ -294,34 +301,29 @@ def get_release_status(command, release_name):
     return release
 
 
-# Run Repo update
 def run_repo_update(command):
+    """
+    Run Repo update
+    """
     repo_update_command = command + " repo update"
-
-    rc, out, err = module.run_command(repo_update_command)
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=repo_update_command
-        )
+    rc, out, err = exec_command(repo_update_command)
 
 
-# Get chart info
 def fetch_chart_info(command, chart_ref):
+    """
+    Get chart info
+    """
     inspect_command = command + " show chart " + chart_ref
 
-    rc, out, err = module.run_command(inspect_command)
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=inspect_command
-        )
+    rc, out, err = exec_command(inspect_command)
 
     return yaml.safe_load(out)
 
 
-# Install/upgrade/rollback release chart
 def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force):
+    """
+    Install/upgrade/rollback release chart
+    """
     deploy_command = command + " upgrade -i"  # install/upgrade
 
     # Always reset values to keep release_values equal to values released
@@ -342,7 +344,13 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
         try:
             import tempfile
         except ImportError:
-            module.fail_json(msg=missing_required_lib("tempfile"), exception=traceback.format_exc())
+            module.fail_json(
+                msg=missing_required_lib("tempfile"),
+                exception=traceback.format_exc(),
+                stdout='',
+                stderr='',
+                command='',
+            )
 
         fd, path = tempfile.mkstemp(suffix='.yml')
         with open(path, 'w') as yaml_file:
@@ -354,8 +362,11 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
     return deploy_command
 
 
-# Delete release chart
 def delete(command, release_name, purge, disable_hook):
+    """
+    Delete release chart
+    """
+
     delete_command = command + " uninstall "
 
     if not purge:
@@ -470,20 +481,30 @@ def main():
             changed = True
 
     if module.check_mode:
-        module.exit_json(changed=changed)
+        module.exit_json(
+            changed=changed,
+            command=helm_cmd,
+            stdout='',
+            stderr='',
+        )
     elif not changed:
-        module.exit_json(changed=False, status=release_status)
-
-    rc, out, err = module.run_command(helm_cmd)
-
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=helm_cmd
+        module.exit_json(
+            changed=False,
+            status=release_status,
+            stdout='',
+            stderr='',
+            command=helm_cmd,
         )
 
-    module.exit_json(changed=changed, stdout=out, stderr=err,
-                     status=get_release_status(helm_cmd_common, release_name), command=helm_cmd)
+    rc, out, err = exec_command(helm_cmd)
+
+    module.exit_json(
+        changed=changed,
+        stdout=out,
+        stderr=err,
+        status=get_release_status(helm_cmd_common, release_name),
+        command=helm_cmd,
+    )
 
 
 if __name__ == '__main__':
