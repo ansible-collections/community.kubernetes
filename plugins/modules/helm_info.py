@@ -7,11 +7,11 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm_info
 
-short_description: Get informations from Helm package deployed inside the cluster
+short_description: Get information from Helm package deployed inside the cluster
 
 version_added: "0.11.0"
 
@@ -23,7 +23,7 @@ requirements:
   - "yaml (https://pypi.org/project/PyYAML/)"
 
 description:
-  -  Get informations (values, states, ...) from Helm package deployed inside the cluster
+  -  Get information (values, states, ...) from Helm package deployed inside the cluster
 
 options:
   binary_path:
@@ -56,14 +56,14 @@ options:
     aliases: [ kubeconfig ]
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Deploy latest version of Grafana chart inside monitoring namespace
-  helm_info:
+  community.kubernetes.helm_info:
     name: test
     release_namespace: monitoring
 '''
 
-RETURN = """
+RETURN = r"""
 status:
   type: complex
   description: A dictionary of status output

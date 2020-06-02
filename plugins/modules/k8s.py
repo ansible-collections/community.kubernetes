@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 
 module: k8s
 
@@ -147,16 +147,16 @@ requirements:
   - "PyYAML >= 3.11"
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Create a k8s namespace
-  k8s:
+  community.kubernetes.k8s:
     name: testing
     api_version: v1
     kind: Namespace
     state: present
 
 - name: Create a Service object from an inline definition
-  k8s:
+  community.kubernetes.k8s:
     state: present
     definition:
       apiVersion: v1
@@ -178,7 +178,7 @@ EXAMPLES = '''
           port: 8000
 
 - name: Remove an existing Service object
-  k8s:
+  community.kubernetes.k8s:
     state: absent
     api_version: v1
     kind: Service
@@ -188,31 +188,31 @@ EXAMPLES = '''
 # Passing the object definition from a file
 
 - name: Create a Deployment by reading the definition from a local file
-  k8s:
+  community.kubernetes.k8s:
     state: present
     src: /testing/deployment.yml
 
 - name: >-
     Read definition file from the Ansible controller file system.
     If the definition file has been encrypted with Ansible Vault it will automatically be decrypted.
-  k8s:
+  community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('file', '/testing/deployment.yml') | from_yaml }}"
 
 - name: Read definition file from the Ansible controller file system after Jinja templating
-  k8s:
+  community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
 
 - name: fail on validation errors
-  k8s:
+  community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
     validate:
       fail_on_error: yes
 
 - name: warn on validation errors, check for unexpected properties
-  k8s:
+  community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
     validate:
@@ -220,7 +220,7 @@ EXAMPLES = '''
       strict: yes
 '''
 
-RETURN = '''
+RETURN = r'''
 result:
   description:
   - The created, patched, or otherwise present object. Will be empty in the case of a deletion.

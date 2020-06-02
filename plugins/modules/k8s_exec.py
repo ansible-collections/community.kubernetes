@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 
 module: k8s_exec
 
@@ -58,15 +58,15 @@ options:
     required: yes
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Execute a command
-  k8s_exec:
+  community.kubernetes.k8s_exec:
     namespace: myproject
     pod: zuul-scheduler
     command: zuul-scheduler full-reconfigure
 '''
 
-RETURN = '''
+RETURN = r'''
 result:
   description:
   - The command object

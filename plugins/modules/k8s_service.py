@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 
 module: k8s_service
 
@@ -121,9 +121,9 @@ requirements:
   - openshift >= 0.6.2
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Expose https port with ClusterIP
-  k8s_service:
+  community.kubernetes.k8s_service:
     state: present
     name: test-https
     namespace: default
@@ -134,7 +134,7 @@ EXAMPLES = '''
       key: special
 
 - name: Expose https port with ClusterIP using spec
-  k8s_service:
+  community.kubernetes.k8s_service:
     state: present
     name: test-https
     namespace: default
@@ -147,7 +147,7 @@ EXAMPLES = '''
           key: special
 '''
 
-RETURN = '''
+RETURN = r'''
 result:
   description:
   - The created, patched, or otherwise present Service object. Will be empty in the case of a deletion.

@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 module: k8s_info
 
 short_description: Describe Kubernetes (K8s) objects
@@ -68,7 +68,7 @@ requirements:
   - "PyYAML >= 3.11"
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Get an existing Service object
   k8s_info:
     api_version: v1
@@ -103,7 +103,7 @@ EXAMPLES = '''
       - status.phase=Running
 '''
 
-RETURN = '''
+RETURN = r'''
 resources:
   description:
   - The object(s) that exists

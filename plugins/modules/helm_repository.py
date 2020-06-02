@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm_repository
 
@@ -59,21 +59,21 @@ options:
   repo_state:
     choices: ['present', 'absent']
     description:
-      - Desirated state of repositoriy.
+      - Desirated state of repository.
     required: false
     default: present
     aliases: [ state ]
     type: str
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Add default repository
-  helm_repository:
+  community.kubernetes.helm_repository:
     name: stable
     repo_url: https://kubernetes-charts.storage.googleapis.com
 '''
 
-RETURN = ''' # '''
+RETURN = r''' # '''
 
 import traceback
 
