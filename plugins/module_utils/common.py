@@ -191,13 +191,19 @@ class K8sAnsibleMixin(object):
             # We have enough in the parameters to authenticate, no need to load incluster or kubeconfig
             pass
         elif auth_set('kubeconfig') or auth_set('context'):
-            kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+            try:
+                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+            except Exception as err:
+                self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
         else:
             # First try to do incluster config, then kubeconfig
             try:
                 kubernetes.config.load_incluster_config()
             except kubernetes.config.ConfigException:
-                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+                try:
+                    kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+                except Exception as err:
+                    self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
 
         # Override any values in the default configuration with Ansible parameters
         configuration = kubernetes.client.Configuration()
