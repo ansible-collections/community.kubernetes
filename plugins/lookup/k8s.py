@@ -194,11 +194,11 @@ RETURN = """
         type: complex
 """
 
+from ansible.errors import AnsibleError
+from ansible.module_utils.common._collections_compat import KeysView
 from ansible.plugins.lookup import LookupBase
 
 from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin
-
-from ansible.errors import AnsibleError
 
 
 try:
@@ -253,6 +253,8 @@ class KubernetesLookup(K8sAnsibleMixin):
         if cluster_info == 'version':
             return [self.client.version]
         if cluster_info == 'api_groups':
+            if isinstance(self.client.resources.api_groups, KeysView):
+                return [list(self.client.resources.api_groups)]
             return [self.client.resources.api_groups]
 
         self.kind = kwargs.get('kind')
