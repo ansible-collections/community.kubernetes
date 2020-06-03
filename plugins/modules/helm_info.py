@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: Ansible Project
+# Copyright: (c) 2020, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
@@ -23,7 +23,7 @@ requirements:
   - "yaml (https://pypi.org/project/PyYAML/)"
 
 description:
-  -  Get information (values, states, ...) from Helm package deployed inside the cluster
+  -  Get information (values, states, ...) from Helm package deployed inside the cluster.
 
 options:
   binary_path:
@@ -63,7 +63,7 @@ EXAMPLES = r'''
     release_namespace: monitoring
 '''
 
-RETURN = r"""
+RETURN = r'''
 status:
   type: complex
   description: A dictionary of status output
@@ -101,7 +101,7 @@ status:
       type: str
       returned: always
       description: Dict of Values used to deploy
-"""
+'''
 
 import traceback
 
@@ -211,8 +211,8 @@ def main():
 
     if release_status is not None:
         module.exit_json(changed=False, status=release_status)
-    else:
-        module.exit_json(changed=False)
+
+    module.exit_json(changed=False)
 
 
 if __name__ == '__main__':
