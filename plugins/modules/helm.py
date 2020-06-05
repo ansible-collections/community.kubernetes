@@ -7,7 +7,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm
 
@@ -120,9 +120,9 @@ options:
     type: str
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Create helm namespace as HELM 3 doesn't create it automatically
-  k8s:
+  community.kubernetes.k8s:
     api_version: v1
     kind: Namespace
     name: "monitoring"
@@ -130,12 +130,12 @@ EXAMPLES = '''
 
 # From repository
 - name: Add stable chart repo
-  helm_repository:
+  community.kubernetes.helm_repository:
     name: stable
     repo_url: "https://kubernetes-charts.storage.googleapis.com"
 
 - name: Deploy latest version of Grafana chart inside monitoring namespace with values
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: stable/grafana
     release_namespace: monitoring
@@ -143,39 +143,39 @@ EXAMPLES = '''
       replicas: 2
 
 - name: Deploy Grafana chart on 5.0.12 with values loaded from template
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: stable/grafana
     chart_version: 5.0.12
     values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
 
 - name: Remove test release and waiting suppression ending
-  helm:
+  community.kubernetes.helm:
     name: test
     state: absent
     wait: true
 
 # From git
 - name: Git clone stable repo on HEAD
-  git:
+  ansible.builtin.git:
     repo: "http://github.com/helm/charts.git"
     dest: /tmp/helm_repo
 
 - name: Deploy Grafana chart from local path
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: /tmp/helm_repo/stable/grafana
     release_namespace: monitoring
 
 # From url
 - name: Deploy Grafana chart on 5.0.12 from url
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: "https://kubernetes-charts.storage.googleapis.com/grafana-5.0.12.tgz"
     release_namespace: monitoring
 '''
 
-RETURN = """
+RETURN = r"""
 status:
   type: complex
   description: A dictionary of status output

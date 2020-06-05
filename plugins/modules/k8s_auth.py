@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 
 module: k8s_auth
 
@@ -75,7 +75,7 @@ requirements:
   - requests-oauthlib
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - hosts: localhost
   module_defaults:
     group/k8s:
@@ -88,7 +88,7 @@ EXAMPLES = '''
     - include_vars: k8s_passwords.yml
 
     - name: Log in (obtain access token)
-      k8s_auth:
+      community.kubernetes.k8s_auth:
         username: admin
         password: "{{ k8s_admin_password }}"
       register: k8s_auth_results
@@ -96,7 +96,7 @@ EXAMPLES = '''
     # Previous task provides the token/api_key, while all other parameters
     # are taken from module_defaults
     - name: Get a list of all pods from any namespace
-      k8s_info:
+      community.kubernetes.k8s_info:
         api_key: "{{ k8s_auth_results.k8s_auth.api_key }}"
         kind: Pod
       register: pod_list
@@ -104,7 +104,7 @@ EXAMPLES = '''
     always:
     - name: If login succeeded, try to log out (revoke access token)
       when: k8s_auth_results.k8s_auth.api_key is defined
-      k8s_auth:
+      community.kubernetes.k8s_auth:
         state: absent
         api_key: "{{ k8s_auth_results.k8s_auth.api_key }}"
 '''
@@ -112,7 +112,7 @@ EXAMPLES = '''
 # Returned value names need to match k8s modules parameter names, to make it
 # easy to pass returned values of k8s_auth to other k8s modules.
 # Discussion: https://github.com/ansible/ansible/pull/50807#discussion_r248827899
-RETURN = '''
+RETURN = r'''
 k8s_auth:
   description: Kubernetes authentication facts.
   returned: success

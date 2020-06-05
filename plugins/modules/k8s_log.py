@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 module: k8s_log
 
 short_description: Fetch logs from Kubernetes resources
@@ -48,7 +48,7 @@ options:
   namespace:
     description:
     - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specfic object.
+      to identify a specific object.
     type: str
   name:
     description:
@@ -76,16 +76,16 @@ requirements:
   - "PyYAML >= 3.11"
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Get a log from a Pod
-  k8s_log:
+  community.kubernetes.k8s_log:
     name: example-1
     namespace: testing
   register: log
 
 # This will get the log from the first Pod found matching the selector
 - name: Log a Pod matching a label selector
-  k8s_log:
+  community.kubernetes.k8s_log:
     namespace: testing
     label_selectors:
     - app=example
@@ -93,7 +93,7 @@ EXAMPLES = '''
 
 # This will get the log from a single Pod managed by this Deployment
 - name: Get a log from a Deployment
-  k8s_log:
+  community.kubernetes.k8s_log:
     api_version: apps/v1
     kind: Deployment
     namespace: testing
@@ -102,7 +102,7 @@ EXAMPLES = '''
 
 # This will get the log from a single Pod managed by this DeploymentConfig
 - name: Get a log from a DeploymentConfig
-  k8s_log:
+  community.kubernetes.k8s_log:
     api_version: apps.openshift.io/v1
     kind: DeploymentConfig
     namespace: testing
@@ -110,7 +110,7 @@ EXAMPLES = '''
   register: log
 '''
 
-RETURN = '''
+RETURN = r'''
 log:
   type: str
   description:

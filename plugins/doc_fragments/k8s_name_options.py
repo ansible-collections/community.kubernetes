@@ -42,7 +42,7 @@ options:
     description:
     - Use to specify an object namespace. Useful when creating, deleting, or discovering an object without
       providing a full resource definition. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specfic object. If I(resource definition) is provided, the I(metadata.namespace) value
+      to identify a specific object. If I(resource definition) is provided, the I(metadata.namespace) value
       from the I(resource_definition) will override this option.
     type: str
 '''
