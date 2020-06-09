@@ -181,7 +181,7 @@ import traceback
 
 from collections import defaultdict
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC
 from ansible_collections.community.kubernetes.plugins.module_utils.raw import KubernetesRawModule
 
 

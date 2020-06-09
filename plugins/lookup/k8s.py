@@ -202,19 +202,12 @@ from ansible_collections.community.kubernetes.plugins.module_utils.common import
 
 
 try:
-    from openshift.dynamic import DynamicClient
     from openshift.dynamic.exceptions import NotFoundError
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
     HAS_K8S_MODULE_HELPER = False
     k8s_import_exception = e
-
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
 
 
 class KubernetesLookup(K8sAnsibleMixin):
@@ -224,11 +217,6 @@ class KubernetesLookup(K8sAnsibleMixin):
         if not HAS_K8S_MODULE_HELPER:
             raise Exception(
                 "Requires the OpenShift Python client. Try `pip install openshift`. Detail: {0}".format(k8s_import_exception)
-            )
-
-        if not HAS_YAML:
-            raise Exception(
-                "Requires PyYAML. Try `pip install PyYAML`"
             )
 
         self.kind = None

@@ -173,7 +173,6 @@ import os
 import os.path
 import subprocess
 
-import ansible.constants as C
 from ansible.parsing.yaml.loader import AnsibleLoader
 from ansible.errors import AnsibleError, AnsibleFileNotFound
 from ansible.module_utils.six.moves import shlex_quote
