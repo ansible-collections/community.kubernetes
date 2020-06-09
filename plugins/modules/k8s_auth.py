@@ -251,7 +251,7 @@ class KubernetesAuthModule(AnsibleModule):
 
             self.openshift_auth_endpoint = oauth_info['authorization_endpoint']
             self.openshift_token_endpoint = oauth_info['token_endpoint']
-        except Exception as e:
+        except Exception:
             self.fail_json(msg="Something went wrong discovering OpenShift OAuth details.",
                            exception=traceback.format_exc())
 
@@ -311,7 +311,7 @@ class KubernetesAuthModule(AnsibleModule):
             "kind": "DeleteOptions"
         }
 
-        ret = requests.delete(url, headers=headers, json=json, verify=self.con_verify_ca)
+        requests.delete(url, headers=headers, json=json, verify=self.con_verify_ca)
         # Ignore errors, the token will time out eventually anyway
 
     def fail(self, msg=None):
