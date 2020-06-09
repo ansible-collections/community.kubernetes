@@ -9,6 +9,7 @@ driver:
 lint: |
   set -e
   yamllint .
+  flake8
 platforms:
   - name: instance-kind
 provisioner:
