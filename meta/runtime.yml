@@ -13,7 +13,3 @@ action_groups:
     - k8s_log
     - k8s_scale
     - k8s_service
-
-action_groups_redirection:
-  k8s:
-    redirect: k8s
