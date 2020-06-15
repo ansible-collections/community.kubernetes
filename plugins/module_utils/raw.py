@@ -39,11 +39,6 @@ except ImportError:
     # Exceptions handled in common
     pass
 
-try:
-    import kubernetes_validate
-    HAS_KUBERNETES_VALIDATE = True
-except ImportError:
-    HAS_KUBERNETES_VALIDATE = False
 
 K8S_CONFIG_HASH_IMP_ERR = None
 try:

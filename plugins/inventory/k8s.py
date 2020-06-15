@@ -317,7 +317,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
 
             try:
                 self.inventory.add_child(namespace_services_group, service_name)
-            except AnsibleError as e:
+            except AnsibleError:
                 raise
 
             ports = [{'name': port.name,
