@@ -10,3 +10,6 @@ rules:
     level: error
   line-length: disable
   truthy: disable
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
