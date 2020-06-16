@@ -1,0 +1,5 @@
+---
+major_changes:
+  - helm - New module for managing Helm charts.
+  - helm_info - New module for retrieving Helm chart information.
+  - helm_repository - New module for managing Helm repositories.

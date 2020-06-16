@@ -132,8 +132,11 @@ The current process for publishing new versions of the Kubernetes Collection is 
 
   1. Ensure you're running Ansible from devel, so the [`build_ignore` key](https://github.com/ansible/ansible/issues/67130) in `galaxy.yml` is used.
   1. Run `git clean -x -d -f` in this repository's directory to clean out any extra files which should not be included.
-  1. Ensure `CHANGELOG.md` contains all the latest changes.
   1. Update `galaxy.yml` and this README's `requirements.yml` example with the new `version` for the collection.
+  1. Update the CHANGELOG:
+    1. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
+    1. Make sure there are fragments for all known changes in `changelogs/fragments`.
+    1. Run `antsibull-changelog release`
   1. Tag the version in Git and push to GitHub.
   1. Run the following commands to build and release the new version on Galaxy:
 
