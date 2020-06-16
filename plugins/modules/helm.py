@@ -230,6 +230,7 @@ command:
   sample: helm upgrade ...
 """
 
+import tempfile
 import traceback
 
 try:
@@ -341,17 +342,6 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
         deploy_command += " --no-hooks"
 
     if release_values != {}:
-        try:
-            import tempfile
-        except ImportError:
-            module.fail_json(
-                msg=missing_required_lib("tempfile"),
-                exception=traceback.format_exc(),
-                stdout='',
-                stderr='',
-                command='',
-            )
-
         fd, path = tempfile.mkstemp(suffix='.yml')
         with open(path, 'w') as yaml_file:
             yaml.dump(release_values, yaml_file, default_flow_style=False)
