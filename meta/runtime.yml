@@ -1,4 +1,6 @@
 ---
+requires_ansible: '>=2.9,<2.11'
+
 action_groups:
   helm:
     - helm
