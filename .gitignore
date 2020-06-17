@@ -6,6 +6,9 @@ __pycache__/
 # Galaxy artifacts.
 *.tar.gz
 
+# Changelog cache files.
+changelogs/.plugin-cache.yaml
+
 # Temporary test files.
 tests/output
 tests/integration/cloud-config-*
