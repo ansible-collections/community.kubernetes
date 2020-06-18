@@ -118,6 +118,11 @@ options:
     description:
       - Timeout when wait option is enabled (helm2 is a number of seconds, helm3 is a duration).
     type: str
+  atomic:
+    description:
+      - If set, the installation process deletes the installation on failure.
+    type: bool
+    default: False
 '''
 
 EXAMPLES = r'''
@@ -230,6 +235,7 @@ command:
   sample: helm upgrade ...
 """
 
+import tempfile
 import traceback
 
 try:
@@ -320,7 +326,7 @@ def fetch_chart_info(command, chart_ref):
     return yaml.safe_load(out)
 
 
-def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force):
+def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, atomic=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -334,6 +340,9 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
         if wait_timeout is not None:
             deploy_command += " --timeout " + wait_timeout
 
+    if atomic:
+        deploy_command += " --atomic"
+
     if force:
         deploy_command += " --force"
 
@@ -341,17 +350,6 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
         deploy_command += " --no-hooks"
 
     if release_values != {}:
-        try:
-            import tempfile
-        except ImportError:
-            module.fail_json(
-                msg=missing_required_lib("tempfile"),
-                exception=traceback.format_exc(),
-                stdout='',
-                stderr='',
-                command='',
-            )
-
         fd, path = tempfile.mkstemp(suffix='.yml')
         with open(path, 'w') as yaml_file:
             yaml.dump(release_values, yaml_file, default_flow_style=False)
@@ -402,6 +400,7 @@ def main():
             purge=dict(type='bool', default=True),
             wait=dict(type='bool', default=False),
             wait_timeout=dict(type='str'),
+            atomic=dict(type='bool', default=False),
         ),
         required_if=[
             ('release_state', 'present', ['release_name', 'chart_ref']),
@@ -433,6 +432,7 @@ def main():
     purge = module.params.get('purge')
     wait = module.params.get('wait')
     wait_timeout = module.params.get('wait_timeout')
+    atomic = module.params.get('atomic')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
@@ -471,13 +471,13 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False)
+                              disable_hook, False, atomic=atomic)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force)
+                              disable_hook, force, atomic=atomic)
             changed = True
 
     if module.check_mode:
