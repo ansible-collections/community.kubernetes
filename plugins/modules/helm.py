@@ -70,7 +70,6 @@ options:
     description:
         - Value to pass to chart.
     required: false
-    default: {}
     aliases: [ values ]
     type: dict
   values_files:
@@ -79,7 +78,7 @@ options:
     required: false
     default: {}
     type: list
-    elemants: str
+    elements: str
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
@@ -370,7 +369,7 @@ def deploy(command, release_name, release_values, chart_name, wait,
 
     if values_files:
         for value_file in values_files:
-          deploy_command += " -f=" + value_file
+            deploy_command += " -f=" + value_file
 
     if release_values != {}:
         try:
