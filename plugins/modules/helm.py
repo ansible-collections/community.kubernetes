@@ -75,13 +75,14 @@ options:
     description:
         - Value to pass to chart.
     required: false
+    default: {}
     aliases: [ values ]
     type: dict
   values_files:
     description:
         - Value files to pass to chart.
     required: false
-    default: {}
+    default: []
     type: list
     elements: str
   update_repo_cache:
@@ -357,7 +358,7 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
 
     if values_files:
         for value_file in values_files:
-            deploy_command += " -f=" + value_file
+            deploy_command += " --values=" + value_file
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
@@ -400,7 +401,7 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
-            values_files=dict(type='list'),
+            values_files=dict(type='list', default=[], elements='str'),
             update_repo_cache=dict(type='bool', default=False),
 
             # Helm options
