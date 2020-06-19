@@ -333,7 +333,7 @@ def fetch_chart_info(command, chart_ref):
     return yaml.safe_load(out)
 
 
-def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, atomic=False, values_files):
+def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, values_files, atomic=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -357,8 +357,8 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
         deploy_command += " --no-hooks"
 
     if values_files:
-      for value_file in values_files:
-        deploy_command += " -f=" + value_file
+        for value_file in values_files:
+          deploy_command += " -f=" + value_file
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
@@ -484,13 +484,13 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False, atomic=atomic, values_files=values_files)
+                              disable_hook, False, values_files, atomic=atomic)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force, atomic=atomic, values_files=values_files)
+                              disable_hook, force, values_files, atomic=atomic)
             changed = True
 
     if module.check_mode:
