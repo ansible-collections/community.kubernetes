@@ -73,6 +73,13 @@ options:
     default: {}
     aliases: [ values ]
     type: dict
+  values_files:
+    description:
+        - Value files to pass to chart.
+    required: false
+    default: {}
+    type: list
+    elemants: str
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
@@ -326,10 +333,9 @@ def fetch_chart_info(command, chart_ref):
 
     return yaml.safe_load(out)
 
-
 def deploy(command, release_name, release_values, chart_name, wait,
-           wait_timeout, disable_hook, force, atomic=False, create_namespace=False,
-           replace=False):
+           wait_timeout, disable_hook, force, values_files, atomic=False,
+           create_namespace=False, replace=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -361,6 +367,22 @@ def deploy(command, release_name, release_values, chart_name, wait,
 
     if create_namespace:
         deploy_command += " --create-namespace"
+
+    if values_files:
+      for value_file in values_files:
+        deploy_command += " -f=" + value_file
+
+    if release_values != {}:
+        try:
+            import tempfile
+        except ImportError:
+            module.fail_json(
+                msg=missing_required_lib("tempfile"),
+                exception=traceback.format_exc(),
+                stdout='',
+                stderr='',
+                command='',
+            )
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
@@ -403,6 +425,7 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
+            values_files=dict(type='list'),
             update_repo_cache=dict(type='bool', default=False),
 
             # Helm options
@@ -437,6 +460,7 @@ def main():
     release_namespace = module.params.get('release_namespace')
     release_state = module.params.get('release_state')
     release_values = module.params.get('release_values')
+    values_files = module.params.get('values_files')
     update_repo_cache = module.params.get('update_repo_cache')
 
     # Helm options
@@ -491,15 +515,15 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False, atomic=atomic, create_namespace=create_namespace,
-                              replace=replace)
+                              disable_hook, False, values_files=values_files, atomic=atomic,
+                              create_namespace=create_namespace, replace=replace)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force, atomic=atomic, create_namespace=create_namespace,
-                              replace=replace)
+                              disable_hook, force, values_files=values_files, atomic=atomic,
+                              create_namespace=create_namespace, replace=replace)
             changed = True
 
     if module.check_mode:
