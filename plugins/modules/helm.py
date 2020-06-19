@@ -78,6 +78,13 @@ options:
     default: {}
     aliases: [ values ]
     type: dict
+  values_files:
+    description:
+        - Value files to pass to chart.
+    required: false
+    default: {}
+    type: list
+    elemants: str
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
@@ -320,7 +327,7 @@ def fetch_chart_info(command, chart_ref):
     return yaml.safe_load(out)
 
 
-def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force):
+def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, values_files):
     """
     Install/upgrade/rollback release chart
     """
@@ -339,6 +346,10 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
 
     if disable_hook:
         deploy_command += " --no-hooks"
+
+    if values_files:
+      for value_file in values_files:
+        deploy_command += " -f=" + value_file
 
     if release_values != {}:
         try:
@@ -392,6 +403,7 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
+            values_files=dict(type='list'),
             update_repo_cache=dict(type='bool', default=False),
 
             # Helm options
@@ -423,6 +435,7 @@ def main():
     release_namespace = module.params.get('release_namespace')
     release_state = module.params.get('release_state')
     release_values = module.params.get('release_values')
+    values_files = module.params.get('values_files')
     update_repo_cache = module.params.get('update_repo_cache')
 
     # Helm options
@@ -471,13 +484,13 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False)
+                              disable_hook, False, values_files=values_files)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force)
+                              disable_hook, force, values_files=values_files)
             changed = True
 
     if module.check_mode:
