@@ -369,8 +369,8 @@ def deploy(command, release_name, release_values, chart_name, wait,
         deploy_command += " --create-namespace"
 
     if values_files:
-      for value_file in values_files:
-        deploy_command += " -f=" + value_file
+        for value_file in values_files:
+          deploy_command += " -f=" + value_file
 
     if release_values != {}:
         try:
