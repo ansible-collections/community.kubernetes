@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - k8s - Fix argspec for 'elements' (https://github.com/ansible-collections/community.kubernetes/issues/13).

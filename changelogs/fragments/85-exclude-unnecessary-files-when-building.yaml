@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Make sure extra files are not included in built collection (https://github.com/ansible-collections/community.kubernetes/pull/85).
