@@ -11,21 +11,21 @@ v0.11.0
 Major Changes
 -------------
 
-- helm - New module for managing Helm charts.
-- helm_info - New module for retrieving Helm chart information.
-- helm_repository - New module for managing Helm repositories.
+- helm - New module for managing Helm charts (https://github.com/ansible-collections/community.kubernetes/pull/61).
+- helm_info - New module for retrieving Helm chart information (https://github.com/ansible-collections/community.kubernetes/pull/61).
+- helm_repository - New module for managing Helm repositories (https://github.com/ansible-collections/community.kubernetes/pull/61).
 
 Minor Changes
 -------------
 
-- Rename repository to ``community.kubernetes``.
+- Rename repository to ``community.kubernetes`` (https://github.com/ansible-collections/community.kubernetes/pull/81).
 
 Bugfixes
 --------
 
-- Make sure extra files are not included in built collection.
-- Update GitHub Actions workflow for better CI stability.
-- k8s_log - Module no longer attempts to parse log as JSON.
+- Make sure extra files are not included in built collection (https://github.com/ansible-collections/community.kubernetes/pull/85).
+- Update GitHub Actions workflow for better CI stability (https://github.com/ansible-collections/community.kubernetes/pull/78).
+- k8s_log - Module no longer attempts to parse log as JSON (https://github.com/ansible-collections/community.kubernetes/pull/69).
 
 New Modules
 -----------
@@ -40,27 +40,27 @@ v0.10.0
 Major Changes
 -------------
 
-- k8s_exec - New module for executing commands on pods via Kubernetes API.
-- k8s_log - New module for retrieving pod logs.
+- k8s_exec - New module for executing commands on pods via Kubernetes API (https://github.com/ansible-collections/community.kubernetes/pull/14).
+- k8s_log - New module for retrieving pod logs (https://github.com/ansible-collections/community.kubernetes/pull/16).
 
 Minor Changes
 -------------
 
-- k8s - Added ``persist_config`` option for persisting refreshed tokens.
+- k8s - Added ``persist_config`` option for persisting refreshed tokens (https://github.com/ansible-collections/community.kubernetes/issues/49).
 
 Security Fixes
 --------------
 
-- kubectl - Warn about information disclosure when using options like ``kubectl_password``, ``kubectl_extra_args``, and ``kubectl_token`` to pass data through to the command line using the ``kubectl`` connection plugin.
+- kubectl - Warn about information disclosure when using options like ``kubectl_password``, ``kubectl_extra_args``, and ``kubectl_token`` to pass data through to the command line using the ``kubectl`` connection plugin (https://github.com/ansible-collections/community.kubernetes/pull/51).
 
 Bugfixes
 --------
 
-- k8s - Add exception handling when retrieving k8s client.
-- k8s - Fix argspec for 'elements'.
-- k8s - Use ``from_yaml`` filter with lookup examples in ``k8s`` module documentation examples.
-- k8s_service - Fix argspec.
-- kubectl - Fix documentation in kubectl connection plugin.
+- k8s - Add exception handling when retrieving k8s client (https://github.com/ansible-collections/community.kubernetes/pull/54).
+- k8s - Fix argspec for 'elements' (https://github.com/ansible-collections/community.kubernetes/issues/13).
+- k8s - Use ``from_yaml`` filter with lookup examples in ``k8s`` module documentation examples (https://github.com/ansible-collections/community.kubernetes/pull/56).
+- k8s_service - Fix argspec (https://github.com/ansible-collections/community.kubernetes/issues/33).
+- kubectl - Fix documentation in kubectl connection plugin (https://github.com/ansible-collections/community.kubernetes/pull/52).
 
 New Modules
 -----------
