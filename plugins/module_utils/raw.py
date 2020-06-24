@@ -171,6 +171,8 @@ class KubernetesRawModule(KubernetesAnsibleModule):
 
         flattened_definitions = []
         for definition in self.resource_definitions:
+            if definition is None:
+                continue
             kind = definition.get('kind', self.kind)
             api_version = definition.get('apiVersion', self.api_version)
             if kind.endswith('List'):
