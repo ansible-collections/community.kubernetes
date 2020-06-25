@@ -76,6 +76,9 @@ options:
   values_files:
     description:
         - Value files to pass to chart.
+        - Paths will be read from the target host's filesystem, not the host running ansible.
+        - values_files option is evaluated before values option if both are used.
+        - Paths are evaluated in the order the paths are specified.
     required: false
     default: []
     type: list
