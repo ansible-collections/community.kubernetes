@@ -70,7 +70,7 @@ requirements:
 
 EXAMPLES = r'''
 - name: Get an existing Service object
-  k8s_info:
+  community.kubernetes.k8s_info:
     api_version: v1
     kind: Service
     name: web
@@ -78,26 +78,26 @@ EXAMPLES = r'''
   register: web_service
 
 - name: Get a list of all service objects
-  k8s_info:
+  community.kubernetes.k8s_info:
     api_version: v1
     kind: Service
     namespace: testing
   register: service_list
 
 - name: Get a list of all pods from any namespace
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
   register: pod_list
 
 - name: Search for all Pods labelled app=web
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
     label_selectors:
       - app = web
       - tier in (dev, test)
 
 - name: Search for all running pods
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
     field_selectors:
       - status.phase=Running
