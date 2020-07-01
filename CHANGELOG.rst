@@ -5,6 +5,45 @@ Kubernetes Collection Release Notes
 .. contents:: Topics
 
 
+v0.11.1
+=======
+
+Major Changes
+-------------
+
+- Add changelog and fragments and document changelog process (https://github.com/ansible-collections/community.kubernetes/pull/131).
+
+Minor Changes
+-------------
+
+- Add action groups for playbooks with module_defaults (https://github.com/ansible-collections/community.kubernetes/pull/107).
+- Add requires_ansible version constraints to runtime.yml (https://github.com/ansible-collections/community.kubernetes/pull/126).
+- Add sanity test ignore file for Ansible 2.11 (https://github.com/ansible-collections/community.kubernetes/pull/130).
+- Add test for openshift apply bug (https://github.com/ansible-collections/community.kubernetes/pull/94).
+- Add version_added to each new collection module (https://github.com/ansible-collections/community.kubernetes/pull/98).
+- Check Python code using flake8 (https://github.com/ansible-collections/community.kubernetes/pull/123).
+- Don't require project coverage check on PRs (https://github.com/ansible-collections/community.kubernetes/pull/102).
+- Improve k8s Deployment and Daemonset wait conditions (https://github.com/ansible-collections/community.kubernetes/pull/35).
+- Minor documentation fixes and use of FQCN in some examples (https://github.com/ansible-collections/community.kubernetes/pull/114).
+- Remove action_groups_redirection entry from meta/runtime.yml (https://github.com/ansible-collections/community.kubernetes/pull/127).
+- Remove deprecated ANSIBLE_METADATA field (https://github.com/ansible-collections/community.kubernetes/pull/95).
+- Use FQCN in module docs and plugin examples (https://github.com/ansible-collections/community.kubernetes/pull/146).
+- Use improved kubernetes diffs where possible (https://github.com/ansible-collections/community.kubernetes/pull/105).
+- helm - add 'atomic' option (https://github.com/ansible-collections/community.kubernetes/pull/115).
+- helm - minor code refactoring (https://github.com/ansible-collections/community.kubernetes/pull/110).
+- helm_info and helm_repository - minor code refactor (https://github.com/ansible-collections/community.kubernetes/pull/117).
+- k8s - Handle set object retrieved from lookup plugin (https://github.com/ansible-collections/community.kubernetes/pull/118).
+
+Bugfixes
+--------
+
+- Fix suboption docs structure for inventory plugins (https://github.com/ansible-collections/community.kubernetes/pull/103).
+- Handle invalid kubeconfig parsing error (https://github.com/ansible-collections/community.kubernetes/pull/119).
+- Make sure Service changes run correctly in check_mode (https://github.com/ansible-collections/community.kubernetes/pull/84).
+- k8s_info - remove unneccessary k8s_facts deprecation notice (https://github.com/ansible-collections/community.kubernetes/pull/97).
+- k8s_scale - Fix scale wait and add tests (https://github.com/ansible-collections/community.kubernetes/pull/100).
+- raw - handle condition when definition is none (https://github.com/ansible-collections/community.kubernetes/pull/139).
+
 v0.11.0
 =======
 
