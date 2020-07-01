@@ -56,7 +56,51 @@ Content in this collection requires the [OpenShift Python client](https://pypi.o
 
 ### Using modules from the Kubernetes Collection in your playbooks
 
-You can either call modules by their Fully Qualified Collection Namespace (FQCN), like `community.kubernetes.k8s_info`, or you can call modules by their short name if you list the `community.kubernetes` collection in the playbook's `collections`, like so:
+It's preferable to use content in this collection using their Fully Qualified Collection Namespace (FQCN), for example `community.kubernetes.k8s_info`:
+
+```yaml
+---
+- hosts: localhost
+  gather_facts: false
+  connection: local
+
+  tasks:
+    - name: Ensure the myapp Namespace exists.
+      community.kubernetes.k8s:
+        api_version: v1
+        kind: Namespace
+        name: myapp
+        state: present
+
+    - name: Ensure the myapp Service exists in the myapp Namespace.
+      community.kubernetes.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: myapp
+            namespace: myapp
+          spec:
+            type: LoadBalancer
+            ports:
+            - port: 8080
+              targetPort: 8080
+            selector:
+              app: myapp
+
+    - name: Get a list of all Services in the myapp namespace.
+      community.kubernetes.k8s_info:
+        kind: Service
+        namespace: myapp
+      register: myapp_services
+
+    - name: Display number of Services in the myapp namespace.
+      debug:
+        var: myapp_services.resources | count
+```
+
+If upgrading older playbooks which were built prior to Ansible 2.10 and this collection's existence, you can also define `collections` in your play and refer to this collection's modules as you did in Ansible 2.9 and below, as in this example:
 
 ```yaml
 ---
@@ -74,34 +118,6 @@ You can either call modules by their Fully Qualified Collection Namespace (FQCN)
         kind: Namespace
         name: myapp
         state: present
-
-    - name: Ensure the myapp Service exists in the myapp Namespace.
-      k8s:
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Service
-          metadata:
-            name: myapp
-            namespace: myapp
-          spec:
-            type: LoadBalancer
-            ports:
-            - port: 8080
-              targetPort: 8080
-            selector:
-              app: myapp
-
-    - name: Get a list of all Services in the myapp namespace.
-      k8s_info:
-        kind: Service
-        namespace: myapp
-      register: myapp_services
-
-    - name: Display number of Services in the myapp namespace.
-      debug:
-        var: myapp_services.resources | count
-
 ```
 
 For documentation on how to use individual modules and other content included in this collection, please see the links in the 'Included content' section earlier in this README.

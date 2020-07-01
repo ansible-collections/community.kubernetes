@@ -94,20 +94,20 @@ EXAMPLES = '''
 # File must be named k8s.yaml or k8s.yml
 
 # Authenticate with token, and return all pods and services for all namespaces
-plugin: k8s
+plugin: community.kubernetes.k8s
 connections:
   - host: https://192.168.64.4:8443
     api_key: xxxxxxxxxxxxxxxx
     validate_certs: false
 
 # Use default config (~/.kube/config) file and active context, and return objects for a specific namespace
-plugin: k8s
+plugin: community.kubernetes.k8s
 connections:
   - namespaces:
     - testing
 
 # Use a custom config file, and a specific context.
-plugin: k8s
+plugin: community.kubernetes.k8s
 connections:
   - kubeconfig: /path/to/config
     context: 'awx/192-168-64-4:8443/developer'
