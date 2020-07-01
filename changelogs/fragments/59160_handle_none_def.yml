@@ -1,2 +1,0 @@
-bugfixes:
-- raw - handle condition when definition is none (https://github.com/ansible/ansible/pull/59160).

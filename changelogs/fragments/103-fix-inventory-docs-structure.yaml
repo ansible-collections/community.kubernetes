@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Fix suboption docs structure for inventory plugins (https://github.com/ansible-collections/community.kubernetes/pull/103).
