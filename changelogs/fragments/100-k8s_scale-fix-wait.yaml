@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - k8s_scale - Fix scale wait and add tests (https://github.com/ansible-collections/community.kubernetes/pull/100).

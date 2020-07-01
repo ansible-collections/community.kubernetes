@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - Remove action_groups_redirection entry from meta/runtime.yml (https://github.com/ansible-collections/community.kubernetes/pull/127).

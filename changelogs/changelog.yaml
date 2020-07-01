@@ -65,6 +65,61 @@ releases:
       name: helm_repository
       namespace: ''
     release_date: '2020-05-04'
+  0.11.1:
+    changes:
+      bugfixes:
+      - Fix suboption docs structure for inventory plugins (https://github.com/ansible-collections/community.kubernetes/pull/103).
+      - Handle invalid kubeconfig parsing error (https://github.com/ansible-collections/community.kubernetes/pull/119).
+      - Make sure Service changes run correctly in check_mode (https://github.com/ansible-collections/community.kubernetes/pull/84).
+      - k8s_info - remove unneccessary k8s_facts deprecation notice (https://github.com/ansible-collections/community.kubernetes/pull/97).
+      - k8s_scale - Fix scale wait and add tests (https://github.com/ansible-collections/community.kubernetes/pull/100).
+      - raw - handle condition when definition is none (https://github.com/ansible-collections/community.kubernetes/pull/139).
+      major_changes:
+      - Add changelog and fragments and document changelog process (https://github.com/ansible-collections/community.kubernetes/pull/131).
+      minor_changes:
+      - Add action groups for playbooks with module_defaults (https://github.com/ansible-collections/community.kubernetes/pull/107).
+      - Add requires_ansible version constraints to runtime.yml (https://github.com/ansible-collections/community.kubernetes/pull/126).
+      - Add sanity test ignore file for Ansible 2.11 (https://github.com/ansible-collections/community.kubernetes/pull/130).
+      - Add test for openshift apply bug (https://github.com/ansible-collections/community.kubernetes/pull/94).
+      - Add version_added to each new collection module (https://github.com/ansible-collections/community.kubernetes/pull/98).
+      - Check Python code using flake8 (https://github.com/ansible-collections/community.kubernetes/pull/123).
+      - Don't require project coverage check on PRs (https://github.com/ansible-collections/community.kubernetes/pull/102).
+      - Improve k8s Deployment and Daemonset wait conditions (https://github.com/ansible-collections/community.kubernetes/pull/35).
+      - Minor documentation fixes and use of FQCN in some examples (https://github.com/ansible-collections/community.kubernetes/pull/114).
+      - Remove action_groups_redirection entry from meta/runtime.yml (https://github.com/ansible-collections/community.kubernetes/pull/127).
+      - Remove deprecated ANSIBLE_METADATA field (https://github.com/ansible-collections/community.kubernetes/pull/95).
+      - Use FQCN in module docs and plugin examples (https://github.com/ansible-collections/community.kubernetes/pull/146).
+      - Use improved kubernetes diffs where possible (https://github.com/ansible-collections/community.kubernetes/pull/105).
+      - helm - add 'atomic' option (https://github.com/ansible-collections/community.kubernetes/pull/115).
+      - helm - minor code refactoring (https://github.com/ansible-collections/community.kubernetes/pull/110).
+      - helm_info and helm_repository - minor code refactor (https://github.com/ansible-collections/community.kubernetes/pull/117).
+      - k8s - Handle set object retrieved from lookup plugin (https://github.com/ansible-collections/community.kubernetes/pull/118).
+    fragments:
+    - 100-k8s_scale-fix-wait.yaml
+    - 102-dont-require-codecov-check-prs.yaml
+    - 103-fix-inventory-docs-structure.yaml
+    - 105-improved-k8s-diffs.yaml
+    - 107-action-groups-module_defaults.yaml
+    - 110-helm-minor-refactor.yaml
+    - 114-minor-docs-fixes.yaml
+    - 115-helm-add-atomic.yaml
+    - 117-helm-minor-refactor.yaml
+    - 118-k8s-lookup-handle-set-object.yaml
+    - 119-handle-kubeconfig-error.yaml
+    - 123-flake8.yaml
+    - 126-requires_ansible-version-constraints.yaml
+    - 127-remove-action_groups_redirection.yaml
+    - 130-add-sanity-ignore-211.yaml
+    - 131-changelog-fragments.yaml
+    - 139-fix-manifest-ends-with-separator.yml
+    - 146-fqcn-in-docs.yaml
+    - 35-wait-conditions.yaml
+    - 84-check_mode-service-change.yaml
+    - 94-openshift-apply-test.yaml
+    - 95-remove-ANSIBLE_METADATA.yaml
+    - 97-remove-k8s_facts-deprecation.yaml
+    - 98-add-version_added.yaml
+    release_date: '2020-07-01'
   0.9.0:
     changes:
       major_changes:

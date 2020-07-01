@@ -45,7 +45,7 @@ You can also include it in a `requirements.yml` file and install it via `ansible
 ---
 collections:
   - name: community.kubernetes
-    version: 0.11.0
+    version: 0.11.1
 ```
 
 ### Installing the OpenShift Python Library
@@ -152,7 +152,8 @@ The current process for publishing new versions of the Kubernetes Collection is 
   1. Update the CHANGELOG:
     1. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
     1. Make sure there are fragments for all known changes in `changelogs/fragments`.
-    1. Run `antsibull-changelog release`
+    1. Run `antsibull-changelog release`.
+  1. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
   1. Tag the version in Git and push to GitHub.
   1. Run the following commands to build and release the new version on Galaxy:
 
