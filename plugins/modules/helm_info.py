@@ -48,10 +48,12 @@ options:
   kube_context:
     description:
       - Helm option to specify which kubeconfig context to use.
+      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_CONTEXT) will be used instead.
     type: str
   kubeconfig_path:
     description:
       - Helm option to specify kubeconfig path to use.
+      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_KUBECONFIG) will be used instead.
     type: path
     aliases: [ kubeconfig ]
 '''
@@ -112,7 +114,7 @@ except ImportError:
     IMP_YAML_ERR = traceback.format_exc()
     IMP_YAML = False
 
-from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib, env_fallback
 
 module = None
 
@@ -177,8 +179,8 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
 
             # Helm options
-            kube_context=dict(type='str'),
-            kubeconfig_path=dict(type='path', aliases=['kubeconfig']),
+            kube_context=dict(type='str', fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
         ),
         supports_check_mode=True,
     )
