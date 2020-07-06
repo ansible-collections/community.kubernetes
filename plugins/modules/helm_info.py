@@ -26,11 +26,6 @@ description:
   -  Get information (values, states, ...) from Helm package deployed inside the cluster.
 
 options:
-  binary_path:
-    description:
-      - The path of a helm binary to use.
-    required: false
-    type: path
   release_name:
     description:
       - Release name to manage.
@@ -43,20 +38,8 @@ options:
     required: true
     type: str
     aliases: [ namespace ]
-
-#Helm options
-  kube_context:
-    description:
-      - Helm option to specify which kubeconfig context to use.
-      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_CONTEXT) will be used instead.
-    type: str
-    aliases: [ context ]
-  kubeconfig_path:
-    description:
-      - Helm option to specify kubeconfig path to use.
-      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_KUBECONFIG) will be used instead.
-    type: path
-    aliases: [ kubeconfig ]
+extends_documentation_fragment:
+  - community.kubernetes.helm_common_options
 '''
 
 EXAMPLES = r'''
