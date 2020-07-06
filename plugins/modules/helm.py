@@ -100,6 +100,7 @@ options:
       - Helm option to specify which kubeconfig context to use.
       - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_CONTEXT) will be used instead.
     type: str
+    aliases: [ context ]
   kubeconfig_path:
     description:
       - Helm option to specify kubeconfig path to use.
@@ -397,7 +398,7 @@ def main():
             # Helm options
             disable_hook=dict(type='bool', default=False),
             force=dict(type='bool', default=False),
-            kube_context=dict(type='str', fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kube_context=dict(type='str', aliases=['context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
             kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
             purge=dict(type='bool', default=True),
             wait=dict(type='bool', default=False),
