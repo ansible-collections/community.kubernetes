@@ -309,7 +309,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                         self.fail_json(msg=msg, error=exc.status, status=exc.status, reason=exc.reason)
                 success = True
                 result['result'] = k8s_obj
-                if wait:
+                if wait and not self.check_mode:
                     success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
                 if existing:
                     existing = existing.to_dict()
@@ -368,7 +368,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                 match, diffs = self.diff_objects(existing.to_dict(), k8s_obj)
                 success = True
                 result['result'] = k8s_obj
-                if wait:
+                if wait and not self.check_mode:
                     success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
                 match, diffs = self.diff_objects(existing.to_dict(), result['result'])
                 result['changed'] = not match
@@ -396,7 +396,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
 
             success = True
             result['result'] = k8s_obj
-            if wait:
+            if wait and not self.check_mode:
                 success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
             match, diffs = self.diff_objects(existing.to_dict(), result['result'])
             result['changed'] = not match
