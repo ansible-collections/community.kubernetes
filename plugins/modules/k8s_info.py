@@ -96,6 +96,14 @@ EXAMPLES = r'''
       - app = web
       - tier in (dev, test)
 
+- name: Using vars while using label_selectors
+  community.kubernetes.k8s_info:
+    kind: Pod
+    label_selectors:
+      - "app = {{ app_label_web }}"
+  vars:
+    app_label_web: web
+
 - name: Search for all running pods
   community.kubernetes.k8s_info:
     kind: Pod
