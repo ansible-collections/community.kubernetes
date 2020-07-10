@@ -1,0 +1,2 @@
+openshift>=0.6.2
+requests-oauthlib
