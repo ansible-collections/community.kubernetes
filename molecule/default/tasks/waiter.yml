@@ -83,11 +83,13 @@
         k8s_pod_name: wait-ds
         k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:2
       register: update_ds_check_mode
+      check_mode: yes
 
-    - name: Check that check_mode returned changed
+    - name: Check that check_mode result contains the changes
       assert:
         that:
           - update_ds_check_mode is changed
+          - "update_ds_check_mode.result.spec.template.spec.containers[0].image == 'gcr.io/kuar-demo/kuard-amd64:2'"
 
     - name: Update a daemonset
       k8s:
