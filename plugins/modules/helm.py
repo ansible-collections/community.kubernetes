@@ -127,9 +127,10 @@ options:
     default: False
   create_namespace:
     description:
-      - Create the release namespace if not present
+      - Create the release namespace if not present.
     type: bool
     default: False
+    version_added: "0.11.1"
 '''
 
 EXAMPLES = r'''
