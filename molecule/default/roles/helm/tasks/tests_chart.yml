@@ -1,11 +1,4 @@
 ---
-- name: Create helm namespace
-  k8s:
-    api_version: v1
-    kind: Namespace
-    name: "{{ helm_namespace }}"
-    wait: true
-
 - name: Check helm_info empty
   helm_info:
     binary_path: "{{ helm_binary }}"
@@ -18,6 +11,22 @@
     that:
       - empty_info.status is undefined
 
+- name: "Install fail {{ chart_test }} from {{ source }}"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  ignore_errors: yes
+  register: install_fail
+
+- name: "Assert that Install fail {{ chart_test }} from {{ source }}"
+  assert:
+    that:
+      - install_fail is failed
+      - "'Error: create: failed to create: namespaces \"' + helm_namespace + '\" not found' in install_fail.stderr"
+
 - name: "Install {{ chart_test }} from {{ source }}"
   helm:
     binary_path: "{{ helm_binary }}"
@@ -25,6 +34,7 @@
     chart_ref: "{{ chart_source }}"
     chart_version: "{{ chart_source_version | default(omit) }}"
     namespace: "{{ helm_namespace }}"
+    create_namespace: true
   register: install
 
 - name: "Assert that {{ chart_test }} chart is installed from {{ source }}"

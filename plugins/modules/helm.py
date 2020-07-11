@@ -126,15 +126,21 @@ options:
       - If set, the installation process deletes the installation on failure.
     type: bool
     default: False
+  create_namespace:
+    description:
+      - Create the release namespace if not present.
+    type: bool
+    default: False
+    version_added: "0.11.1"
 '''
 
 EXAMPLES = r'''
-- name: Create helm namespace as HELM 3 doesn't create it automatically
-  community.kubernetes.k8s:
-    api_version: v1
-    kind: Namespace
-    name: "monitoring"
-    wait: true
+- name: Deploy latest version of Prometheus chart inside monitoring namespace (and create it)
+  community.kubernetes.helm:
+    name: test
+    chart_ref: stable/prometheus
+    release_namespace: monitoring
+    create_namespace: true
 
 # From repository
 - name: Add stable chart repo
@@ -329,7 +335,7 @@ def fetch_chart_info(command, chart_ref):
     return yaml.safe_load(out)
 
 
-def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, atomic=False):
+def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force, atomic=False, create_namespace=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -351,6 +357,9 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
 
     if disable_hook:
         deploy_command += " --no-hooks"
+
+    if create_namespace:
+        deploy_command += " --create-namespace"
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
@@ -404,6 +413,7 @@ def main():
             wait=dict(type='bool', default=False),
             wait_timeout=dict(type='str'),
             atomic=dict(type='bool', default=False),
+            create_namespace=dict(type='bool', default=False),
         ),
         required_if=[
             ('release_state', 'present', ['release_name', 'chart_ref']),
@@ -436,6 +446,7 @@ def main():
     wait = module.params.get('wait')
     wait_timeout = module.params.get('wait_timeout')
     atomic = module.params.get('atomic')
+    create_namespace = module.params.get('create_namespace')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
@@ -474,13 +485,13 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False, atomic=atomic)
+                              disable_hook, False, atomic=atomic, create_namespace=create_namespace)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force, atomic=atomic)
+                              disable_hook, force, atomic=atomic, create_namespace=create_namespace)
             changed = True
 
     if module.check_mode:
