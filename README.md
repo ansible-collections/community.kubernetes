@@ -22,14 +22,14 @@ Click on the name of a plugin or module to view that content's documentation:
   - **Modules**:
     - [k8s](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
     - [k8s_auth](https://docs.ansible.com/ansible/latest/modules/k8s_auth_module.html)
-    - [k8s_exec](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/k8s_exec.py)
-    - [k8s_log](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/k8s_log.py)
+    - [k8s_exec](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_exec.py)
+    - [k8s_log](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_log.py)
     - [k8s_info](https://docs.ansible.com/ansible/latest/modules/k8s_info_module.html)
     - [k8s_scale](https://docs.ansible.com/ansible/latest/modules/k8s_scale_module.html)
     - [k8s_service](https://docs.ansible.com/ansible/latest/modules/k8s_service_module.html)
-    - [helm](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm.py)
-    - [helm_info](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm_info.py)
-    - [helm_repository](https://github.com/ansible-collections/community.kubernetes/blob/master/plugins/modules/helm_repository.py)
+    - [helm](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm.py)
+    - [helm_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_info.py)
+    - [helm_repository](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_repository.py)
 
 ## Installation and Usage
 
