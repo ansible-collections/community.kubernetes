@@ -88,7 +88,7 @@ jobs:
 
       - name: Install ansible base (devel branch)
         run: |
-          pip uninstall ansible
+          pip uninstall -y ansible
           pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
       - name: Create default collection path symlink
