@@ -27,11 +27,6 @@ description:
   - Install, upgrade, delete packages with the Helm package manager.
 
 options:
-  binary_path:
-    description:
-      - The path of a helm binary to use.
-    required: false
-    type: path
   chart_ref:
     description:
       - chart_reference on chart repository.
@@ -95,18 +90,6 @@ options:
       - Helm option to force reinstall, ignore on new install.
     default: False
     type: bool
-  kube_context:
-    description:
-      - Helm option to specify which kubeconfig context to use.
-      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_CONTEXT) will be used instead.
-    type: str
-    aliases: [ context ]
-  kubeconfig_path:
-    description:
-      - Helm option to specify kubeconfig path to use.
-      - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_KUBECONFIG) will be used instead.
-    type: path
-    aliases: [ kubeconfig ]
   purge:
     description:
       - Remove the release from the store and make its name free for later use.
@@ -132,6 +115,8 @@ options:
     type: bool
     default: False
     version_added: "0.11.1"
+extends_documentation_fragment:
+  - community.kubernetes.helm_common_options
 '''
 
 EXAMPLES = r'''
