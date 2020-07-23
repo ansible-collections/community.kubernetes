@@ -86,10 +86,10 @@ jobs:
       - name: Install molecule and openshift dependencies
         run: pip install molecule yamllint openshift flake8
 
-      - name: Install ansible base (2.10 branch)
+      - name: Install ansible base, latest release.
         run: |
           pip uninstall -y ansible
-          pip install https://github.com/ansible/ansible/archive/stable-2.10.tar.gz --disable-pip-version-check
+          pip install --pre ansible-base
 
       # The devel branch doesn't work with Molecule currently.
       # See: https://github.com/ansible-community/molecule/issues/2757
