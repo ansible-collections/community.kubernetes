@@ -84,10 +84,21 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install molecule and openshift dependencies
-        run: pip install molecule yamllint openshift flake8
+        run: pip install ansible molecule yamllint openshift flake8
 
-      - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      # The latest release doesn't work with Molecule currently.
+      # See: https://github.com/ansible-community/molecule/issues/2757
+      # - name: Install ansible base, latest release.
+      #   run: |
+      #     pip uninstall -y ansible
+      #     pip install --pre ansible-base
+
+      # The devel branch doesn't work with Molecule currently.
+      # See: https://github.com/ansible-community/molecule/issues/2757
+      # - name: Install ansible base (devel branch)
+      #   run: |
+      #     pip uninstall -y ansible
+      #     pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
       - name: Create default collection path symlink
         run: |
