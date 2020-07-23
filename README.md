@@ -11,25 +11,25 @@ The collection includes a variety of Ansible content to help automate the manage
 Click on the name of a plugin or module to view that content's documentation:
 
   - **Connection Plugins**:
-    - [kubectl](https://docs.ansible.com/ansible/latest/plugins/connection/kubectl.html)
+    - [kubectl](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/kubectl_connection.html)
   - **Filter Plugins**:
     - [k8s_config_resource_name](https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#kubernetes-filters)
   - **Inventory Source**:
-    - [k8s](https://docs.ansible.com/ansible/latest/plugins/inventory/k8s.html)
-    - [openshift](https://docs.ansible.com/ansible/latest/plugins/inventory/openshift.html)
+    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_inventory.html)
+    - [openshift](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/openshift_inventory.html)
   - **Lookup Plugins**:
-    - [k8s](https://docs.ansible.com/ansible/latest/plugins/lookup/k8s.html)
+    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_lookup.html)
   - **Modules**:
-    - [k8s](https://docs.ansible.com/ansible/latest/modules/k8s_module.html)
-    - [k8s_auth](https://docs.ansible.com/ansible/latest/modules/k8s_auth_module.html)
-    - [k8s_exec](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_exec.py)
-    - [k8s_log](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_log.py)
-    - [k8s_info](https://docs.ansible.com/ansible/latest/modules/k8s_info_module.html)
-    - [k8s_scale](https://docs.ansible.com/ansible/latest/modules/k8s_scale_module.html)
-    - [k8s_service](https://docs.ansible.com/ansible/latest/modules/k8s_service_module.html)
-    - [helm](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm.py)
-    - [helm_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_info.py)
-    - [helm_repository](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_repository.py)
+    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_module.html)
+    - [k8s_auth](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_auth_module.html)
+    - [k8s_exec](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_exec_module.html)
+    - [k8s_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_info_module.html)
+    - [k8s_log](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_log_module.html)
+    - [k8s_scale](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_scale_module.html)
+    - [k8s_service](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_service_module.html)
+    - [helm](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_module.html)
+    - [helm_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_info_module.html)
+    - [helm_repository](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html)
 
 ## Installation and Usage
 
