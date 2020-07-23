@@ -30,10 +30,13 @@ requirements:
   - "openshift == 0.4.3"
   - "PyYAML >= 3.11"
 
+notes:
+- Return code C(return_code) for the command executed is added in output in version 0.11.1.
 options:
   proxy:
     description:
-    - The URL of an HTTP proxy to use for the connection. Can also be specified via K8S_AUTH_PROXY environment variable.
+    - The URL of an HTTP proxy to use for the connection.
+    - Can also be specified via I(K8S_AUTH_PROXY) environment variable.
     - Please note that this module does not pick up typical proxy settings from the environment (e.g. HTTP_PROXY).
     type: str
   namespace:
@@ -48,7 +51,8 @@ options:
     required: yes
   container:
     description:
-    - The name of the container in the pod to connect to. Defaults to only container if there is only one container in the pod.
+    - The name of the container in the pod to connect to.
+    - Defaults to only container if there is only one container in the pod.
     type: str
     required: no
   command:
@@ -64,6 +68,19 @@ EXAMPLES = r'''
     namespace: myproject
     pod: zuul-scheduler
     command: zuul-scheduler full-reconfigure
+
+- name: Check RC status of command executed
+  community.kubernetes.k8s_exec:
+    namespace: myproject
+    pod: busybox-test
+    command: cmd_with_non_zero_exit_code
+  register: command_status
+  ignore_errors: True
+
+- name: Check last command status
+  debug:
+    msg: "cmd failed"
+  when: command_status.return_code != 0
 '''
 
 RETURN = r'''
@@ -85,10 +102,23 @@ result:
      stderr_lines:
        description: The command stderr
        type: str
+     return_code:
+       description: The command status code
+       type: int
 '''
 
 import copy
 import shlex
+import traceback
+
+try:
+    import yaml
+    IMP_YAML = True
+except ImportError:
+    IMP_YAML_ERR = traceback.format_exc()
+    IMP_YAML = False
+
+from ansible.module_utils.basic import missing_required_lib
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
 from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC
 
@@ -113,6 +143,10 @@ class KubernetesExecCommand(KubernetesAnsibleModule):
 
 def main():
     module = KubernetesExecCommand()
+
+    if not IMP_YAML:
+        module.fail_json(msg=missing_required_lib("yaml"), exception=IMP_YAML_ERR)
+
     # Load kubernetes.client.Configuration
     module.get_api_client()
     api = core_v1_api.CoreV1Api()
@@ -131,15 +165,27 @@ def main():
         stdin=False,
         tty=False,
         _preload_content=False, **optional_kwargs)
-    stdout, stderr = [], []
+    stdout, stderr, rc = [], [], 0
     while resp.is_open():
         resp.update(timeout=1)
         if resp.peek_stdout():
             stdout.append(resp.read_stdout())
         if resp.peek_stderr():
             stderr.append(resp.read_stderr())
+    err = resp.read_channel(3)
+    err = yaml.safe_load(err)
+    if err['status'] == 'Success':
+        rc = 0
+    else:
+        rc = int(err['details']['causes'][0]['message'])
+
     module.exit_json(
-        changed=True, stdout="".join(stdout), stderr="".join(stderr))
+        # Some command might change environment, but ultimately failing at end
+        changed=True,
+        stdout="".join(stdout),
+        stderr="".join(stderr),
+        return_code=rc
+    )
 
 
 if __name__ == '__main__':
