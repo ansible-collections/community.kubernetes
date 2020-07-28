@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Test against stable ansible branch so molecule tests work (https://github.com/ansible-collections/community.kubernetes/pull/168).

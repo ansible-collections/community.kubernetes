@@ -11,7 +11,7 @@ DOCUMENTATION = r'''
 ---
 module: helm_plugin
 short_description: Manage Helm plugins
-version_added: "0.11.0"
+version_added: "1.0.0"
 author:
   - Abhijeet Kasurde (@Akasurde)
 requirements:

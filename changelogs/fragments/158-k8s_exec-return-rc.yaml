@@ -1,0 +1,3 @@
+---
+major_changes:
+  - k8s_exec - Return rc for the command executed (https://github.com/ansible-collections/community.kubernetes/pull/158).
