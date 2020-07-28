@@ -45,7 +45,7 @@ You can also include it in a `requirements.yml` file and install it via `ansible
 ---
 collections:
   - name: community.kubernetes
-    version: 0.11.1
+    version: 1.0.0
 ```
 
 ### Installing the OpenShift Python Library

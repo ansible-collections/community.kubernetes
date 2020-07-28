@@ -31,7 +31,7 @@ requirements:
   - "PyYAML >= 3.11"
 
 notes:
-- Return code C(return_code) for the command executed is added in output in version 0.11.1.
+- Return code C(return_code) for the command executed is added in output in version 1.0.0.
 options:
   proxy:
     description:
