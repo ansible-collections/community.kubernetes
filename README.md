@@ -29,6 +29,8 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s_service](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_service_module.html)
     - [helm](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_module.html)
     - [helm_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_info_module.html)
+    - [helm_plugin](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin.py)
+    - [helm_plugin_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin_info.py)
     - [helm_repository](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html)
 
 ## Installation and Usage
