@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - Update openshift requirements in k8s module doc (https://github.com/ansible-collections/community.kubernetes/pull/153).

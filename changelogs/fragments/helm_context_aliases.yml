@@ -1,3 +1,0 @@
-minor_changes:
-- helm - add aliases context for kube_context.
-- helm_info - add aliases context for kube_context.

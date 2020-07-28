@@ -1,2 +1,3 @@
+---
 bugfixes:
-- raw - handle condition when definition is none (https://github.com/ansible-collections/community.kubernetes/pull/139).
+  - raw - handle condition when definition is none (https://github.com/ansible-collections/community.kubernetes/pull/139).
