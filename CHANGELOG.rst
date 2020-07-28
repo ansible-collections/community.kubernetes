@@ -22,9 +22,9 @@ Minor Changes
 - Update base branch to 'main' (https://github.com/ansible-collections/community.kubernetes/issues/148).
 - helm - Add support for K8S_AUTH_CONTEXT, K8S_AUTH_KUBECONFIG env (https://github.com/ansible-collections/community.kubernetes/pull/141).
 - helm - Allow creating namespaces with Helm (https://github.com/ansible-collections/community.kubernetes/pull/157).
-- helm - add aliases context for kube_context.
+- helm - add aliases context for kube_context (https://github.com/ansible-collections/community.kubernetes/pull/152).
 - helm - add support for K8S_AUTH_KUBECONFIG and K8S_AUTH_CONTEXT environment variable (https://github.com/ansible-collections/community.kubernetes/issues/140).
-- helm_info - add aliases context for kube_context.
+- helm_info - add aliases context for kube_context (https://github.com/ansible-collections/community.kubernetes/pull/152).
 - helm_info - add support for K8S_AUTH_KUBECONFIG and K8S_AUTH_CONTEXT environment variable (https://github.com/ansible-collections/community.kubernetes/issues/140).
 - k8s_exec - return RC for the command executed (https://github.com/ansible-collections/community.kubernetes/issues/122).
 - k8s_info - Update example using vars (https://github.com/ansible-collections/community.kubernetes/pull/156).
