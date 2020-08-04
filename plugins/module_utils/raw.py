@@ -27,6 +27,7 @@ import traceback
 from ansible.module_utils.basic import missing_required_lib
 from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC
 from ansible.module_utils.six import string_types
+from ansible.module_utils._text import to_native
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
 from ansible.module_utils.common.dict_transformations import dict_merge
 
@@ -175,7 +176,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
                 continue
             kind = definition.get('kind', self.kind)
             api_version = definition.get('apiVersion', self.api_version)
-            if kind.endswith('List'):
+            if kind and kind.endswith('List'):
                 resource = self.find_resource(kind, api_version, fail=False)
                 flattened_definitions.extend(self.flatten_list_kind(resource, definition))
             else:
@@ -269,6 +270,9 @@ class KubernetesRawModule(KubernetesAnsibleModule):
         except DynamicApiError as exc:
             self.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc.body),
                            error=exc.status, status=exc.status, reason=exc.reason)
+        except Exception as exc:
+            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(to_native(exc)),
+                           error='', status='', reason='')
 
         if state == 'absent':
             result['method'] = "delete"
@@ -421,6 +425,12 @@ class KubernetesRawModule(KubernetesAnsibleModule):
             if self.warnings:
                 msg += "\n" + "\n    ".join(self.warnings)
             error = dict(msg=msg, error=exc.status, status=exc.status, reason=exc.reason, warnings=self.warnings)
+            return None, error
+        except Exception as exc:
+            msg = "Failed to patch object: {0}".format(exc)
+            if self.warnings:
+                msg += "\n" + "\n    ".join(self.warnings)
+            error = dict(msg=msg, error=to_native(exc), status='', reason='', warnings=self.warnings)
             return None, error
 
     def create_project_request(self, definition):
