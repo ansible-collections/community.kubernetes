@@ -37,7 +37,7 @@ Click on the name of a plugin or module to view that content's documentation:
 
 ### Installing the Collection from Ansible Galaxy
 
-Before using the Kuberentes collection, you need to install it with the Ansible Galaxy CLI:
+Before using the Kubernetes collection, you need to install it with the Ansible Galaxy CLI:
 
     ansible-galaxy collection install community.kubernetes
 
