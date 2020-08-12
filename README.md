@@ -37,7 +37,7 @@ Click on the name of a plugin or module to view that content's documentation:
 
 ### Installing the Collection from Ansible Galaxy
 
-Before using the Kuberentes collection, you need to install it with the Ansible Galaxy CLI:
+Before using the Kubernetes collection, you need to install it with the Ansible Galaxy CLI:
 
     ansible-galaxy collection install community.kubernetes
 
@@ -127,6 +127,8 @@ For documentation on how to use individual modules and other content included in
 ## Testing and Development
 
 If you want to develop new content for this collection or improve what's already here, the easiest way to work on the collection is to clone it into one of the configured [`COLLECTIONS_PATHS`](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#collections-paths), and work on it there.
+
+See [Contributing to community.kubernetes](CONTRIBUTING.md).
 
 ### Testing with `ansible-test`
 
