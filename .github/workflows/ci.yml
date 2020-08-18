@@ -108,3 +108,94 @@ jobs:
       - name: Run molecule default test scenario
         run: molecule test
         working-directory: ./ansible_collections/community/kubernetes
+
+  downstream-sanity:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['3.6']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/kubernetes
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install ansible base (devel branch)
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+
+      - name: Run sanity tests on Python ${{ matrix.python_version }}
+        run: make downstream-test-sanity
+        working-directory: ./ansible_collections/community/kubernetes
+
+  downstream-integration:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['3.6']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/kubernetes
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install ansible base (devel branch)
+        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+
+      - name: Run integration tests on Python ${{ matrix.python_version }}
+        run: make downstream-test-integration
+        working-directory: ./ansible_collections/community/kubernetes
+
+  downstream-molecule:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['3.7']
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+        with:
+          path: ansible_collections/community/kubernetes
+
+      - name: Set up KinD cluster
+        uses: engineerd/setup-kind@v0.4.0
+
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install molecule and openshift dependencies
+        run: pip install ansible molecule yamllint openshift flake8
+
+      # The latest release doesn't work with Molecule currently.
+      # See: https://github.com/ansible-community/molecule/issues/2757
+      # - name: Install ansible base, latest release.
+      #   run: |
+      #     pip uninstall -y ansible
+      #     pip install --pre ansible-base
+
+      # The devel branch doesn't work with Molecule currently.
+      # See: https://github.com/ansible-community/molecule/issues/2757
+      # - name: Install ansible base (devel branch)
+      #   run: |
+      #     pip uninstall -y ansible
+      #     pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+
+      - name: Create default collection path symlink
+        run: |
+          mkdir -p /home/runner/.ansible
+          ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
+
+      - name: Run molecule default test scenario
+        run: make downstream-test-molecule
+        working-directory: ./ansible_collections/community/kubernetes

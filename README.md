@@ -136,15 +136,15 @@ The `tests` directory contains configuration for running sanity and integration 
 
 You can run the collection's test suites with the commands:
 
-    ansible-test sanity --docker -v --color
-    ansible-test integration --docker -v --color
+    make test-sanity
+    make test-integration
 
 ### Testing with `molecule`
 
-There are also integration tests in the `molecule` directory which are meant to be run against a local Kubernetes cluster, e.g. using [KinD](https://kind.sigs.k8s.io) or [Minikube](https://minikube.sigs.k8s.io). To run the tests, set up a local cluster, then run Molecule:
+There are also integration tests in the `molecule` directory which are meant to be run against a local Kubernetes cluster, e.g. using [KinD](https://kind.sigs.k8s.io) or [Minikube](https://minikube.sigs.k8s.io). To setup a local cluster using KinD and run Molecule:
 
     kind create cluster
-    molecule test
+    make test-molecule
 
 ## Publishing New Versions
 
@@ -157,6 +157,11 @@ Releases are automatically built and pushed to Ansible Galaxy for any new tag. B
     1. Run `antsibull-changelog release`.
   1. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
   1. Tag the version in Git and push to GitHub.
+  1. Run the following commands to build and release the new version on Galaxy:
+
+     ```
+     make release
+     ```
 
 After the version is published, verify it exists on the [Kubernetes Collection Galaxy page](https://galaxy.ansible.com/community/kubernetes).
 
