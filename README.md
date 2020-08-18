@@ -128,6 +128,8 @@ For documentation on how to use individual modules and other content included in
 
 If you want to develop new content for this collection or improve what's already here, the easiest way to work on the collection is to clone it into one of the configured [`COLLECTIONS_PATHS`](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#collections-paths), and work on it there.
 
+See [Contributing to community.kubernetes](CONTRIBUTING.md).
+
 ### Testing with `ansible-test`
 
 The `tests` directory contains configuration for running sanity and integration tests using [`ansible-test`](https://docs.ansible.com/ansible/latest/dev_guide/testing_integration.html).
