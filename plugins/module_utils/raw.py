@@ -25,7 +25,7 @@ import sys
 import traceback
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
 from ansible.module_utils.six import string_types
 from ansible.module_utils._text import to_native
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
@@ -78,6 +78,8 @@ class KubernetesRawModule(KubernetesAnsibleModule):
     @property
     def argspec(self):
         argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
+        argument_spec.update(copy.deepcopy(NAME_ARG_SPEC))
+        argument_spec.update(copy.deepcopy(RESOURCE_ARG_SPEC))
         argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
         argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
         argument_spec['wait'] = dict(type='bool', default=False)
