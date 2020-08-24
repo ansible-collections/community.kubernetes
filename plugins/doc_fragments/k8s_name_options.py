@@ -15,9 +15,10 @@ class ModuleDocFragment(object):
 options:
   api_version:
     description:
-    - Use to specify the API version. Use to create, delete, or discover an object without providing a full
-      resource definition. Use in conjunction with I(kind), I(name), and I(namespace) to identify a
-      specific object. If I(resource definition) is provided, the I(apiVersion) from the I(resource_definition)
+    - Use to specify the API version.
+    - Use to create, delete, or discover an object without providing a full resource definition.
+    - Use in conjunction with I(kind), I(name), and I(namespace) to identify a specific object.
+    - If I(resource definition) is provided, the I(apiVersion) value from the I(resource_definition)
       will override this option.
     type: str
     default: v1
@@ -26,23 +27,26 @@ options:
     - version
   kind:
     description:
-    - Use to specify an object model. Use to create, delete, or discover an object without providing a full
-      resource definition. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
-      specific object. If I(resource definition) is provided, the I(kind) from the I(resource_definition)
+    - Use to specify an object model.
+    - Use to create, delete, or discover an object without providing a full resource definition.
+    - Use in conjunction with I(api_version), I(name), and I(namespace) to identify a specific object.
+    - If I(resource definition) is provided, the I(kind) value from the I(resource_definition)
       will override this option.
     type: str
   name:
     description:
-    - Use to specify an object name. Use to create, delete, or discover an object without providing a full
-      resource definition. Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
-      specific object. If I(resource definition) is provided, the I(metadata.name) value from the
-      I(resource_definition) will override this option.
+    - Use to specify an object name.
+    - Use to create, delete, or discover an object without providing a full resource definition.
+    - Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a specific object.
+    - If I(resource definition) is provided, the I(metadata.name) value from the I(resource_definition)
+      will override this option.
     type: str
   namespace:
     description:
-    - Use to specify an object namespace. Useful when creating, deleting, or discovering an object without
-      providing a full resource definition. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specific object. If I(resource definition) is provided, the I(metadata.namespace) value
-      from the I(resource_definition) will override this option.
+    - Use to specify an object namespace.
+    - Useful when creating, deleting, or discovering an object without providing a full resource definition.
+    - Use in conjunction with I(api_version), I(kind), and I(name) to identify a specific object.
+    - If I(resource definition) is provided, the I(metadata.namespace) value from the I(resource_definition)
+      will override this option.
     type: str
 '''

@@ -25,31 +25,15 @@ description:
   - This module was called C(k8s_facts) before Ansible 2.9. The usage did not change.
 
 options:
-  api_version:
-    description:
-    - Use to specify the API version. in conjunction with I(kind), I(name), and I(namespace) to identify a
-      specific object.
-    default: v1
-    aliases:
-    - api
-    - version
-    type: str
   kind:
     description:
-    - Use to specify an object model. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
-      specific object.
-    required: yes
+    - Use to specify an object model.
+    - Use to create, delete, or discover an object without providing a full resource definition.
+    - Use in conjunction with I(api_version), I(name), and I(namespace) to identify a specific object.
+    - If I(resource definition) is provided, the I(kind) value from the I(resource_definition)
+      will override this option.
     type: str
-  name:
-    description:
-    - Use to specify an object name.  Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
-      specific object.
-    type: str
-  namespace:
-    description:
-    - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specific object.
-    type: str
+    required: True
   label_selectors:
     description: List of label selectors to use to filter results
     type: list
@@ -61,6 +45,7 @@ options:
 
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
+  - community.kubernetes.k8s_name_options
 
 requirements:
   - "python >= 2.7"
@@ -109,6 +94,11 @@ EXAMPLES = r'''
     kind: Pod
     field_selectors:
       - status.phase=Running
+
+- name: List custom objects created using CRD
+  community.kubernetes.k8s_info:
+    kind: MyCustomObject
+    api_version: "stable.example.com/v1"
 '''
 
 RETURN = r'''
