@@ -228,7 +228,8 @@ class Connection(ConnectionBase):
     def _build_exec_cmd(self, cmd):
         """ Build the local kubectl exec command to run cmd on remote_host
         """
-        local_cmd = censored_local_cmd = [self.transport_cmd]
+        local_cmd = [self.transport_cmd]
+        censored_local_cmd = [self.transport_cmd]
 
         # Build command options based on doc string
         doc_yaml = AnsibleLoader(self.documentation).get_single_data()
