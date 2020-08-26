@@ -109,7 +109,7 @@ jobs:
         run: make test-molecule
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-sanity:
+  downstream-sanity-2.9:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -126,13 +126,13 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+        run: pip install "ansible>=2.9.0,<2.10.0"
 
       - name: Run sanity tests on Python ${{ matrix.python_version }}
         run: make downstream-test-sanity
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-integration:
+  downstream-integration-2.9:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -149,13 +149,13 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+        run: pip install "ansible>=2.9.0,<2.10.0"
 
       - name: Run integration tests on Python ${{ matrix.python_version }}
         run: make downstream-test-integration
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-molecule:
+  downstream-molecule-2.9:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -175,21 +175,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install molecule and openshift dependencies
-        run: pip install ansible molecule yamllint openshift flake8
-
-      # The latest release doesn't work with Molecule currently.
-      # See: https://github.com/ansible-community/molecule/issues/2757
-      # - name: Install ansible base, latest release.
-      #   run: |
-      #     pip uninstall -y ansible
-      #     pip install --pre ansible-base
-
-      # The devel branch doesn't work with Molecule currently.
-      # See: https://github.com/ansible-community/molecule/issues/2757
-      # - name: Install ansible base (devel branch)
-      #   run: |
-      #     pip uninstall -y ansible
-      #     pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+        run: pip install "ansible>=2.9.0,<2.10.0" molecule yamllint openshift flake8
 
       - name: Create default collection path symlink
         run: |
