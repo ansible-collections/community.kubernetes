@@ -30,7 +30,7 @@ jobs:
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests on Python ${{ matrix.python_version }}
-        run: ansible-test sanity --docker -v --color --python ${{ matrix.python_version }}
+        run: make test-sanity PYTHON_VERSION=${{ matrix.python_version }}
         working-directory: ./ansible_collections/community/kubernetes
 
   integration:
@@ -53,7 +53,7 @@ jobs:
         run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
       - name: Run integration tests on Python ${{ matrix.python_version }}
-        run: ansible-test integration --docker -v --color --retry-on-error --python ${{ matrix.python_version }} --continue-on-error --diff --coverage
+        run: make test-integration PYTHON_VERSION=${{ matrix.python_version }}
         working-directory: ./ansible_collections/community/kubernetes
 
       - name: Generate coverage report.
@@ -106,7 +106,7 @@ jobs:
           ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
 
       - name: Run molecule default test scenario
-        run: molecule test
+        run: make test-molecule
         working-directory: ./ansible_collections/community/kubernetes
 
   downstream-sanity:

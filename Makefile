@@ -1,6 +1,9 @@
 # Also needs to be updated in galaxy.yml
 VERSION = 1.0.0
 
+TEST_ARGS ?= ""
+PYTHON_VERSION ?= `python -c 'import platform; print("{0}.{1}".format(platform.python_version_tuple()[0], platform.python_version_tuple()[1]))'`
+
 clean:
 	rm -f community-kubernetes-${VERSION}.tar.gz
 	rm -rf ansible_collections
@@ -15,13 +18,13 @@ install: build
 	ansible-galaxy collection install -p ansible_collections community-kubernetes-${VERSION}.tar.gz
 
 test-sanity:
-	ansible-test sanity -v --docker --color $(TEST_ARGS)
+	ansible-test sanity --docker -v --color --python $(PYTHON_VERSION) $(TEST_ARGS)
 
 test-integration:
-	ansible-test integration --docker -v --color $(TEST_ARGS)
+	ansible-test integration --docker -v --color --retry-on-error --python $(PYTHON_VERSION) --continue-on-error --diff --coverage $(TEST_ARGS)
 
 test-molecule:
-	ansible-test integration --docker -v --color $(TEST_ARGS)
+	molecule test
 
 downstream-test-sanity: 
 	./utils/downstream.sh -s

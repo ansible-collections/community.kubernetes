@@ -157,11 +157,6 @@ Releases are automatically built and pushed to Ansible Galaxy for any new tag. B
     1. Run `antsibull-changelog release`.
   1. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
   1. Tag the version in Git and push to GitHub.
-  1. Run the following commands to build and release the new version on Galaxy:
-
-     ```
-     make release
-     ```
 
 After the version is published, verify it exists on the [Kubernetes Collection Galaxy page](https://galaxy.ansible.com/community/kubernetes).
 
