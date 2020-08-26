@@ -32,6 +32,7 @@ f_prep()
         LICENSE
         README.md
         Makefile
+        setup.cfg
         .yamllint
     )
 
