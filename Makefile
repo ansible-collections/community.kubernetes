@@ -7,6 +7,7 @@ PYTHON_VERSION ?= `python -c 'import platform; print("{0}.{1}".format(platform.p
 clean:
 	rm -f community-kubernetes-${VERSION}.tar.gz
 	rm -rf ansible_collections
+	rm -rf tests/output
 
 build: clean
 	ansible-galaxy collection build
@@ -18,10 +19,10 @@ install: build
 	ansible-galaxy collection install -p ansible_collections community-kubernetes-${VERSION}.tar.gz
 
 test-sanity:
-	ansible-test sanity --docker -v --color --python $(PYTHON_VERSION) $(TEST_ARGS)
+	ansible-test sanity --docker -v --color --python $(PYTHON_VERSION) $(?TEST_ARGS)
 
 test-integration:
-	ansible-test integration --docker -v --color --retry-on-error --python $(PYTHON_VERSION) --continue-on-error --diff --coverage $(TEST_ARGS)
+	ansible-test integration --docker -v --color --retry-on-error --python $(PYTHON_VERSION) --continue-on-error --diff --coverage $(?TEST_ARGS)
 
 test-molecule:
 	molecule test
