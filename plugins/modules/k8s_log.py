@@ -26,40 +26,25 @@ description:
   - Analogous to `kubectl logs` or `oc logs`
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
+  - community.kubernetes.k8s_name_options
 options:
-  api_version:
-    description:
-    - Use to specify the API version. in conjunction with I(kind), I(name), and I(namespace) to identify a
-      specific object.
-    - If using I(label_selector), cannot be overridden
-    default: v1
-    aliases:
-    - api
-    - version
-    type: str
   kind:
     description:
-    - Use to specify an object model. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
-      specific object.
-    - If using I(label_selector), cannot be overridden
-    required: no
+    - Use to specify an object model.
+    - Use in conjunction with I(api_version), I(name), and I(namespace) to identify a specific object.
+    - If using I(label_selector), cannot be overridden.
+    type: str
     default: Pod
-    type: str
-  namespace:
-    description:
-    - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specific object.
-    type: str
   name:
     description:
-    - Use to specify an object name.  Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
-      specific object.
-    - Only one of I(name) or I(label_selector) may be provided
+    - Use to specify an object name.
+    - Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a specific object.
+    - Only one of I(name) or I(label_selector) may be provided.
     type: str
   label_selectors:
     description:
     - List of label selectors to use to filter results
-    - Only one of I(name) or I(label_selector) may be provided
+    - Only one of I(name) or I(label_selector) may be provided.
     type: list
     elements: str
   container:
@@ -129,7 +114,7 @@ import copy
 from ansible.module_utils.six import PY2
 
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, NAME_ARG_SPEC
 
 
 class KubernetesLogModule(KubernetesAnsibleModule):
@@ -142,12 +127,10 @@ class KubernetesLogModule(KubernetesAnsibleModule):
     @property
     def argspec(self):
         args = copy.deepcopy(AUTH_ARG_SPEC)
+        args.update(NAME_ARG_SPEC)
         args.update(
             dict(
-                kind=dict(default='Pod'),
-                api_version=dict(default='v1', aliases=['api', 'version']),
-                name=dict(),
-                namespace=dict(),
+                kind=dict(type='str', default='Pod'),
                 container=dict(),
                 label_selectors=dict(type='list', elements='str', default=[]),
             )

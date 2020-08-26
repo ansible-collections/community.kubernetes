@@ -83,6 +83,9 @@ COMMON_ARG_SPEC = {
         'type': 'bool',
         'default': False,
     },
+}
+
+RESOURCE_ARG_SPEC = {
     'resource_definition': {
         'type': list_dict_str,
         'aliases': ['definition', 'inline']
@@ -90,6 +93,9 @@ COMMON_ARG_SPEC = {
     'src': {
         'type': 'path',
     },
+}
+
+NAME_ARG_SPEC = {
     'kind': {},
     'name': {},
     'namespace': {},

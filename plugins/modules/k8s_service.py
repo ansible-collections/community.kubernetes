@@ -22,43 +22,10 @@ description:
 
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
+  - community.kubernetes.k8s_resource_options
+  - community.kubernetes.k8s_state_options
 
 options:
-  resource_definition:
-    description:
-    - A partial YAML definition of the Service object being created/updated. Here you can define Kubernetes
-      Service Resource parameters not covered by this module's parameters.
-    - "NOTE: I(resource_definition) has lower priority than module parameters. If you try to define e.g.
-      I(metadata.namespace) here, that value will be ignored and I(metadata) used instead."
-    aliases:
-    - definition
-    - inline
-    type: dict
-  src:
-    description:
-    - "Provide a path to a file containing a valid YAML definition of an object dated. Mutually
-      exclusive with I(resource_definition). NOTE: I(kind), I(api_version), I(resource_name), and I(namespace)
-      will be overwritten by corresponding values found in the configuration read in from the I(src) file."
-    - Reads from the local file system. To read from the Ansible controller's file system, use the file lookup
-      plugin or template lookup plugin, combined with the from_yaml filter, and pass the result to
-      I(resource_definition). See Examples below.
-    type: path
-  state:
-    description:
-    - Determines if an object should be created, patched, or deleted. When set to C(present), an object will be
-      created, if it does not already exist. If set to C(absent), an existing object will be deleted. If set to
-      C(present), an existing object will be patched, if its attributes differ from those specified using
-      module options and I(resource_definition).
-    default: present
-    choices:
-    - present
-    - absent
-    type: str
-  force:
-    description:
-    - If set to C(True), and I(state) is C(present), an existing object will be replaced.
-    default: false
-    type: bool
   merge_type:
     description:
     - Whether to override the default patch merge approach with a specific type. By default, the strategic
@@ -181,7 +148,7 @@ import traceback
 
 from collections import defaultdict
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC
 from ansible_collections.community.kubernetes.plugins.module_utils.raw import KubernetesRawModule
 
 
@@ -190,25 +157,10 @@ SERVICE_ARG_SPEC = {
         'type': 'bool',
         'default': False,
     },
-    'state': {
-        'default': 'present',
-        'choices': ['present', 'absent'],
-    },
-    'force': {
-        'type': 'bool',
-        'default': False,
-    },
-    'resource_definition': {
-        'type': 'dict',
-        'aliases': ['definition', 'inline']
-    },
     'name': {'required': True},
     'namespace': {'required': True},
     'merge_type': {'type': 'list', 'elements': 'str', 'choices': ['json', 'merge', 'strategic-merge']},
     'selector': {'type': 'dict'},
-    'src': {
-        'type': 'path',
-    },
     'type': {
         'type': 'str',
         'choices': [
@@ -240,6 +192,8 @@ class KubernetesService(KubernetesRawModule):
     def argspec(self):
         """ argspec property builder """
         argument_spec = copy.deepcopy(AUTH_ARG_SPEC)
+        argument_spec.update(COMMON_ARG_SPEC)
+        argument_spec.update(RESOURCE_ARG_SPEC)
         argument_spec.update(SERVICE_ARG_SPEC)
         return argument_spec
 

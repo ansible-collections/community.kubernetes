@@ -21,7 +21,7 @@ __metaclass__ = type
 
 import copy
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
 from ansible.module_utils.six import string_types
 
@@ -142,11 +142,10 @@ class KubernetesAnsibleScaleModule(KubernetesAnsibleModule):
 
     @property
     def argspec(self):
-        args = copy.deepcopy(COMMON_ARG_SPEC)
-        args.pop('state')
-        args.pop('force')
+        args = copy.deepcopy(SCALE_ARG_SPEC)
+        args.update(RESOURCE_ARG_SPEC)
+        args.update(NAME_ARG_SPEC)
         args.update(AUTH_ARG_SPEC)
-        args.update(SCALE_ARG_SPEC)
         return args
 
     def scale(self, resource, existing_object, replicas, wait, wait_time):
