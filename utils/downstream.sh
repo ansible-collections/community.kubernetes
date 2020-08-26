@@ -32,6 +32,7 @@ f_prep()
         LICENSE
         README.md
         Makefile
+        .yamllint
     )
 
     # Directories to recursively copy downstream (relative repo root dir path)
@@ -40,6 +41,7 @@ f_prep()
         meta
         plugins
         tests
+        molecule
     )
 
     # Temp build dir 
