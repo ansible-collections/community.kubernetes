@@ -136,15 +136,15 @@ The `tests` directory contains configuration for running sanity and integration 
 
 You can run the collection's test suites with the commands:
 
-    ansible-test sanity --docker -v --color
-    ansible-test integration --docker -v --color
+    make test-sanity
+    make test-integration
 
 ### Testing with `molecule`
 
-There are also integration tests in the `molecule` directory which are meant to be run against a local Kubernetes cluster, e.g. using [KinD](https://kind.sigs.k8s.io) or [Minikube](https://minikube.sigs.k8s.io). To run the tests, set up a local cluster, then run Molecule:
+There are also integration tests in the `molecule` directory which are meant to be run against a local Kubernetes cluster, e.g. using [KinD](https://kind.sigs.k8s.io) or [Minikube](https://minikube.sigs.k8s.io). To setup a local cluster using KinD and run Molecule:
 
     kind create cluster
-    molecule test
+    make test-molecule
 
 ## Publishing New Versions
 
