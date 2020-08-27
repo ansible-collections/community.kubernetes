@@ -109,7 +109,7 @@ jobs:
         run: make test-molecule
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-sanity-2.9:
+  downstream-sanity-29:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -132,7 +132,7 @@ jobs:
         run: make downstream-test-sanity
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-integration-2.9:
+  downstream-integration-29:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -155,7 +155,7 @@ jobs:
         run: make downstream-test-integration
         working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-molecule-2.9:
+  downstream-molecule-29:
     runs-on: ubuntu-latest
     strategy:
       matrix:
