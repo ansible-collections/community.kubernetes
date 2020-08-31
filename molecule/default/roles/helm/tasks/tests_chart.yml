@@ -201,6 +201,63 @@
     that:
       - install is not changed
 
+# Test --replace
+- name: Install chart for replace option
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test-0001
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is installed from {{ source }}"
+  assert:
+    that:
+      - install is changed
+
+- name: Remove {{ chart_test }} with --purge
+  helm:
+    binary_path: "{{ helm_binary }}"
+    state: absent
+    name: test-0001
+    purge: False
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Check if chart is removed
+  assert:
+    that:
+      - install is changed
+
+- name: Install chart again with same name test-0001
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test-0001
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+    replace: True
+  register: install
+
+- name: "Assert that {{ chart_test }} chart is installed from {{ source }}"
+  assert:
+    that:
+      - install is changed
+
+- name: Remove {{ chart_test }} (cleanup)
+  helm:
+    binary_path: "{{ helm_binary }}"
+    state: absent
+    name: test-0001
+    namespace: "{{ helm_namespace }}"
+  register: install
+
+- name: Check if chart is removed
+  assert:
+    that:
+      - install is changed
+
 - name: Remove helm namespace
   k8s:
     api_version: v1
