@@ -47,7 +47,7 @@ f_prep()
 
     # Temp build dir 
     _tmp_dir=$(mktemp -d)
-    _build_dir="${_tmp_dir}/ansible_collections/kubernetes/base"
+    _build_dir="${_tmp_dir}/ansible_collections/kubernetes/core"
     mkdir -p "${_build_dir}"
 }
 
@@ -64,14 +64,14 @@ f_show_help()
 f_text_sub()
 {
     # Switch FQCN and dependent components
-    sed -i "s/community-kubernetes/kubernetes-base/" "${_build_dir}/Makefile"
-    sed -i "s/community\/kubernetes/kubernetes\/base/" "${_build_dir}/Makefile"
+    sed -i "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
+    sed -i "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
     sed -i "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
-    sed -i "s/community.kubernetes/kubernetes.base/" "${_build_dir}/galaxy.yml"
-    sed -i "s/name\:.*$/name: base/" "${_build_dir}/galaxy.yml"
+    sed -i "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
+    sed -i "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
     sed -i "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
     sed -i "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
-    find "${_build_dir}" -type f -exec sed -i "s/community\.kubernetes/kubernetes\.base/g" {} \;
+    find "${_build_dir}" -type f -exec sed -i "s/community\.kubernetes/kubernetes\.core/g" {} \;
 }
 
 f_cleanup()
