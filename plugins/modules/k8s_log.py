@@ -9,7 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-DOCUMENTATION = r'''
+DOCUMENTATION = r"""
 module: k8s_log
 
 short_description: Fetch logs from Kubernetes resources
@@ -59,9 +59,9 @@ requirements:
   - "python >= 2.7"
   - "openshift >= 0.6"
   - "PyYAML >= 3.11"
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Get a log from a Pod
   community.kubernetes.k8s_log:
     name: example-1
@@ -93,9 +93,9 @@ EXAMPLES = r'''
     namespace: testing
     name: example
   register: log
-'''
+"""
 
-RETURN = r'''
+RETURN = r"""
 log:
   type: str
   description:
@@ -106,15 +106,20 @@ log_lines:
   description:
   - The log of the object, split on newlines
   returned: success
-'''
+"""
 
 
 import copy
 
-from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import (
+    AnsibleModule,
+)
 from ansible.module_utils.six import PY2
 
-from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_SPEC, NAME_ARG_SPEC)
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC,
+    NAME_ARG_SPEC,
+)
 
 
 def argspec():
@@ -122,106 +127,91 @@ def argspec():
     args.update(NAME_ARG_SPEC)
     args.update(
         dict(
-            kind=dict(type='str', default='Pod'),
+            kind=dict(type="str", default="Pod"),
             container=dict(),
-            label_selectors=dict(type='list', elements='str', default=[]),
+            label_selectors=dict(type="list", elements="str", default=[]),
         )
     )
     return args
 
+    def execute_module(self):
+        name = self.params.get("name")
+        namespace = self.params.get("namespace")
+        label_selector = ",".join(self.params.get("label_selectors", {}))
+        if name and label_selector:
+            self.fail(msg="Only one of name or label_selectors can be provided")
 
-def execute_module(module, k8s_ansible_mixin):
-    name = module.params.get('name')
-    namespace = module.params.get('namespace')
-    label_selector = ','.join(module.params.get('label_selectors', {}))
-    if name and label_selector:
-        module.fail(msg='Only one of name or label_selectors can be provided')
+        self.client = self.get_api_client()
+        resource = self.find_resource(
+            self.params["kind"], self.params["api_version"], fail=True
+        )
+        v1_pods = self.find_resource("Pod", "v1", fail=True)
 
-    resource = k8s_ansible_mixin.find_resource(module.params['kind'], module.params['api_version'], fail=True)
-    v1_pods = k8s_ansible_mixin.find_resource('Pod', 'v1', fail=True)
+        if "log" not in resource.subresources:
+            if not name:
+                self.fail(
+                    msg="name must be provided for resources that do not support the log subresource"
+                )
+            instance = resource.get(name=name, namespace=namespace)
+            try:
+                selectors = self.extract_selectors(instance)
+            except ValueError as e:
+                self.fail(" ".join(e.args))
 
-    if 'log' not in resource.subresources:
-        if not name:
-            module.fail(msg='name must be provided for resources that do not support the log subresource')
-        instance = resource.get(name=name, namespace=namespace)
-        label_selector = ','.join(extract_selectors(module, instance))
-        resource = v1_pods
+            if not selectors:
+                self.fail(
+                    "No Pod selector was found on the {0}.{1} with name {2} in namespace {3}".format(
+                        "/".join(instance.group, instance.apiVersion),
+                        instance.kind,
+                        instance.metadata.name,
+                        instance.metadata.namespace,
+                    )
+                )
 
-    if label_selector:
-        instances = v1_pods.get(namespace=namespace, label_selector=label_selector)
-        if not instances.items:
-            module.fail(msg='No pods in namespace {0} matched selector {1}'.format(namespace, label_selector))
-        # This matches the behavior of kubectl when logging pods via a selector
-        name = instances.items[0].metadata.name
-        resource = v1_pods
+            label_selector = ",".join(selectors)
 
-    kwargs = {}
-    if module.params.get('container'):
-        kwargs['query_params'] = dict(container=module.params['container'])
+            resource = v1_pods
 
-    log = serialize_log(resource.log.get(
-        name=name,
-        namespace=namespace,
-        serialize=False,
-        **kwargs
-    ))
+        if label_selector:
+            instances = v1_pods.get(namespace=namespace, label_selector=label_selector)
+            if not instances.items:
+                self.fail(
+                    msg="No pods in namespace {0} matched selector {1}".format(
+                        namespace, label_selector
+                    )
+                )
+            # This matches the behavior of kubectl when logging pods via a selector
+            name = instances.items[0].metadata.name
+            resource = v1_pods
 
-    module.exit_json(changed=False, log=log, log_lines=log.split('\n'))
+        kwargs = {}
+        if self.params.get("container"):
+            kwargs["query_params"] = dict(container=self.params["container"])
 
+        log = serialize_log(
+            resource.log.get(name=name, namespace=namespace, serialize=False, **kwargs)
+        )
 
-def extract_selectors(module, instance):
-    # Parses selectors on an object based on the specifications documented here:
-    # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
-    selectors = []
-    if not instance.spec.selector:
-        module.fail(msg='{0} {1} does not support the log subresource directly, and no Pod selector was found on the object'.format(
-                    '/'.join(instance.group, instance.apiVersion), instance.kind))
-
-    if not (instance.spec.selector.matchLabels or instance.spec.selector.matchExpressions):
-        # A few resources (like DeploymentConfigs) just use a simple key:value style instead of supporting expressions
-        for k, v in dict(instance.spec.selector).items():
-            selectors.append('{0}={1}'.format(k, v))
-        return selectors
-
-    if instance.spec.selector.matchLabels:
-        for k, v in dict(instance.spec.selector.matchLabels).items():
-            selectors.append('{0}={1}'.format(k, v))
-
-    if instance.spec.selector.matchExpressions:
-        for expression in instance.spec.selector.matchExpressions:
-            operator = expression.operator
-
-            if operator == 'Exists':
-                selectors.append(expression.key)
-            elif operator == 'DoesNotExist':
-                selectors.append('!{0}'.format(expression.key))
-            elif operator in ['In', 'NotIn']:
-                selectors.append('{key} {operator} {values}'.format(
-                    key=expression.key,
-                    operator=operator.lower(),
-                    values='({0})'.format(', '.join(expression.values))
-                ))
-            else:
-                module.fail(msg='The k8s_log module does not support the {0} matchExpression operator'.format(operator.lower()))
-
-    return selectors
+        self.exit_json(changed=False, log=log, log_lines=log.split("\n"))
 
 
 def serialize_log(response):
     if PY2:
         return response.data
-    return response.data.decode('utf8')
+    return response.data.decode("utf8")
 
 
 def main():
     module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
     from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-        K8sAnsibleMixin, get_api_client)
+        K8sAnsibleMixin,
+        get_api_client,
+    )
 
     k8s_ansible_mixin = K8sAnsibleMixin(module)
     k8s_ansible_mixin.client = get_api_client(module=module)
     execute_module(module, k8s_ansible_mixin)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

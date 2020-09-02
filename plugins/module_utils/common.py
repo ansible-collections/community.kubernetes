@@ -782,6 +782,42 @@ class K8sAnsibleMixin(object):
         result['method'] = 'create'
         return result
 
+    def extract_selectors(self, instance):
+        # Parses selectors on an object based on the specifications documented here:
+        # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#label-selectors
+        selectors = []
+        if not instance.spec.selector:
+            return selectors
+
+        if not (instance.spec.selector.matchLabels or instance.spec.selector.matchExpressions):
+            # Some resources may just use a simple key:value style instead of supporting expressions
+            for k, v in dict(instance.spec.selector).items():
+                selectors.append('{0}={1}'.format(k, v))
+            return selectors
+
+        if instance.spec.selector.matchLabels:
+            for k, v in dict(instance.spec.selector.matchLabels).items():
+                selectors.append('{0}={1}'.format(k, v))
+
+        if instance.spec.selector.matchExpressions:
+            for expression in instance.spec.selector.matchExpressions:
+                operator = expression.operator
+
+                if operator == 'Exists':
+                    selectors.append(expression.key)
+                elif operator == 'DoesNotExist':
+                    selectors.append('!{0}'.format(expression.key))
+                elif operator in ['In', 'NotIn']:
+                    selectors.append('{key} {operator} {values}'.format(
+                        key=expression.key,
+                        operator=operator.lower(),
+                        values='({0})'.format(', '.join(expression.values))
+                    ))
+                else:
+                    raise ValueError('This collection does not support parsing the {0} matchExpression operator'.format(operator.lower()))
+
+        return selectors
+
 
 class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
     # NOTE: This class KubernetesAnsibleModule is deprecated in favor of
