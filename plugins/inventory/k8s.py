@@ -154,6 +154,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
     connection_plugin = "community.kubernetes.kubectl"
     transport = "kubectl"
 
+    PARENT_RESOURCES = [
+        {'api_version': 'apps/v1', 'kind': 'Deployment'},
+        {'api_version': 'apps/v1', 'kind': 'DaemonSet'},
+        {'api_version': 'apps/v1', 'kind': 'StatefulSet'},
+    ]
+
     def parse(self, inventory, loader, path, cache=True):
         super(InventoryModule, self).parse(inventory, loader, path)
         cache_key = self._get_cache_prefix(path)
@@ -238,10 +244,17 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
 
     def get_pods_from_parents(self, client, name, namespace, namespace_group):
 
+<<<<<<< HEAD
         v1_pods = client.resources.get(api_version="v1", kind="Pod")
         for kind in ["Deployment", "Daemonset", "StatefulSet"]:
             try:
                 resource = client.resources.get(api_version="apps/v1", kind=kind)
+=======
+        v1_pods = client.resources.get(api_version='v1', kind='Pod')
+        for item in self.PARENT_RESOURCES:
+            try:
+                resource = client.resources.get(api_version=item['api_version'], kind=item['kind'])
+>>>>>>> Make parent resources more easily configurable
                 instances = resource.get(namespace=namespace)
             except Exception:
                 # TODO Could be expected due to RBAC or odd cluster, maybe should log a warning or something?
@@ -263,6 +276,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
                     )
                 except DynamicApiError as exc:
                     self.display.debug(exc)
+<<<<<<< HEAD
                     raise K8sInventoryException(
                         "Error fetching Pod list: %s" % format_dynamic_api_exc(exc)
                     )
@@ -272,6 +286,11 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
                         namespace_group, kind.lower(), instance.metadata.name
                     )
                 )
+=======
+                    raise K8sInventoryException('Error fetching Pod list: %s' % format_dynamic_api_exc(exc))
+
+                instance_group = self.sanitize('{0}_{1}_{2}'.format(namespace_group, item['kind'].lower(), instance.metadata.name))
+>>>>>>> Make parent resources more easily configurable
                 self.inventory.add_group(instance_group)
                 self.inventory.add_child(namespace_group, instance_group)
 
