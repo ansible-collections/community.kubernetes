@@ -72,21 +72,14 @@
     - meta: refresh_inventory
 
 - name: Verify inventory and connection plugins
-  hosts: namespace_inventory_pods
-  gather_facts: no
+  hosts: namespace_inventory_deployment_inventory
+  gather_facts: yes
 
   vars:
     file_content: |
       Hello world
 
   tasks:
-    - name: End play if host not running (TODO should we not add these to the inventory?)
-      meta: end_host
-      when: pod_phase != "Running"
-
-    - debug: var=hostvars
-    - setup:
-
     - debug: var=ansible_facts
 
     - name: Assert the TEST environment variable was retrieved
