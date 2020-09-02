@@ -1,0 +1,70 @@
+---
+- block:
+    - set_fact:
+        wait_namespace: wait
+        k8s_pod_name: pod-info-1
+
+    - name: Ensure namespace exists
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ wait_namespace }}"
+
+    - name: Add a simple pod with initContainer
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: "{{ k8s_pod_name }}"
+            namespace: "{{ wait_namespace }}"
+          spec:
+            initContainers:
+              - name: init-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 20']
+            containers:
+              - name: utilitypod-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 360']
+
+    - community.kubernetes.k8s_info:
+        name: "{{ k8s_pod_name }}"
+        kind: Pod
+        namespace: "{{ wait_namespace }}"
+        wait: yes
+        wait_sleep: 5
+        wait_timeout: 400
+      register: wait_info
+
+    - name: Assert that pod creation succeeded
+      assert:
+        that:
+          - wait_info is successful
+          - wait_info.changed is false
+
+    - name: Remove Pod
+      k8s:
+        api_version: v1
+        kind: Pod
+        name: "{{ k8s_pod_name }}"
+        namespace: "{{ wait_namespace }}"
+        state: absent
+        wait: yes
+      ignore_errors: yes
+      register: short_wait_remove_pod
+
+    - name: Check if pod is removed
+      assert:
+        that:
+          - short_wait_remove_pod is successful
+          - short_wait_remove_pod.changed is true
+
+  always:
+    - name: Remove namespace
+      k8s:
+        kind: Namespace
+        name: "{{ wait_namespace }}"
+        state: absent

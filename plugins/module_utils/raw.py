@@ -25,7 +25,8 @@ import sys
 import traceback
 
 from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, WAIT_ARG_SPEC)
 from ansible.module_utils.six import string_types
 from ansible.module_utils._text import to_native
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
@@ -68,24 +69,13 @@ class KubernetesRawModule(KubernetesAnsibleModule):
         )
 
     @property
-    def condition_spec(self):
-        return dict(
-            type=dict(),
-            status=dict(default=True, choices=[True, False, "Unknown"]),
-            reason=dict()
-        )
-
-    @property
     def argspec(self):
         argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
         argument_spec.update(copy.deepcopy(NAME_ARG_SPEC))
         argument_spec.update(copy.deepcopy(RESOURCE_ARG_SPEC))
         argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
+        argument_spec.update(copy.deepcopy(WAIT_ARG_SPEC))
         argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
-        argument_spec['wait'] = dict(type='bool', default=False)
-        argument_spec['wait_sleep'] = dict(type='int', default=5)
-        argument_spec['wait_timeout'] = dict(type='int', default=120)
-        argument_spec['wait_condition'] = dict(type='dict', default=None, options=self.condition_spec)
         argument_spec['validate'] = dict(type='dict', default=None, options=self.validate_spec)
         argument_spec['append_hash'] = dict(type='bool', default=False)
         argument_spec['apply'] = dict(type='bool', default=False)

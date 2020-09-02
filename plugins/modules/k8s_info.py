@@ -46,6 +46,7 @@ options:
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
   - community.kubernetes.k8s_name_options
+  - community.kubernetes.k8s_wait_options
 
 requirements:
   - "python >= 2.7"
@@ -99,6 +100,23 @@ EXAMPLES = r'''
   community.kubernetes.k8s_info:
     kind: MyCustomObject
     api_version: "stable.example.com/v1"
+
+- name: Wait till the Object is created
+  community.kubernetes.k8s_info:
+    kind: Pod
+    wait: yes
+    name: pod-not-yet-created
+    namespace: default
+    wait_sleep: 10
+    wait_timeout: 360
+
+- name: Wait for object deletion
+  community.kubernetes.k8s_info:
+    api_version: v1
+    kind: Namespace
+    name: testing
+  register: result
+  until: not result.resources
 '''
 
 RETURN = r'''
@@ -131,7 +149,8 @@ resources:
 '''
 
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    KubernetesAnsibleModule, AUTH_ARG_SPEC, WAIT_ARG_SPEC)
 import copy
 
 
@@ -148,14 +167,19 @@ class KubernetesInfoModule(KubernetesAnsibleModule):
         self.exit_json(changed=False,
                        **self.kubernetes_facts(self.params['kind'],
                                                self.params['api_version'],
-                                               self.params['name'],
-                                               self.params['namespace'],
-                                               self.params['label_selectors'],
-                                               self.params['field_selectors']))
+                                               name=self.params['name'],
+                                               namespace=self.params['namespace'],
+                                               label_selectors=self.params['label_selectors'],
+                                               field_selectors=self.params['field_selectors'],
+                                               wait=self.params['wait'],
+                                               wait_sleep=self.params['wait_sleep'],
+                                               wait_timeout=self.params['wait_timeout'],
+                                               condition=self.params['wait_condition']))
 
     @property
     def argspec(self):
         args = copy.deepcopy(AUTH_ARG_SPEC)
+        args.update(WAIT_ARG_SPEC)
         args.update(
             dict(
                 kind=dict(required=True),
@@ -163,7 +187,7 @@ class KubernetesInfoModule(KubernetesAnsibleModule):
                 name=dict(),
                 namespace=dict(),
                 label_selectors=dict(type='list', elements='str', default=[]),
-                field_selectors=dict(type='list', elements='str', default=[]),
+                field_selectors=dict(type='list', elements='str', default=[])
             )
         )
         return args

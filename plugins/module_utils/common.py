@@ -142,6 +142,21 @@ AUTH_ARG_SPEC = {
     },
 }
 
+WAIT_ARG_SPEC = dict(
+    wait=dict(type='bool', default=False),
+    wait_sleep=dict(type='int', default=5),
+    wait_timeout=dict(type='int', default=120),
+    wait_condition=dict(
+        type='dict',
+        default=None,
+        options=dict(
+            type=dict(),
+            status=dict(default=True, choices=[True, False, "Unknown"]),
+            reason=dict()
+        )
+    )
+)
+
 # Map kubernetes-client parameters to ansible parameters
 AUTH_ARG_MAP = {
     'kubeconfig': 'kubeconfig',
@@ -235,22 +250,42 @@ class K8sAnsibleMixin(object):
             if fail:
                 self.fail(msg='Failed to find exact match for {0}.{1} by [kind, name, singularName, shortNames]'.format(api_version, kind))
 
-    def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None):
+    def kubernetes_facts(self, kind, api_version, name=None, namespace=None,
+                         label_selectors=None, field_selectors=None,
+                         wait=False, wait_sleep=5, wait_timeout=120,
+                         condition=None, state='present'):
         resource = self.find_resource(kind, api_version)
         if not resource:
             return dict(resources=[])
+        if not label_selectors:
+            label_selectors = []
+        if not field_selectors:
+            field_selectors = []
+
         try:
-            result = resource.get(name=name,
-                                  namespace=namespace,
-                                  label_selector=','.join(label_selectors),
-                                  field_selector=','.join(field_selectors)).to_dict()
+            if wait:
+                definition = {'kind': kind, 'metadata': {'name': name, 'namespace': namespace}}
+                success, result, duration = self.wait(resource, definition, wait_sleep, wait_timeout,
+                                                      state=state, condition=condition,
+                                                      label_selectors=','.join(label_selectors),
+                                                      field_selectors=','.join(field_selectors))
+                if not success:
+                    msg = "Gathering info about Resource timed out"
+                    if result:
+                        self.fail_json(msg=msg, **result)
+                    else:
+                        self.fail_json(msg=msg)
+
+            else:
+                result = resource.get(name=name, namespace=namespace,
+                                      label_selector=','.join(label_selectors),
+                                      field_selector=','.join(field_selectors)).to_dict()
         except openshift.dynamic.exceptions.NotFoundError:
             return dict(resources=[])
 
         if 'items' in result:
             return dict(resources=result['items'])
-        else:
-            return dict(resources=[result])
+        return dict(resources=[result])
 
     def remove_aliases(self):
         """
@@ -309,7 +344,9 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
     def fail(self, msg=None):
         self.fail_json(msg=msg)
 
-    def _wait_for(self, resource, name, namespace, predicate, sleep, timeout, state):
+    def _wait_for(self, resource, name, namespace,
+                  predicate, sleep, timeout, state,
+                  label_selectors=None, field_selectors=None):
         start = datetime.now()
 
         def _wait_for_elapsed():
@@ -318,7 +355,9 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
         response = None
         while _wait_for_elapsed() < timeout:
             try:
-                response = resource.get(name=name, namespace=namespace)
+                response = resource.get(name=name, namespace=namespace,
+                                        label_selector=label_selectors,
+                                        field_selector=field_selectors)
                 if predicate(response):
                     if response:
                         return True, response.to_dict(), _wait_for_elapsed()
@@ -332,7 +371,8 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
             response = response.to_dict()
         return False, response, _wait_for_elapsed()
 
-    def wait(self, resource, definition, sleep, timeout, state='present', condition=None):
+    def wait(self, resource, definition, sleep, timeout, state='present', condition=None,
+             label_selectors=None, field_selectors=None):
 
         def _deployment_ready(deployment):
             # FIXME: frustratingly bool(deployment.status) is True even if status is empty
@@ -394,4 +434,5 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
             predicate = _custom_condition
         else:
             predicate = _resource_absent
-        return self._wait_for(resource, definition['metadata']['name'], definition['metadata'].get('namespace'), predicate, sleep, timeout, state)
+        return self._wait_for(resource, definition['metadata']['name'], definition['metadata'].get('namespace'), predicate,
+                              sleep, timeout, state, label_selectors=label_selectors, field_selectors=field_selectors)
