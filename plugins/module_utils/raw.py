@@ -32,7 +32,6 @@ from ansible.module_utils.common.dict_transformations import dict_merge
 
 
 try:
-    import yaml
     from openshift.dynamic.exceptions import DynamicApiError, NotFoundError, ConflictError, ForbiddenError, KubernetesValidateMissing
     import urllib3
 except ImportError:

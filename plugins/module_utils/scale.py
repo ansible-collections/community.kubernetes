@@ -23,10 +23,8 @@ import copy
 
 from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
-from ansible.module_utils.six import string_types
 
 try:
-    import yaml
     from openshift.dynamic.exceptions import NotFoundError
 except ImportError:
     pass
