@@ -150,7 +150,7 @@ class InventoryModule(K8sInventoryModule):
                 self.get_routes_for_namespace(client, name, namespace)
 
     def get_routes_for_namespace(self, client, name, namespace):
-        v1_route = client.resources.get(api_version='v1', kind='Route')
+        v1_route = client.resources.get(api_version='route.openshift.io/v1', kind='Route')
         try:
             obj = v1_route.get(namespace=namespace)
         except DynamicApiError as exc:
