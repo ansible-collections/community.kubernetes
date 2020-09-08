@@ -114,6 +114,7 @@ import copy
 from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import (
     AnsibleModule,
 )
+
 from ansible.module_utils.six import PY2
 
 from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
@@ -134,65 +135,65 @@ def argspec():
     )
     return args
 
-    def execute_module(self):
-        name = self.params.get("name")
-        namespace = self.params.get("namespace")
-        label_selector = ",".join(self.params.get("label_selectors", {}))
-        if name and label_selector:
-            self.fail(msg="Only one of name or label_selectors can be provided")
 
-        self.client = self.get_api_client()
-        resource = self.find_resource(
-            self.params["kind"], self.params["api_version"], fail=True
-        )
-        v1_pods = self.find_resource("Pod", "v1", fail=True)
+def execute_module(module, k8s_ansible_mixin):
+    name = module.params.get("name")
+    namespace = module.params.get("namespace")
+    label_selector = ",".join(module.params.get("label_selectors", {}))
+    if name and label_selector:
+        module.fail(msg="Only one of name or label_selectors can be provided")
 
-        if "log" not in resource.subresources:
-            if not name:
-                self.fail(
-                    msg="name must be provided for resources that do not support the log subresource"
+    resource = k8s_ansible_mixin.find_resource(
+        module.params["kind"], module.params["api_version"], fail=True
+    )
+    v1_pods = k8s_ansible_mixin.find_resource("Pod", "v1", fail=True)
+
+    if "log" not in resource.subresources:
+        if not name:
+            module.fail(
+                msg="name must be provided for resources that do not support the log subresource"
+            )
+        instance = resource.get(name=name, namespace=namespace)
+        try:
+            selectors = k8s_ansible_mixin.extract_selectors(instance)
+        except ValueError as e:
+            module.fail(" ".join(e.args))
+
+        if not selectors:
+            module.fail(
+                "No Pod selector was found on the {0}.{1} with name {2} in namespace {3}".format(
+                    "/".join(instance.group, instance.apiVersion),
+                    instance.kind,
+                    instance.metadata.name,
+                    instance.metadata.namespace,
                 )
-            instance = resource.get(name=name, namespace=namespace)
-            try:
-                selectors = self.extract_selectors(instance)
-            except ValueError as e:
-                self.fail(" ".join(e.args))
+            )
 
-            if not selectors:
-                self.fail(
-                    "No Pod selector was found on the {0}.{1} with name {2} in namespace {3}".format(
-                        "/".join(instance.group, instance.apiVersion),
-                        instance.kind,
-                        instance.metadata.name,
-                        instance.metadata.namespace,
-                    )
+        label_selector = ",".join(selectors)
+
+        resource = v1_pods
+
+    if label_selector:
+        instances = v1_pods.get(namespace=namespace, label_selector=label_selector)
+        if not instances.items:
+            module.fail(
+                msg="No pods in namespace {0} matched selector {1}".format(
+                    namespace, label_selector
                 )
+            )
+        # This matches the behavior of kubectl when logging pods via a selector
+        name = instances.items[0].metadata.name
+        resource = v1_pods
 
-            label_selector = ",".join(selectors)
+    kwargs = {}
+    if module.params.get("container"):
+        kwargs["query_params"] = dict(container=module.params["container"])
 
-            resource = v1_pods
+    log = serialize_log(
+        resource.log.get(name=name, namespace=namespace, serialize=False, **kwargs)
+    )
 
-        if label_selector:
-            instances = v1_pods.get(namespace=namespace, label_selector=label_selector)
-            if not instances.items:
-                self.fail(
-                    msg="No pods in namespace {0} matched selector {1}".format(
-                        namespace, label_selector
-                    )
-                )
-            # This matches the behavior of kubectl when logging pods via a selector
-            name = instances.items[0].metadata.name
-            resource = v1_pods
-
-        kwargs = {}
-        if self.params.get("container"):
-            kwargs["query_params"] = dict(container=self.params["container"])
-
-        log = serialize_log(
-            resource.log.get(name=name, namespace=namespace, serialize=False, **kwargs)
-        )
-
-        self.exit_json(changed=False, log=log, log_lines=log.split("\n"))
+    module.exit_json(changed=False, log=log, log_lines=log.split("\n"))
 
 
 def serialize_log(response):
@@ -205,7 +206,7 @@ def main():
     module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
     from ansible_collections.community.kubernetes.plugins.module_utils.common import (
         K8sAnsibleMixin,
-        get_api_client,
+        get_api_client
     )
 
     k8s_ansible_mixin = K8sAnsibleMixin(module)

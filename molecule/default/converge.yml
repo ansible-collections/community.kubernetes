@@ -40,7 +40,7 @@
       k8s:
         api_version: v1
         kind: Namespace
-        name: inventory
+        name: inventory-ns
 
     - name: Add a deployment
       k8s:
@@ -49,7 +49,7 @@
           kind: Deployment
           metadata:
             name: inventory
-            namespace: inventory
+            namespace: inventory-ns
           spec:
             replicas: 1
             selector:
@@ -72,7 +72,7 @@
     - meta: refresh_inventory
 
 - name: Verify inventory and connection plugins
-  hosts: namespace_inventory_deployment_inventory
+  hosts: namespace_inventory_ns_deployment_inventory
   gather_facts: yes
 
   vars:
@@ -109,5 +109,5 @@
       k8s:
         api_version: v1
         kind: Namespace
-        name: inventory
+        name: inventory-ns
         state: absent

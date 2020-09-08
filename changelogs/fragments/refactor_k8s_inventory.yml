@@ -1,0 +1,8 @@
+breaking_changes:
+- k8s inventory - no longer adds services to lists of hosts (https://github.com/ansible-collections/community.kubernetes/pull/217).
+- k8s inventory - removed the ``*_pods`` groups, as pods are the only valid hosts anyway (https://github.com/ansible-collections/community.kubernetes/pull/217).
+minor_changes:
+- k8s inventory - group names are now sanitized (https://github.com/ansible-collections/community.kubernetes/pull/217).
+- k8s inventory - add new groups for Deployments, Daemonsets and StatefulSets, allowing
+  easy access to pods that are created by those resources (https://github.com/ansible-collections/community.kubernetes/pull/217).
+- k8s inventory - move extract_selector method to common (https://github.com/ansible-collections/community.kubernetes/pull/217).

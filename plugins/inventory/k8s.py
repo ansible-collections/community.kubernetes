@@ -19,7 +19,9 @@ DOCUMENTATION = """
       - Groups by cluster name, namespace, namespace_services, namespace_pods, and labels.
       - Uses the kubectl connection plugin to access the Kubernetes cluster.
       - Uses k8s.(yml|yaml) YAML configuration file to set parameter values.
-
+    extends_documentation_fragment:
+      - inventory_cache
+      - constructed
     options:
       plugin:
          description: token that ensures this is a source file for the 'k8s' plugin.
@@ -115,17 +117,17 @@ connections:
     context: 'awx/192-168-64-4:8443/developer'
 """
 
-import re
 import json
 
 from ansible.errors import AnsibleError
+from ansible.module_utils._text import to_native
+from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 from ansible_collections.community.kubernetes.plugins.module_utils.common import (
     K8sAnsibleMixin,
     HAS_K8S_MODULE_HELPER,
     k8s_import_exception,
     get_api_client,
 )
-from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 
 try:
     from openshift.dynamic.exceptions import DynamicApiError
@@ -155,9 +157,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
     transport = "kubectl"
 
     PARENT_RESOURCES = [
-        {'api_version': 'apps/v1', 'kind': 'Deployment'},
-        {'api_version': 'apps/v1', 'kind': 'DaemonSet'},
-        {'api_version': 'apps/v1', 'kind': 'StatefulSet'},
+        {"api_version": "apps/v1", "kind": "Deployment"},
+        {"api_version": "apps/v1", "kind": "DaemonSet"},
+        {"api_version": "apps/v1", "kind": "StatefulSet"},
     ]
 
     def parse(self, inventory, loader, path, cache=True):
@@ -196,7 +198,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
         for connection in connections:
             if not isinstance(connection, dict):
                 raise K8sInventoryException("Expecting connection to be a dictionary.")
-            client = self.get_api_client(**connection)
+            client = get_api_client(**connection)
             name = connection.get(
                 "name", self.get_default_host_name(client.configuration.host)
             )
@@ -208,12 +210,13 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
             sanitized_name = self._sanitize_group_name(name)
             self.inventory.add_group(sanitized_name)
             for namespace in namespaces:
-                namespace_group = self._sanitize_group_name('namespace_{0}'.format(namespace))
+                namespace_group = self._sanitize_group_name(
+                    "namespace_{0}".format(namespace)
+                )
 
                 self.inventory.add_group(namespace_group)
                 self.inventory.add_child(sanitized_name, namespace_group)
 
-                self.get_pods_for_namespace(client, name, namespace, namespace_group)
                 self.get_pods_from_parents(client, name, namespace, namespace_group)
 
     @staticmethod
@@ -238,14 +241,22 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
 
     def get_pods_from_parents(self, client, name, namespace, namespace_group):
 
-        v1_pods = client.resources.get(api_version='v1', kind='Pod')
+        strict = self.get_option("strict")
+        v1_pods = client.resources.get(api_version="v1", kind="Pod")
         for item in self.PARENT_RESOURCES:
             try:
-                resource = client.resources.get(api_version=item['api_version'], kind=item['kind'])
+                resource = client.resources.get(
+                    api_version=item["api_version"], kind=item["kind"]
+                )
                 instances = resource.get(namespace=namespace)
-            except Exception:
-                # TODO Could be expected due to RBAC or odd cluster, maybe should log a warning or something?
-                continue
+            except Exception as e:
+                if strict:
+                    raise AnsibleError(
+                        "Could not get resource of kind %s: %s"
+                        % (item["kind"], to_native(e))
+                    )
+                else:
+                    continue
             for instance in instances.items:
                 try:
                     label_selector = ",".join(self.extract_selectors(instance))
@@ -268,10 +279,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
                     )
 
                 instance_group = self._sanitize_group_name(
-                    '{0}_{1}_{2}'.format(
-                        namespace_group,
-                        item['kind'].lower(),
-                        instance.metadata.name
+                    "{0}_{1}_{2}".format(
+                        namespace_group, item["kind"].lower(), instance.metadata.name
                     )
                 )
                 self.inventory.add_group(instance_group)
@@ -279,27 +288,6 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
 
                 for pod in pods.items:
                     self.add_pod_to_groups(pod, [instance_group])
-
-    def get_pods_for_namespace(self, client, name, namespace, namespace_group):
-        v1_pod = client.resources.get(api_version="v1", kind="Pod")
-        try:
-            obj = v1_pod.get(namespace=namespace)
-        except DynamicApiError as exc:
-            self.display.debug(exc)
-            raise K8sInventoryException(
-                "Error fetching Pod list: %s" % format_dynamic_api_exc(exc)
-            )
-
-        for pod in obj.items:
-            pod_groups = [namespace_group]
-            if pod.metadata.labels:
-                # create a group for each label_value
-                for key, value in pod.metadata.labels:
-                    group_name = self._sanitize_group_name('label_{0}_{1}'.format(key, value))
-                    if group_name not in pod_groups:
-                        pod_groups.append(group_name)
-                    self.inventory.add_group(group_name)
-            self.add_pod_to_groups(pod, pod_groups)
 
     def add_pod_to_groups(self, pod, pod_groups):
         # If the pod has no running containers or has permanently terminated we should skip
