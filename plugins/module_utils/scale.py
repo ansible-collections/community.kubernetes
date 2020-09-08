@@ -23,10 +23,8 @@ import copy
 
 from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
-from ansible.module_utils.six import string_types
 
 try:
-    import yaml
     from openshift.dynamic.exceptions import NotFoundError
 except ImportError:
     pass
@@ -59,31 +57,7 @@ class KubernetesAnsibleScaleModule(KubernetesAnsibleModule):
         self.api_version = self.params.get('api_version')
         self.name = self.params.get('name')
         self.namespace = self.params.get('namespace')
-        resource_definition = self.params.get('resource_definition')
-
-        if resource_definition:
-            if isinstance(resource_definition, string_types):
-                try:
-                    self.resource_definitions = yaml.safe_load_all(resource_definition)
-                except (IOError, yaml.YAMLError) as exc:
-                    self.fail(msg="Error loading resource_definition: {0}".format(exc))
-            elif isinstance(resource_definition, list):
-                self.resource_definitions = resource_definition
-            else:
-                self.resource_definitions = [resource_definition]
-        src = self.params.get('src')
-        if src:
-            self.resource_definitions = self.load_resource_definitions(src)
-
-        if not resource_definition and not src:
-            implicit_definition = dict(
-                kind=self.kind,
-                apiVersion=self.api_version,
-                metadata=dict(name=self.name)
-            )
-            if self.namespace:
-                implicit_definition['metadata']['namespace'] = self.namespace
-            self.resource_definitions = [implicit_definition]
+        self.set_resource_definitions()
 
     def execute_module(self):
         definition = self.resource_definitions[0]

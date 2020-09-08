@@ -26,14 +26,12 @@ import traceback
 
 from ansible.module_utils.basic import missing_required_lib
 from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
-from ansible.module_utils.six import string_types
 from ansible.module_utils._text import to_native
 from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
 from ansible.module_utils.common.dict_transformations import dict_merge
 
 
 try:
-    import yaml
     from openshift.dynamic.exceptions import DynamicApiError, NotFoundError, ConflictError, ForbiddenError, KubernetesValidateMissing
     import urllib3
 except ImportError:
@@ -108,7 +106,6 @@ class KubernetesRawModule(KubernetesAnsibleModule):
         self.api_version = self.params.get('api_version')
         self.name = self.params.get('name')
         self.namespace = self.params.get('namespace')
-        resource_definition = self.params.get('resource_definition')
         validate = self.params.get('validate')
         if validate:
             if LooseVersion(self.openshift_version) < LooseVersion("0.8.0"):
@@ -125,34 +122,7 @@ class KubernetesRawModule(KubernetesAnsibleModule):
         if self.apply:
             if not HAS_K8S_APPLY:
                 self.fail_json(msg=missing_required_lib("openshift >= 0.9.2", reason="for apply"))
-
-        if resource_definition:
-            if isinstance(resource_definition, string_types):
-                try:
-                    self.resource_definitions = yaml.safe_load_all(resource_definition)
-                except (IOError, yaml.YAMLError) as exc:
-                    self.fail(msg="Error loading resource_definition: {0}".format(exc))
-            elif isinstance(resource_definition, list):
-                self.resource_definitions = resource_definition
-            else:
-                self.resource_definitions = [resource_definition]
-        src = self.params.get('src')
-        if src:
-            self.resource_definitions = self.load_resource_definitions(src)
-        try:
-            self.resource_definitions = [item for item in self.resource_definitions if item]
-        except AttributeError:
-            pass
-
-        if not resource_definition and not src:
-            implicit_definition = dict(
-                kind=self.kind,
-                apiVersion=self.api_version,
-                metadata=dict(name=self.name)
-            )
-            if self.namespace:
-                implicit_definition['metadata']['namespace'] = self.namespace
-            self.resource_definitions = [implicit_definition]
+        self.set_resource_definitions()
 
     def flatten_list_kind(self, list_resource, definitions):
         flattened = []

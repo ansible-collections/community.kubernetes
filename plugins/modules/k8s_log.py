@@ -32,19 +32,19 @@ options:
     description:
     - Use to specify an object model.
     - Use in conjunction with I(api_version), I(name), and I(namespace) to identify a specific object.
-    - If using I(label_selector), cannot be overridden.
+    - If using I(label_selectors), cannot be overridden.
     type: str
     default: Pod
   name:
     description:
     - Use to specify an object name.
     - Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a specific object.
-    - Only one of I(name) or I(label_selector) may be provided.
+    - Only one of I(name) or I(label_selectors) may be provided.
     type: str
   label_selectors:
     description:
     - List of label selectors to use to filter results
-    - Only one of I(name) or I(label_selector) may be provided.
+    - Only one of I(name) or I(label_selectors) may be provided.
     type: list
     elements: str
   container:
@@ -139,6 +139,7 @@ class KubernetesLogModule(KubernetesAnsibleModule):
 
     def execute_module(self):
         name = self.params.get('name')
+        namespace = self.params.get('namespace')
         label_selector = ','.join(self.params.get('label_selectors', {}))
         if name and label_selector:
             self.fail(msg='Only one of name or label_selectors can be provided')
@@ -148,16 +149,16 @@ class KubernetesLogModule(KubernetesAnsibleModule):
         v1_pods = self.find_resource('Pod', 'v1', fail=True)
 
         if 'log' not in resource.subresources:
-            if not self.params.get('name'):
+            if not name:
                 self.fail(msg='name must be provided for resources that do not support the log subresource')
-            instance = resource.get(name=self.params['name'], namespace=self.params.get('namespace'))
+            instance = resource.get(name=name, namespace=namespace)
             label_selector = ','.join(self.extract_selectors(instance))
             resource = v1_pods
 
         if label_selector:
-            instances = v1_pods.get(namespace=self.params['namespace'], label_selector=label_selector)
+            instances = v1_pods.get(namespace=namespace, label_selector=label_selector)
             if not instances.items:
-                self.fail(msg='No pods in namespace {0} matched selector {1}'.format(self.params['namespace'], label_selector))
+                self.fail(msg='No pods in namespace {0} matched selector {1}'.format(namespace, label_selector))
             # This matches the behavior of kubectl when logging pods via a selector
             name = instances.items[0].metadata.name
             resource = v1_pods
@@ -168,7 +169,7 @@ class KubernetesLogModule(KubernetesAnsibleModule):
 
         log = serialize_log(resource.log.get(
             name=name,
-            namespace=self.params.get('namespace'),
+            namespace=namespace,
             serialize=False,
             **kwargs
         ))

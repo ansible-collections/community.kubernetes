@@ -18,7 +18,6 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-import copy
 from datetime import datetime
 import time
 import os
@@ -63,11 +62,7 @@ except ImportError:
 
 
 def list_dict_str(value):
-    if isinstance(value, list):
-        return value
-    elif isinstance(value, dict):
-        return value
-    elif isinstance(value, string_types):
+    if isinstance(value, (list, dict, string_types)):
         return value
     raise TypeError
 
@@ -160,20 +155,6 @@ AUTH_ARG_MAP = {
 
 
 class K8sAnsibleMixin(object):
-    _argspec_cache = None
-
-    @property
-    def argspec(self):
-        """
-        Introspect the model properties, and return an Ansible module arg_spec dict.
-        :return: dict
-        """
-        if self._argspec_cache:
-            return self._argspec_cache
-        argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
-        argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
-        self._argspec_cache = argument_spec
-        return self._argspec_cache
 
     def get_api_client(self, **auth_params):
         auth_params = auth_params or getattr(self, 'params', {})
@@ -395,3 +376,37 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
         else:
             predicate = _resource_absent
         return self._wait_for(resource, definition['metadata']['name'], definition['metadata'].get('namespace'), predicate, sleep, timeout, state)
+
+    def set_resource_definitions(self):
+        resource_definition = self.params.get('resource_definition')
+
+        self.resource_definitions = []
+
+        if resource_definition:
+            if isinstance(resource_definition, string_types):
+                try:
+                    self.resource_definitions = yaml.safe_load_all(resource_definition)
+                except (IOError, yaml.YAMLError) as exc:
+                    self.fail(msg="Error loading resource_definition: {0}".format(exc))
+            elif isinstance(resource_definition, list):
+                self.resource_definitions = resource_definition
+            else:
+                self.resource_definitions = [resource_definition]
+
+        src = self.params.get('src')
+        if src:
+            self.resource_definitions = self.load_resource_definitions(src)
+        try:
+            self.resource_definitions = [item for item in self.resource_definitions if item]
+        except AttributeError:
+            pass
+
+        if not resource_definition and not src:
+            implicit_definition = dict(
+                kind=self.kind,
+                apiVersion=self.api_version,
+                metadata=dict(name=self.name)
+            )
+            if self.namespace:
+                implicit_definition['metadata']['namespace'] = self.namespace
+            self.resource_definitions = [implicit_definition]
