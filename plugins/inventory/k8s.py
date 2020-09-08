@@ -205,10 +205,10 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
             else:
                 namespaces = self.get_available_namespaces(client)
 
-            sanitized_name = self.sanitize(name)
+            sanitized_name = self._sanitize_group_name(name)
             self.inventory.add_group(sanitized_name)
             for namespace in namespaces:
-                namespace_group = self.sanitize("namespace_{0}".format(namespace))
+                namespace_group = self._sanitize_group_name('namespace_{0}'.format(namespace))
 
                 self.inventory.add_group(namespace_group)
                 self.inventory.add_child(sanitized_name, namespace_group)
@@ -225,12 +225,6 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
             .replace(":", "_")
         )
 
-    @staticmethod
-    def sanitize(name):
-        if name[:1].isdigit():
-            name = "_" + name
-        return re.sub("[^0-9a-zA-Z_]", "_", name)
-
     def get_available_namespaces(self, client):
         v1_namespace = client.resources.get(api_version="v1", kind="Namespace")
         try:
@@ -244,17 +238,10 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
 
     def get_pods_from_parents(self, client, name, namespace, namespace_group):
 
-<<<<<<< HEAD
-        v1_pods = client.resources.get(api_version="v1", kind="Pod")
-        for kind in ["Deployment", "Daemonset", "StatefulSet"]:
-            try:
-                resource = client.resources.get(api_version="apps/v1", kind=kind)
-=======
         v1_pods = client.resources.get(api_version='v1', kind='Pod')
         for item in self.PARENT_RESOURCES:
             try:
                 resource = client.resources.get(api_version=item['api_version'], kind=item['kind'])
->>>>>>> Make parent resources more easily configurable
                 instances = resource.get(namespace=namespace)
             except Exception:
                 # TODO Could be expected due to RBAC or odd cluster, maybe should log a warning or something?
@@ -276,21 +263,17 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
                     )
                 except DynamicApiError as exc:
                     self.display.debug(exc)
-<<<<<<< HEAD
                     raise K8sInventoryException(
                         "Error fetching Pod list: %s" % format_dynamic_api_exc(exc)
                     )
 
-                instance_group = self.sanitize(
-                    "{0}_{1}_{2}".format(
-                        namespace_group, kind.lower(), instance.metadata.name
+                instance_group = self._sanitize_group_name(
+                    '{0}_{1}_{2}'.format(
+                        namespace_group,
+                        item['kind'].lower(),
+                        instance.metadata.name
                     )
                 )
-=======
-                    raise K8sInventoryException('Error fetching Pod list: %s' % format_dynamic_api_exc(exc))
-
-                instance_group = self.sanitize('{0}_{1}_{2}'.format(namespace_group, item['kind'].lower(), instance.metadata.name))
->>>>>>> Make parent resources more easily configurable
                 self.inventory.add_group(instance_group)
                 self.inventory.add_child(namespace_group, instance_group)
 
@@ -312,7 +295,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
             if pod.metadata.labels:
                 # create a group for each label_value
                 for key, value in pod.metadata.labels:
-                    group_name = self.sanitize("label_{0}_{1}".format(key, value))
+                    group_name = self._sanitize_group_name('label_{0}_{1}'.format(key, value))
                     if group_name not in pod_groups:
                         pod_groups.append(group_name)
                     self.inventory.add_group(group_name)
