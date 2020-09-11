@@ -21,8 +21,9 @@ __metaclass__ = type
 
 import copy
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin)
 
 try:
     from openshift.dynamic.exceptions import NotFoundError
@@ -39,7 +40,7 @@ SCALE_ARG_SPEC = {
 }
 
 
-class KubernetesAnsibleScaleModule(KubernetesAnsibleModule):
+class KubernetesAnsibleScaleModule(K8sAnsibleMixin):
 
     def __init__(self, k8s_kind=None, *args, **kwargs):
         self.client = None
@@ -49,10 +50,19 @@ class KubernetesAnsibleScaleModule(KubernetesAnsibleModule):
             ('resource_definition', 'src'),
         ]
 
-        KubernetesAnsibleModule.__init__(self, *args,
-                                         mutually_exclusive=mutually_exclusive,
-                                         supports_check_mode=True,
-                                         **kwargs)
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            mutually_exclusive=mutually_exclusive,
+            supports_check_mode=True,
+        )
+
+        self.module = module
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.fail = self.module.fail_json
+        self.exit_json = self.module.exit_json
+        super(KubernetesAnsibleScaleModule, self).__init__()
+
         self.kind = k8s_kind or self.params.get('kind')
         self.api_version = self.params.get('api_version')
         self.name = self.params.get('name')
