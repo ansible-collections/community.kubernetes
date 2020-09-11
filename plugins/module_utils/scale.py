@@ -58,6 +58,7 @@ class KubernetesAnsibleScaleModule(K8sAnsibleMixin):
 
         self.module = module
         self.params = self.module.params
+        self.check_mode = self.module.check_mode
         self.fail_json = self.module.fail_json
         self.fail = self.module.fail_json
         self.exit_json = self.module.exit_json

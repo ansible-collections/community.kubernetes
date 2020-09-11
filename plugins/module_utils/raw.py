@@ -25,10 +25,10 @@ import sys
 import traceback
 
 from ansible.module_utils.basic import missing_required_lib, AnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin)
 from ansible.module_utils._text import to_native
 from ansible.module_utils.common.dict_transformations import dict_merge
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin)
 
 
 try:
@@ -105,6 +105,7 @@ class KubernetesRawModule(K8sAnsibleMixin):
         )
 
         self.module = module
+        self.check_mode = self.module.check_mode
         self.params = self.module.params
         self.fail_json = self.module.fail_json
         self.fail = self.module.fail_json

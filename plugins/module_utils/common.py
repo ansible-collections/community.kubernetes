@@ -24,7 +24,7 @@ import os
 import traceback
 
 
-from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible.module_utils.basic import missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
 

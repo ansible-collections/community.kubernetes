@@ -147,6 +147,7 @@ class KubernetesInfoModule(K8sAnsibleMixin):
         self.module = module
         self.params = self.module.params
         self.fail_json = self.module.fail_json
+        self.exit_json = self.module.exit_json
         super(KubernetesInfoModule, self).__init__()
 
     def execute_module(self):
