@@ -24,10 +24,10 @@ from distutils.version import LooseVersion
 import sys
 import traceback
 
-from ansible.module_utils.basic import missing_required_lib
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC
+from ansible.module_utils.basic import missing_required_lib, AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin)
 from ansible.module_utils._text import to_native
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
 from ansible.module_utils.common.dict_transformations import dict_merge
 
 
@@ -55,7 +55,7 @@ except ImportError:
     HAS_K8S_APPLY = False
 
 
-class KubernetesRawModule(KubernetesAnsibleModule):
+class KubernetesRawModule(K8sAnsibleMixin):
 
     @property
     def validate_spec(self):
@@ -98,10 +98,20 @@ class KubernetesRawModule(KubernetesAnsibleModule):
             ('merge_type', 'apply'),
         ]
 
-        KubernetesAnsibleModule.__init__(self, *args,
-                                         mutually_exclusive=mutually_exclusive,
-                                         supports_check_mode=True,
-                                         **kwargs)
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            mutually_exclusive=mutually_exclusive,
+            supports_check_mode=True,
+        )
+
+        self.module = module
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.fail = self.module.fail_json
+        self.exit_json = self.module.exit_json
+
+        super(KubernetesRawModule, self).__init__()
+
         self.kind = k8s_kind or self.params.get('kind')
         self.api_version = self.params.get('api_version')
         self.name = self.params.get('name')
