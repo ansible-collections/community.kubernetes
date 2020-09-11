@@ -121,8 +121,6 @@ from ansible_collections.community.kubernetes.plugins.module_utils.common import
 class KubernetesLogModule(K8sAnsibleMixin):
 
     def __init__(self):
-        super(KubernetesLogModule, self).__init__()
-
         module = AnsibleModule(
             argument_spec=self.argspec,
             supports_check_mode=True,
@@ -132,6 +130,7 @@ class KubernetesLogModule(K8sAnsibleMixin):
         self.fail_json = self.module.fail_json
         self.fail = self.module.fail_json
         self.exit_json = self.module.exit_json
+        super(KubernetesLogModule, self).__init__()
 
     @property
     def argspec(self):
