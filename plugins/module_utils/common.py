@@ -259,14 +259,30 @@ class K8sAnsibleMixin(object):
             self.fail(msg="Error loading resource_definition: {0}".format(exc))
         return result
 
-    @staticmethod
-    def diff_objects(existing, new):
+    def diff_objects(self, existing, new):
         result = dict()
         diff = recursive_diff(existing, new)
-        if diff:
-            result['before'] = diff[0]
-            result['after'] = diff[1]
-        return not diff, result
+        if not diff:
+            return True, result
+
+        result['before'] = diff[0]
+        result['after'] = diff[1]
+
+        # If only metadata.generation and metadata.resourceVersion changed, ignore it
+        ignored_keys = set(['generation', 'resourceVersion'])
+
+        if list(result['after'].keys()) != ['metadata'] or list(result['before'].keys()) != ['metadata']:
+            return False, result
+
+        if not set(result['after']['metadata'].keys()).issubset(ignored_keys):
+            return False, result
+        if not set(result['before']['metadata'].keys()).issubset(ignored_keys):
+            return False, result
+
+        if hasattr(self, 'warn'):
+            self.warn('No meaningful diff was generated, but the API may not be idempotent (only metadata.generation or metadata.resourceVersion were changed)')
+
+        return True, result
 
 
 class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
