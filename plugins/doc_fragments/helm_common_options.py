@@ -30,5 +30,5 @@ options:
       - Helm option to specify kubeconfig path to use.
       - If the value is not specified in the task, the value of environment variable C(K8S_AUTH_KUBECONFIG) will be used instead.
     type: path
-    aliases: [ kubeconfig_path]
+    aliases: [ kubeconfig_path ]
 '''
