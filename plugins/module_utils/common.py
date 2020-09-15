@@ -202,7 +202,10 @@ class K8sAnsibleMixin(object):
                     setattr(configuration, key, value)
 
         kubernetes.client.Configuration.set_default(configuration)
-        return DynamicClient(kubernetes.client.ApiClient(configuration))
+        try:
+            return DynamicClient(kubernetes.client.ApiClient(configuration))
+        except Exception as err:
+            self.fail(msg='Failed to get client due to %s' % to_native(err))
 
     def find_resource(self, kind, api_version, fail=False):
         for attribute in ['kind', 'name', 'singular_name']:
