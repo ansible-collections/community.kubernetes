@@ -156,6 +156,15 @@ AUTH_ARG_MAP = {
 
 class K8sAnsibleMixin(object):
 
+    def __init__(self, *args, **kwargs):
+        if not HAS_K8S_MODULE_HELPER:
+            self.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
+                           error=to_native(k8s_import_exception))
+        self.openshift_version = openshift.__version__
+
+        if not HAS_YAML:
+            self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
+
     def get_api_client(self, **auth_params):
         auth_params = auth_params or getattr(self, 'params', {})
         auth = {}
@@ -284,28 +293,6 @@ class K8sAnsibleMixin(object):
 
         return True, result
 
-
-class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
-    resource_definition = None
-    api_version = None
-    kind = None
-
-    def __init__(self, *args, **kwargs):
-
-        kwargs['argument_spec'] = self.argspec
-        AnsibleModule.__init__(self, *args, **kwargs)
-
-        if not HAS_K8S_MODULE_HELPER:
-            self.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
-                           error=to_native(k8s_import_exception))
-        self.openshift_version = openshift.__version__
-
-        if not HAS_YAML:
-            self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
-
-    def execute_module(self):
-        raise NotImplementedError()
-
     def fail(self, msg=None):
         self.fail_json(msg=msg)
 
@@ -429,3 +416,17 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
             if self.namespace:
                 implicit_definition['metadata']['namespace'] = self.namespace
             self.resource_definitions = [implicit_definition]
+
+
+class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
+    # NOTE: This class KubernetesAnsibleModule is deprecated in favor of
+    #       class K8sAnsibleMixin and will be removed 2.0.0 release.
+    #       Please use K8sAnsibleMixin instead.
+
+    def __init__(self, *args, **kwargs):
+        kwargs['argument_spec'] = self.argspec
+        AnsibleModule.__init__(self, *args, **kwargs)
+        K8sAnsibleMixin.__init__(self, *args, **kwargs)
+
+        self.warn("class KubernetesAnsibleModule is deprecated"
+                  " and will be removed in 2.0.0. Please use K8sAnsibleMixin instead.")

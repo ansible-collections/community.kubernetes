@@ -111,18 +111,26 @@ log_lines:
 
 import copy
 
+from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.six import PY2
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, NAME_ARG_SPEC
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    K8sAnsibleMixin, AUTH_ARG_SPEC, NAME_ARG_SPEC)
 
 
-class KubernetesLogModule(KubernetesAnsibleModule):
+class KubernetesLogModule(K8sAnsibleMixin):
 
-    def __init__(self, *args, **kwargs):
-        KubernetesAnsibleModule.__init__(self, *args,
-                                         supports_check_mode=True,
-                                         **kwargs)
+    def __init__(self):
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            supports_check_mode=True,
+        )
+        self.module = module
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.fail = self.module.fail_json
+        self.exit_json = self.module.exit_json
+        super(KubernetesLogModule, self).__init__()
 
     @property
     def argspec(self):

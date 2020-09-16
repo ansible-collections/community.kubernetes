@@ -130,17 +130,25 @@ resources:
       type: dict
 '''
 
-
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
 import copy
 
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    K8sAnsibleMixin, AUTH_ARG_SPEC)
 
-class KubernetesInfoModule(KubernetesAnsibleModule):
+
+class KubernetesInfoModule(K8sAnsibleMixin):
 
     def __init__(self, *args, **kwargs):
-        KubernetesAnsibleModule.__init__(self, *args,
-                                         supports_check_mode=True,
-                                         **kwargs)
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            supports_check_mode=True,
+        )
+        self.module = module
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.exit_json = self.module.exit_json
+        super(KubernetesInfoModule, self).__init__()
 
     def execute_module(self):
         self.client = self.get_api_client()
