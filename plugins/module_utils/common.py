@@ -24,7 +24,7 @@ import os
 import traceback
 
 
-from ansible.module_utils.basic import missing_required_lib
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
 
@@ -416,3 +416,17 @@ class K8sAnsibleMixin(object):
             if self.namespace:
                 implicit_definition['metadata']['namespace'] = self.namespace
             self.resource_definitions = [implicit_definition]
+
+
+class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
+    # NOTE: This class KubernetesAnsibleModule is deprecated in favor of
+    #       class K8sAnsibleMixin and will be removed 2.0.0 release.
+    #       Please use K8sAnsibleMixin instead.
+
+    def __init__(self, *args, **kwargs):
+        kwargs['argument_spec'] = self.argspec
+        AnsibleModule.__init__(self, *args, **kwargs)
+        K8sAnsibleMixin.__init__(self, *args, **kwargs)
+
+        self.warn("class KubernetesAnsibleModule is deprecated"
+                  " and will be removed in 2.0.0. Please use K8sAnsibleMixin instead.")
