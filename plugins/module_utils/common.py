@@ -38,7 +38,7 @@ try:
     from openshift.dynamic import DynamicClient
     from openshift.dynamic.exceptions import (
         ResourceNotFoundError, ResourceNotUniqueError, NotFoundError, DynamicApiError,
-        ConflictError, ForbiddenError, KubernetesValidateMissing)
+        ConflictError, ForbiddenError)
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -57,6 +57,7 @@ except ImportError:
 K8S_CONFIG_HASH_IMP_ERR = None
 try:
     from openshift.helper.hashes import generate_hash
+    from openshift.dynamic.exceptions import KubernetesValidateMissing
     HAS_K8S_CONFIG_HASH = True
 except ImportError:
     K8S_CONFIG_HASH_IMP_ERR = traceback.format_exc()
