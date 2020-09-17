@@ -148,8 +148,9 @@ import traceback
 
 from collections import defaultdict
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC
-from ansible_collections.community.kubernetes.plugins.module_utils.raw import KubernetesRawModule
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    K8sAnsibleMixin, AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
 
 
 SERVICE_ARG_SPEC = {
@@ -171,9 +172,38 @@ SERVICE_ARG_SPEC = {
 }
 
 
-class KubernetesService(KubernetesRawModule):
+class KubernetesService(K8sAnsibleMixin):
     def __init__(self, *args, **kwargs):
-        super(KubernetesService, self).__init__(*args, k8s_kind='Service', **kwargs)
+        mutually_exclusive = [
+            ('resource_definition', 'src'),
+            ('merge_type', 'apply'),
+        ]
+
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            mutually_exclusive=mutually_exclusive,
+            supports_check_mode=True,
+        )
+
+        self.module = module
+        self.check_mode = self.module.check_mode
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.fail = self.module.fail_json
+        self.exit_json = self.module.exit_json
+
+        super(KubernetesService, self).__init__(*args, **kwargs)
+
+        self.client = None
+        self.warnings = []
+
+        self.kind = self.params.get('kind')
+        self.api_version = self.params.get('api_version')
+        self.name = self.params.get('name')
+        self.namespace = self.params.get('namespace')
+
+        self.check_library_version()
+        self.set_resource_definitions()
 
     @staticmethod
     def merge_dicts(x, y):
