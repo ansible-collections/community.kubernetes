@@ -133,23 +133,23 @@ DOCUMENTATION = '''
 EXAMPLES = """
 - name: Fetch a list of namespaces
   set_fact:
-    projects: "{{ lookup('k8s', api_version='v1', kind='Namespace') }}"
+    projects: "{{ lookup('community.kubernetes.k8s', api_version='v1', kind='Namespace') }}"
 
 - name: Fetch all deployments
   set_fact:
-    deployments: "{{ lookup('k8s', kind='Deployment') }}"
+    deployments: "{{ lookup('community.kubernetes.k8s', kind='Deployment') }}"
 
 - name: Fetch all deployments in a namespace
   set_fact:
-    deployments: "{{ lookup('k8s', kind='Deployment', namespace='testing') }}"
+    deployments: "{{ lookup('community.kubernetes.k8s', kind='Deployment', namespace='testing') }}"
 
 - name: Fetch a specific deployment by name
   set_fact:
-    deployments: "{{ lookup('k8s', kind='Deployment', namespace='testing', resource_name='elastic') }}"
+    deployments: "{{ lookup('community.kubernetes.k8s', kind='Deployment', namespace='testing', resource_name='elastic') }}"
 
 - name: Fetch with label selector
   set_fact:
-    service: "{{ lookup('k8s', kind='Service', label_selector='app=galaxy') }}"
+    service: "{{ lookup('community.kubernetes.k8s', kind='Service', label_selector='app=galaxy') }}"
 
 # Use parameters from a YAML config
 
@@ -159,11 +159,11 @@ EXAMPLES = """
 
 - name: Using the config (loaded from a file in prior task), fetch the latest version of the object
   set_fact:
-    service: "{{ lookup('k8s', resource_definition=config) }}"
+    service: "{{ lookup('community.kubernetes.k8s', resource_definition=config) }}"
 
 - name: Use a config from the local filesystem
   set_fact:
-    service: "{{ lookup('k8s', src='service.yml') }}"
+    service: "{{ lookup('community.kubernetes.k8s', src='service.yml') }}"
 """
 
 RETURN = """
@@ -194,27 +194,20 @@ RETURN = """
         type: complex
 """
 
+from ansible.errors import AnsibleError
+from ansible.module_utils.common._collections_compat import KeysView
 from ansible.plugins.lookup import LookupBase
 
 from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin
 
-from ansible.errors import AnsibleError
-
 
 try:
-    from openshift.dynamic import DynamicClient
     from openshift.dynamic.exceptions import NotFoundError
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
     HAS_K8S_MODULE_HELPER = False
     k8s_import_exception = e
-
-try:
-    import yaml
-    HAS_YAML = True
-except ImportError:
-    HAS_YAML = False
 
 
 class KubernetesLookup(K8sAnsibleMixin):
@@ -224,11 +217,6 @@ class KubernetesLookup(K8sAnsibleMixin):
         if not HAS_K8S_MODULE_HELPER:
             raise Exception(
                 "Requires the OpenShift Python client. Try `pip install openshift`. Detail: {0}".format(k8s_import_exception)
-            )
-
-        if not HAS_YAML:
-            raise Exception(
-                "Requires PyYAML. Try `pip install PyYAML`"
             )
 
         self.kind = None
@@ -253,6 +241,8 @@ class KubernetesLookup(K8sAnsibleMixin):
         if cluster_info == 'version':
             return [self.client.version]
         if cluster_info == 'api_groups':
+            if isinstance(self.client.resources.api_groups, KeysView):
+                return [list(self.client.resources.api_groups)]
             return [self.client.resources.api_groups]
 
         self.kind = kwargs.get('kind')

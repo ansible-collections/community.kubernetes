@@ -9,11 +9,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
-
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 module: k8s_info
 
 short_description: Describe Kubernetes (K8s) objects
@@ -29,31 +25,15 @@ description:
   - This module was called C(k8s_facts) before Ansible 2.9. The usage did not change.
 
 options:
-  api_version:
-    description:
-    - Use to specify the API version. in conjunction with I(kind), I(name), and I(namespace) to identify a
-      specific object.
-    default: v1
-    aliases:
-    - api
-    - version
-    type: str
   kind:
     description:
-    - Use to specify an object model. Use in conjunction with I(api_version), I(name), and I(namespace) to identify a
-      specific object.
-    required: yes
+    - Use to specify an object model.
+    - Use to create, delete, or discover an object without providing a full resource definition.
+    - Use in conjunction with I(api_version), I(name), and I(namespace) to identify a specific object.
+    - If I(resource definition) is provided, the I(kind) value from the I(resource_definition)
+      will override this option.
     type: str
-  name:
-    description:
-    - Use to specify an object name.  Use in conjunction with I(api_version), I(kind) and I(namespace) to identify a
-      specific object.
-    type: str
-  namespace:
-    description:
-    - Use to specify an object namespace. Use in conjunction with I(api_version), I(kind), and I(name)
-      to identify a specific object.
-    type: str
+    required: True
   label_selectors:
     description: List of label selectors to use to filter results
     type: list
@@ -65,6 +45,7 @@ options:
 
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
+  - community.kubernetes.k8s_name_options
 
 requirements:
   - "python >= 2.7"
@@ -72,9 +53,9 @@ requirements:
   - "PyYAML >= 3.11"
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Get an existing Service object
-  k8s_info:
+  community.kubernetes.k8s_info:
     api_version: v1
     kind: Service
     name: web
@@ -82,32 +63,45 @@ EXAMPLES = '''
   register: web_service
 
 - name: Get a list of all service objects
-  k8s_info:
+  community.kubernetes.k8s_info:
     api_version: v1
     kind: Service
     namespace: testing
   register: service_list
 
 - name: Get a list of all pods from any namespace
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
   register: pod_list
 
 - name: Search for all Pods labelled app=web
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
     label_selectors:
       - app = web
       - tier in (dev, test)
 
+- name: Using vars while using label_selectors
+  community.kubernetes.k8s_info:
+    kind: Pod
+    label_selectors:
+      - "app = {{ app_label_web }}"
+  vars:
+    app_label_web: web
+
 - name: Search for all running pods
-  k8s_info:
+  community.kubernetes.k8s_info:
     kind: Pod
     field_selectors:
       - status.phase=Running
+
+- name: List custom objects created using CRD
+  community.kubernetes.k8s_info:
+    kind: MyCustomObject
+    api_version: "stable.example.com/v1"
 '''
 
-RETURN = '''
+RETURN = r'''
 resources:
   description:
   - The object(s) that exists
@@ -136,19 +130,25 @@ resources:
       type: dict
 '''
 
-
-from ansible_collections.community.kubernetes.plugins.module_utils.common import KubernetesAnsibleModule, AUTH_ARG_SPEC
 import copy
 
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    K8sAnsibleMixin, AUTH_ARG_SPEC)
 
-class KubernetesInfoModule(KubernetesAnsibleModule):
+
+class KubernetesInfoModule(K8sAnsibleMixin):
 
     def __init__(self, *args, **kwargs):
-        KubernetesAnsibleModule.__init__(self, *args,
-                                         supports_check_mode=True,
-                                         **kwargs)
-        if self._name == 'k8s_facts':
-            self.deprecate("The 'k8s_facts' module has been renamed to 'k8s_info'", version='2.13')
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            supports_check_mode=True,
+        )
+        self.module = module
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.exit_json = self.module.exit_json
+        super(KubernetesInfoModule, self).__init__()
 
     def execute_module(self):
         self.client = self.get_api_client()

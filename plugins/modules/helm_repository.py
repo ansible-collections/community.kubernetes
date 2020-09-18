@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: Ansible Project
+# Copyright: (c) 2020, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm_repository
 
 short_description: Add and remove Helm repository
+
+version_added: "0.11.0"
 
 author:
   - Lucas Boisserie (@LucasBoisserie)
@@ -24,7 +23,7 @@ requirements:
   - "yaml (https://pypi.org/project/PyYAML/)"
 
 description:
-  -  Manage Helm repositories
+  -  Manage Helm repositories.
 
 options:
   binary_path:
@@ -60,21 +59,21 @@ options:
   repo_state:
     choices: ['present', 'absent']
     description:
-      - Desirated state of repositoriy.
+      - Desirated state of repository.
     required: false
     default: present
     aliases: [ state ]
     type: str
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Add default repository
-  helm_repository:
+  community.kubernetes.helm_repository:
     name: stable
     repo_url: https://kubernetes-charts.storage.googleapis.com
 '''
 
-RETURN = ''' # '''
+RETURN = r''' # '''
 
 import traceback
 

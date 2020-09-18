@@ -4,6 +4,7 @@ k8s_pod_metadata:
     app: "{{ k8s_pod_name }}"
 
 k8s_pod_spec:
+  serviceAccount: "{{ k8s_pod_service_account }}"
   containers:
     - image: "{{ k8s_pod_image }}"
       imagePullPolicy: Always
@@ -14,15 +15,23 @@ k8s_pod_spec:
         exec:
           command:
             - /bin/true
-      resources:
-        limits:
-          cpu: "100m"
-          memory: "100Mi"
+      resources: "{{ k8s_pod_resources }}"
       ports: "{{ k8s_pod_ports }}"
+      env: "{{ k8s_pod_env }}"
+
+
+k8s_pod_service_account: default
+
+k8s_pod_resources:
+  limits:
+    cpu: "100m"
+    memory: "100Mi"
 
 k8s_pod_command: []
 
 k8s_pod_ports: []
+
+k8s_pod_env: []
 
 k8s_pod_template:
   metadata: "{{ k8s_pod_metadata }}"

@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - k8s - Add exception handling when retrieving k8s client (https://github.com/ansible-collections/community.kubernetes/pull/54).

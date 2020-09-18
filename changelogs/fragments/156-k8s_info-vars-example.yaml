@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - k8s_info - Update example using vars (https://github.com/ansible-collections/community.kubernetes/pull/156).

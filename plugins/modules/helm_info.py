@@ -1,20 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright: Ansible Project
+# Copyright: (c) 2020, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm_info
 
-short_description: Get informations from Helm package deployed inside the cluster
+short_description: Get information from Helm package deployed inside the cluster
+
+version_added: "0.11.0"
 
 author:
   - Lucas Boisserie (@LucasBoisserie)
@@ -24,14 +23,9 @@ requirements:
   - "yaml (https://pypi.org/project/PyYAML/)"
 
 description:
-  -  Get informations (values, states, ...) from Helm package deployed inside the cluster
+  -  Get information (values, states, ...) from Helm package deployed inside the cluster.
 
 options:
-  binary_path:
-    description:
-      - The path of a helm binary to use.
-    required: false
-    type: path
   release_name:
     description:
       - Release name to manage.
@@ -44,27 +38,18 @@ options:
     required: true
     type: str
     aliases: [ namespace ]
-
-#Helm options
-  kube_context:
-    description:
-      - Helm option to specify which kubeconfig context to use.
-    type: str
-  kubeconfig_path:
-    description:
-      - Helm option to specify kubeconfig path to use.
-    type: path
-    aliases: [ kubeconfig ]
+extends_documentation_fragment:
+  - community.kubernetes.helm_common_options
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Deploy latest version of Grafana chart inside monitoring namespace
-  helm_info:
+  community.kubernetes.helm_info:
     name: test
     release_namespace: monitoring
 '''
 
-RETURN = """
+RETURN = r'''
 status:
   type: complex
   description: A dictionary of status output
@@ -102,7 +87,7 @@ status:
       type: str
       returned: always
       description: Dict of Values used to deploy
-"""
+'''
 
 import traceback
 
@@ -113,7 +98,7 @@ except ImportError:
     IMP_YAML_ERR = traceback.format_exc()
     IMP_YAML = False
 
-from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib, env_fallback
 
 module = None
 
@@ -178,8 +163,8 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
 
             # Helm options
-            kube_context=dict(type='str'),
-            kubeconfig_path=dict(type='path', aliases=['kubeconfig']),
+            kube_context=dict(type='str', aliases=['context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
         ),
         supports_check_mode=True,
     )
@@ -212,8 +197,8 @@ def main():
 
     if release_status is not None:
         module.exit_json(changed=False, status=release_status)
-    else:
-        module.exit_json(changed=False)
+
+    module.exit_json(changed=False)
 
 
 if __name__ == '__main__':

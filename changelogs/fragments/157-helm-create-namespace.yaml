@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - helm - Allow creating namespaces with Helm (https://github.com/ansible-collections/community.kubernetes/pull/157).
