@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - k8s - Added ``persist_config`` option for persisting refreshed tokens (https://github.com/ansible-collections/community.kubernetes/issues/49).

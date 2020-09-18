@@ -83,11 +83,13 @@
         k8s_pod_name: wait-ds
         k8s_pod_image: gcr.io/kuar-demo/kuard-amd64:2
       register: update_ds_check_mode
+      check_mode: yes
 
-    - name: Check that check_mode returned changed
+    - name: Check that check_mode result contains the changes
       assert:
         that:
           - update_ds_check_mode is changed
+          - "update_ds_check_mode.result.spec.template.spec.containers[0].image == 'gcr.io/kuar-demo/kuard-amd64:2'"
 
     - name: Update a daemonset
       k8s:
@@ -119,6 +121,8 @@
         namespace: "{{ wait_namespace }}"
         label_selectors:
           - app=wait-ds
+        field_selectors:
+          - status.phase=Running
       register: updated_ds_pods
 
     - name: Check that daemonset wait worked
@@ -229,6 +233,12 @@
             protocol: TCP
       register: update_deploy
 
+    # It looks like the Deployment is updated to have the desired state *before* the pods are terminated
+    # Wait a couple of seconds to allow the old pods to at least get to Terminating state
+    - name: Avoid race condition
+      pause:
+        seconds: 2
+
     - name: Get updated pods
       k8s_info:
         api_version: v1
@@ -236,13 +246,17 @@
         namespace: "{{ wait_namespace }}"
         label_selectors:
           - app=wait-deploy
+        field_selectors:
+          - status.phase=Running
       register: updated_deploy_pods
+      until: "{{ updated_deploy_pods.resources[0].spec.containers[0].image.endswith(':2') }}"
+      retries: 6
+      delay: 5
 
     - name: Check that deployment wait worked
       assert:
         that:
           - deploy.result.status.availableReplicas == deploy.result.status.replicas
-          - updated_deploy_pods.resources[0].spec.containers[0].image.endswith(":2")
 
     - name: Pause a deployment
       k8s:

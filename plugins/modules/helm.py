@@ -6,15 +6,14 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 ---
 module: helm
 
 short_description: Manages Kubernetes packages with the Helm package manager
+
+version_added: "0.11.0"
 
 author:
   - Lucas Boisserie (@LucasBoisserie)
@@ -28,11 +27,6 @@ description:
   - Install, upgrade, delete packages with the Helm package manager.
 
 options:
-  binary_path:
-    description:
-      - The path of a helm binary to use.
-    required: false
-    type: path
   chart_ref:
     description:
       - chart_reference on chart repository.
@@ -96,15 +90,6 @@ options:
       - Helm option to force reinstall, ignore on new install.
     default: False
     type: bool
-  kube_context:
-    description:
-      - Helm option to specify which kubeconfig context to use.
-    type: str
-  kubeconfig_path:
-    description:
-      - Helm option to specify kubeconfig path to use.
-    type: path
-    aliases: [ kubeconfig ]
   purge:
     description:
       - Remove the release from the store and make its name free for later use.
@@ -119,24 +104,44 @@ options:
     description:
       - Timeout when wait option is enabled (helm2 is a number of seconds, helm3 is a duration).
     type: str
+  atomic:
+    description:
+      - If set, the installation process deletes the installation on failure.
+    type: bool
+    default: False
+  create_namespace:
+    description:
+      - Create the release namespace if not present.
+    type: bool
+    default: False
+    version_added: "0.11.1"
+  replace:
+    description:
+      - Reuse the given name, only if that name is a deleted release which remains in the history.
+      - This is unsafe in production environment.
+    type: bool
+    default: False
+    version_added: "1.11.0"
+extends_documentation_fragment:
+  - community.kubernetes.helm_common_options
 '''
 
-EXAMPLES = '''
-- name: Create helm namespace as HELM 3 doesn't create it automatically
-  k8s:
-    api_version: v1
-    kind: Namespace
-    name: "monitoring"
-    wait: true
+EXAMPLES = r'''
+- name: Deploy latest version of Prometheus chart inside monitoring namespace (and create it)
+  community.kubernetes.helm:
+    name: test
+    chart_ref: stable/prometheus
+    release_namespace: monitoring
+    create_namespace: true
 
 # From repository
 - name: Add stable chart repo
-  helm_repository:
+  community.kubernetes.helm_repository:
     name: stable
     repo_url: "https://kubernetes-charts.storage.googleapis.com"
 
 - name: Deploy latest version of Grafana chart inside monitoring namespace with values
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: stable/grafana
     release_namespace: monitoring
@@ -144,39 +149,39 @@ EXAMPLES = '''
       replicas: 2
 
 - name: Deploy Grafana chart on 5.0.12 with values loaded from template
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: stable/grafana
     chart_version: 5.0.12
     values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
 
 - name: Remove test release and waiting suppression ending
-  helm:
+  community.kubernetes.helm:
     name: test
     state: absent
     wait: true
 
 # From git
 - name: Git clone stable repo on HEAD
-  git:
+  ansible.builtin.git:
     repo: "http://github.com/helm/charts.git"
     dest: /tmp/helm_repo
 
 - name: Deploy Grafana chart from local path
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: /tmp/helm_repo/stable/grafana
     release_namespace: monitoring
 
 # From url
 - name: Deploy Grafana chart on 5.0.12 from url
-  helm:
+  community.kubernetes.helm:
     name: test
     chart_ref: "https://kubernetes-charts.storage.googleapis.com/grafana-5.0.12.tgz"
     release_namespace: monitoring
 '''
 
-RETURN = """
+RETURN = r"""
 status:
   type: complex
   description: A dictionary of status output
@@ -231,6 +236,7 @@ command:
   sample: helm upgrade ...
 """
 
+import tempfile
 import traceback
 
 try:
@@ -240,32 +246,42 @@ except ImportError:
     IMP_YAML_ERR = traceback.format_exc()
     IMP_YAML = False
 
-from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible.module_utils.basic import AnsibleModule, missing_required_lib, env_fallback
 
 module = None
 
 
-# Get Values from deployed release
-def get_values(command, release_name):
-    get_command = command + " get values --output=yaml " + release_name
-
-    rc, out, err = module.run_command(get_command)
-
+def exec_command(command):
+    rc, out, err = module.run_command(command)
     if rc != 0:
         module.fail_json(
             msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=get_command
+            stdout=out,
+            stderr=err,
+            command=command,
         )
+    return rc, out, err
 
+
+def get_values(command, release_name):
+    """
+    Get Values from deployed release
+    """
+
+    get_command = command + " get values --output=yaml " + release_name
+
+    rc, out, err = exec_command(get_command)
     # Helm 3 return "null" string when no values are set
     if out.rstrip("\n") == "null":
         return {}
-    else:
-        return yaml.safe_load(out)
+    return yaml.safe_load(out)
 
 
-# Get Release from all deployed releases
 def get_release(state, release_name):
+    """
+    Get Release from all deployed releases
+    """
+
     if state is not None:
         for release in state:
             if release['name'] == release_name:
@@ -273,17 +289,14 @@ def get_release(state, release_name):
     return None
 
 
-# Get Release state from deployed release
 def get_release_status(command, release_name):
+    """
+    Get Release state from deployed release
+    """
+
     list_command = command + " list --output=yaml --filter " + release_name
 
-    rc, out, err = module.run_command(list_command)
-
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=list_command
-        )
+    rc, out, err = exec_command(list_command)
 
     release = get_release(yaml.safe_load(out), release_name)
 
@@ -295,56 +308,61 @@ def get_release_status(command, release_name):
     return release
 
 
-# Run Repo update
 def run_repo_update(command):
+    """
+    Run Repo update
+    """
     repo_update_command = command + " repo update"
-
-    rc, out, err = module.run_command(repo_update_command)
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=repo_update_command
-        )
+    rc, out, err = exec_command(repo_update_command)
 
 
-# Get chart info
 def fetch_chart_info(command, chart_ref):
+    """
+    Get chart info
+    """
     inspect_command = command + " show chart " + chart_ref
 
-    rc, out, err = module.run_command(inspect_command)
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=inspect_command
-        )
+    rc, out, err = exec_command(inspect_command)
 
     return yaml.safe_load(out)
 
 
-# Install/upgrade/rollback release chart
-def deploy(command, release_name, release_values, chart_name, wait, wait_timeout, disable_hook, force):
-    deploy_command = command + " upgrade -i"  # install/upgrade
+def deploy(command, release_name, release_values, chart_name, wait,
+           wait_timeout, disable_hook, force, atomic=False, create_namespace=False,
+           replace=False):
+    """
+    Install/upgrade/rollback release chart
+    """
+    if replace:
+        # '--replace' is not supported by 'upgrade -i'
+        deploy_command = command + " install"
+    else:
+        deploy_command = command + " upgrade -i"  # install/upgrade
 
-    # Always reset values to keep release_values equal to values released
-    deploy_command += " --reset-values"
+        # Always reset values to keep release_values equal to values released
+        deploy_command += " --reset-values"
 
     if wait:
         deploy_command += " --wait"
         if wait_timeout is not None:
             deploy_command += " --timeout " + wait_timeout
 
+    if atomic:
+        deploy_command += " --atomic"
+
     if force:
         deploy_command += " --force"
+
+    if replace:
+        deploy_command += " --replace"
 
     if disable_hook:
         deploy_command += " --no-hooks"
 
-    if release_values != {}:
-        try:
-            import tempfile
-        except ImportError:
-            module.fail_json(msg=missing_required_lib("tempfile"), exception=traceback.format_exc())
+    if create_namespace:
+        deploy_command += " --create-namespace"
 
+    if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
         with open(path, 'w') as yaml_file:
             yaml.dump(release_values, yaml_file, default_flow_style=False)
@@ -355,8 +373,11 @@ def deploy(command, release_name, release_values, chart_name, wait, wait_timeout
     return deploy_command
 
 
-# Delete release chart
 def delete(command, release_name, purge, disable_hook):
+    """
+    Delete release chart
+    """
+
     delete_command = command + " uninstall "
 
     if not purge:
@@ -387,11 +408,14 @@ def main():
             # Helm options
             disable_hook=dict(type='bool', default=False),
             force=dict(type='bool', default=False),
-            kube_context=dict(type='str'),
-            kubeconfig_path=dict(type='path', aliases=['kubeconfig']),
+            kube_context=dict(type='str', aliases=['context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
             purge=dict(type='bool', default=True),
             wait=dict(type='bool', default=False),
             wait_timeout=dict(type='str'),
+            atomic=dict(type='bool', default=False),
+            create_namespace=dict(type='bool', default=False),
+            replace=dict(type='bool', default=False),
         ),
         required_if=[
             ('release_state', 'present', ['release_name', 'chart_ref']),
@@ -423,6 +447,9 @@ def main():
     purge = module.params.get('purge')
     wait = module.params.get('wait')
     wait_timeout = module.params.get('wait_timeout')
+    atomic = module.params.get('atomic')
+    create_namespace = module.params.get('create_namespace')
+    replace = module.params.get('replace')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
@@ -446,6 +473,9 @@ def main():
     # keep helm_cmd_common for get_release_status in module_exit_json
     helm_cmd = helm_cmd_common
     if release_state == "absent" and release_status is not None:
+        if replace:
+            module.fail_json(msg="replace is not applicable when state is absent")
+
         helm_cmd = delete(helm_cmd, release_name, purge, disable_hook)
         changed = True
     elif release_state == "present":
@@ -461,30 +491,42 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False)
+                              disable_hook, False, atomic=atomic, create_namespace=create_namespace,
+                              replace=replace)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force)
+                              disable_hook, force, atomic=atomic, create_namespace=create_namespace,
+                              replace=replace)
             changed = True
 
     if module.check_mode:
-        module.exit_json(changed=changed)
+        module.exit_json(
+            changed=changed,
+            command=helm_cmd,
+            stdout='',
+            stderr='',
+        )
     elif not changed:
-        module.exit_json(changed=False, status=release_status)
-
-    rc, out, err = module.run_command(helm_cmd)
-
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            command=helm_cmd
+        module.exit_json(
+            changed=False,
+            status=release_status,
+            stdout='',
+            stderr='',
+            command=helm_cmd,
         )
 
-    module.exit_json(changed=changed, stdout=out, stderr=err,
-                     status=get_release_status(helm_cmd_common, release_name), command=helm_cmd)
+    rc, out, err = exec_command(helm_cmd)
+
+    module.exit_json(
+        changed=changed,
+        stdout=out,
+        stderr=err,
+        status=get_release_status(helm_cmd_common, release_name),
+        command=helm_cmd,
+    )
 
 
 if __name__ == '__main__':

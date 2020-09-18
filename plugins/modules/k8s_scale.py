@@ -9,11 +9,8 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-ANSIBLE_METADATA = {'metadata_version': '1.1',
-                    'status': ['preview'],
-                    'supported_by': 'community'}
 
-DOCUMENTATION = '''
+DOCUMENTATION = r'''
 
 module: k8s_scale
 
@@ -39,9 +36,9 @@ requirements:
     - "PyYAML >= 3.11"
 '''
 
-EXAMPLES = '''
+EXAMPLES = r'''
 - name: Scale deployment up, and extend timeout
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     api_version: v1
     kind: Deployment
     name: elastic
@@ -50,7 +47,7 @@ EXAMPLES = '''
     wait_timeout: 60
 
 - name: Scale deployment down when current replicas match
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     api_version: v1
     kind: Deployment
     name: elastic
@@ -59,7 +56,7 @@ EXAMPLES = '''
     replicas: 2
 
 - name: Increase job parallelism
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     api_version: batch/v1
     kind: job
     name: pi-with-timeout
@@ -69,25 +66,25 @@ EXAMPLES = '''
 # Match object using local file or inline definition
 
 - name: Scale deployment based on a file from the local filesystem
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     src: /myproject/elastic_deployment.yml
     replicas: 3
     wait: no
 
 - name: Scale deployment based on a template output
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     resource_definition: "{{ lookup('template', '/myproject/elastic_deployment.yml') | from_yaml }}"
     replicas: 3
     wait: no
 
 - name: Scale deployment based on a file from the Ansible controller filesystem
-  k8s_scale:
+  community.kubernetes.k8s_scale:
     resource_definition: "{{ lookup('file', '/myproject/elastic_deployment.yml') | from_yaml }}"
     replicas: 3
     wait: no
 '''
 
-RETURN = '''
+RETURN = r'''
 result:
   description:
   - If a change was made, will return the patched object, otherwise returns the existing object.
@@ -114,6 +111,11 @@ result:
        description: Current status details for the object.
        returned: success
        type: complex
+     duration:
+       description: elapsed time of task in seconds
+       returned: when C(wait) is true
+       type: int
+       sample: 48
 '''
 
 from ansible_collections.community.kubernetes.plugins.module_utils.scale import KubernetesAnsibleScaleModule

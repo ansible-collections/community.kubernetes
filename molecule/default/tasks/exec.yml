@@ -43,6 +43,19 @@
         that:
           - "'nameserver' in output.stdout"
 
+    - name: Check if rc is returned for the given command
+      k8s_exec:
+        namespace: "{{ exec_namespace }}"
+        pod: "{{ pod }}"
+        command: 'false'
+      register: command_status
+      ignore_errors: True
+
+    - name: Check last command status
+      assert:
+        that:
+          - command_status.return_code != 0
+
   always:
     - name: "Cleanup namespace"
       k8s:

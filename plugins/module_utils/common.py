@@ -18,14 +18,13 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-import copy
-import json
+from datetime import datetime
+import time
 import os
 import traceback
 
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
-from ansible.module_utils.common.dict_transformations import recursive_diff
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
 
@@ -34,7 +33,7 @@ try:
     import kubernetes
     import openshift
     from openshift.dynamic import DynamicClient
-    from openshift.dynamic.exceptions import ResourceNotFoundError, ResourceNotUniqueError
+    from openshift.dynamic.exceptions import ResourceNotFoundError, ResourceNotUniqueError, NotFoundError
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -56,13 +55,14 @@ try:
 except ImportError:
     pass
 
+try:
+    from openshift.dynamic.apply import recursive_diff
+except ImportError:
+    from ansible.module_utils.common.dict_transformations import recursive_diff
+
 
 def list_dict_str(value):
-    if isinstance(value, list):
-        return value
-    elif isinstance(value, dict):
-        return value
-    elif isinstance(value, string_types):
+    if isinstance(value, (list, dict, string_types)):
         return value
     raise TypeError
 
@@ -78,6 +78,9 @@ COMMON_ARG_SPEC = {
         'type': 'bool',
         'default': False,
     },
+}
+
+RESOURCE_ARG_SPEC = {
     'resource_definition': {
         'type': list_dict_str,
         'aliases': ['definition', 'inline']
@@ -85,6 +88,9 @@ COMMON_ARG_SPEC = {
     'src': {
         'type': 'path',
     },
+}
+
+NAME_ARG_SPEC = {
     'kind': {},
     'name': {},
     'namespace': {},
@@ -149,20 +155,15 @@ AUTH_ARG_MAP = {
 
 
 class K8sAnsibleMixin(object):
-    _argspec_cache = None
 
-    @property
-    def argspec(self):
-        """
-        Introspect the model properties, and return an Ansible module arg_spec dict.
-        :return: dict
-        """
-        if self._argspec_cache:
-            return self._argspec_cache
-        argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
-        argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
-        self._argspec_cache = argument_spec
-        return self._argspec_cache
+    def __init__(self, *args, **kwargs):
+        if not HAS_K8S_MODULE_HELPER:
+            self.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
+                           error=to_native(k8s_import_exception))
+        self.openshift_version = openshift.__version__
+
+        if not HAS_YAML:
+            self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
 
     def get_api_client(self, **auth_params):
         auth_params = auth_params or getattr(self, 'params', {})
@@ -186,13 +187,19 @@ class K8sAnsibleMixin(object):
             # We have enough in the parameters to authenticate, no need to load incluster or kubeconfig
             pass
         elif auth_set('kubeconfig') or auth_set('context'):
-            kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+            try:
+                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+            except Exception as err:
+                self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
         else:
             # First try to do incluster config, then kubeconfig
             try:
                 kubernetes.config.load_incluster_config()
             except kubernetes.config.ConfigException:
-                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+                try:
+                    kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+                except Exception as err:
+                    self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
 
         # Override any values in the default configuration with Ansible parameters
         configuration = kubernetes.client.Configuration()
@@ -204,7 +211,10 @@ class K8sAnsibleMixin(object):
                     setattr(configuration, key, value)
 
         kubernetes.client.Configuration.set_default(configuration)
-        return DynamicClient(kubernetes.client.ApiClient(configuration))
+        try:
+            return DynamicClient(kubernetes.client.ApiClient(configuration))
+        except Exception as err:
+            self.fail(msg='Failed to get client due to %s' % to_native(err))
 
     def find_resource(self, kind, api_version, fail=False):
         for attribute in ['kind', 'name', 'singular_name']:
@@ -258,36 +268,165 @@ class K8sAnsibleMixin(object):
             self.fail(msg="Error loading resource_definition: {0}".format(exc))
         return result
 
-    @staticmethod
-    def diff_objects(existing, new):
+    def diff_objects(self, existing, new):
         result = dict()
         diff = recursive_diff(existing, new)
-        if diff:
-            result['before'] = diff[0]
-            result['after'] = diff[1]
-        return not diff, result
+        if not diff:
+            return True, result
 
+        result['before'] = diff[0]
+        result['after'] = diff[1]
 
-class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
-    resource_definition = None
-    api_version = None
-    kind = None
+        # If only metadata.generation and metadata.resourceVersion changed, ignore it
+        ignored_keys = set(['generation', 'resourceVersion'])
 
-    def __init__(self, *args, **kwargs):
+        if list(result['after'].keys()) != ['metadata'] or list(result['before'].keys()) != ['metadata']:
+            return False, result
 
-        kwargs['argument_spec'] = self.argspec
-        AnsibleModule.__init__(self, *args, **kwargs)
+        if not set(result['after']['metadata'].keys()).issubset(ignored_keys):
+            return False, result
+        if not set(result['before']['metadata'].keys()).issubset(ignored_keys):
+            return False, result
 
-        if not HAS_K8S_MODULE_HELPER:
-            self.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
-                           error=to_native(k8s_import_exception))
-        self.openshift_version = openshift.__version__
+        if hasattr(self, 'warn'):
+            self.warn('No meaningful diff was generated, but the API may not be idempotent (only metadata.generation or metadata.resourceVersion were changed)')
 
-        if not HAS_YAML:
-            self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
-
-    def execute_module(self):
-        raise NotImplementedError()
+        return True, result
 
     def fail(self, msg=None):
         self.fail_json(msg=msg)
+
+    def _wait_for(self, resource, name, namespace, predicate, sleep, timeout, state):
+        start = datetime.now()
+
+        def _wait_for_elapsed():
+            return (datetime.now() - start).seconds
+
+        response = None
+        while _wait_for_elapsed() < timeout:
+            try:
+                response = resource.get(name=name, namespace=namespace)
+                if predicate(response):
+                    if response:
+                        return True, response.to_dict(), _wait_for_elapsed()
+                    else:
+                        return True, {}, _wait_for_elapsed()
+                time.sleep(sleep)
+            except NotFoundError:
+                if state == 'absent':
+                    return True, {}, _wait_for_elapsed()
+        if response:
+            response = response.to_dict()
+        return False, response, _wait_for_elapsed()
+
+    def wait(self, resource, definition, sleep, timeout, state='present', condition=None):
+
+        def _deployment_ready(deployment):
+            # FIXME: frustratingly bool(deployment.status) is True even if status is empty
+            # Furthermore deployment.status.availableReplicas == deployment.status.replicas == None if status is empty
+            # deployment.status.replicas is None is perfectly ok if desired replicas == 0
+            # Scaling up means that we also need to check that we're not in a
+            # situation where status.replicas == status.availableReplicas
+            # but spec.replicas != status.replicas
+            return (deployment.status
+                    and deployment.spec.replicas == (deployment.status.replicas or 0)
+                    and deployment.status.availableReplicas == deployment.status.replicas
+                    and deployment.status.observedGeneration == deployment.metadata.generation
+                    and not deployment.status.unavailableReplicas)
+
+        def _pod_ready(pod):
+            return (pod.status and pod.status.containerStatuses is not None
+                    and all([container.ready for container in pod.status.containerStatuses]))
+
+        def _daemonset_ready(daemonset):
+            return (daemonset.status and daemonset.status.desiredNumberScheduled is not None
+                    and daemonset.status.numberReady == daemonset.status.desiredNumberScheduled
+                    and daemonset.status.observedGeneration == daemonset.metadata.generation
+                    and not daemonset.status.unavailableReplicas)
+
+        def _custom_condition(resource):
+            if not resource.status or not resource.status.conditions:
+                return False
+            match = [x for x in resource.status.conditions if x.type == condition['type']]
+            if not match:
+                return False
+            # There should never be more than one condition of a specific type
+            match = match[0]
+            if match.status == 'Unknown':
+                if match.status == condition['status']:
+                    if 'reason' not in condition:
+                        return True
+                    if condition['reason']:
+                        return match.reason == condition['reason']
+                return False
+            status = True if match.status == 'True' else False
+            if status == condition['status']:
+                if condition.get('reason'):
+                    return match.reason == condition['reason']
+                return True
+            return False
+
+        def _resource_absent(resource):
+            return not resource
+
+        waiter = dict(
+            Deployment=_deployment_ready,
+            DaemonSet=_daemonset_ready,
+            Pod=_pod_ready
+        )
+        kind = definition['kind']
+        if state == 'present' and not condition:
+            predicate = waiter.get(kind, lambda x: x)
+        elif state == 'present' and condition:
+            predicate = _custom_condition
+        else:
+            predicate = _resource_absent
+        return self._wait_for(resource, definition['metadata']['name'], definition['metadata'].get('namespace'), predicate, sleep, timeout, state)
+
+    def set_resource_definitions(self):
+        resource_definition = self.params.get('resource_definition')
+
+        self.resource_definitions = []
+
+        if resource_definition:
+            if isinstance(resource_definition, string_types):
+                try:
+                    self.resource_definitions = yaml.safe_load_all(resource_definition)
+                except (IOError, yaml.YAMLError) as exc:
+                    self.fail(msg="Error loading resource_definition: {0}".format(exc))
+            elif isinstance(resource_definition, list):
+                self.resource_definitions = resource_definition
+            else:
+                self.resource_definitions = [resource_definition]
+
+        src = self.params.get('src')
+        if src:
+            self.resource_definitions = self.load_resource_definitions(src)
+        try:
+            self.resource_definitions = [item for item in self.resource_definitions if item]
+        except AttributeError:
+            pass
+
+        if not resource_definition and not src:
+            implicit_definition = dict(
+                kind=self.kind,
+                apiVersion=self.api_version,
+                metadata=dict(name=self.name)
+            )
+            if self.namespace:
+                implicit_definition['metadata']['namespace'] = self.namespace
+            self.resource_definitions = [implicit_definition]
+
+
+class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
+    # NOTE: This class KubernetesAnsibleModule is deprecated in favor of
+    #       class K8sAnsibleMixin and will be removed 2.0.0 release.
+    #       Please use K8sAnsibleMixin instead.
+
+    def __init__(self, *args, **kwargs):
+        kwargs['argument_spec'] = self.argspec
+        AnsibleModule.__init__(self, *args, **kwargs)
+        K8sAnsibleMixin.__init__(self, *args, **kwargs)
+
+        self.warn("class KubernetesAnsibleModule is deprecated"
+                  " and will be removed in 2.0.0. Please use K8sAnsibleMixin instead.")
