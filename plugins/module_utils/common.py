@@ -18,22 +18,27 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-from datetime import datetime
 import time
 import os
 import traceback
+import sys
+from datetime import datetime
+from distutils.version import LooseVersion
 
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
+from ansible.module_utils.common.dict_transformations import dict_merge
 
 K8S_IMP_ERR = None
 try:
     import kubernetes
     import openshift
     from openshift.dynamic import DynamicClient
-    from openshift.dynamic.exceptions import ResourceNotFoundError, ResourceNotUniqueError, NotFoundError
+    from openshift.dynamic.exceptions import (
+        ResourceNotFoundError, ResourceNotUniqueError, NotFoundError, DynamicApiError,
+        ConflictError, ForbiddenError)
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -48,6 +53,22 @@ try:
 except ImportError:
     YAML_IMP_ERR = traceback.format_exc()
     HAS_YAML = False
+
+K8S_CONFIG_HASH_IMP_ERR = None
+try:
+    from openshift.helper.hashes import generate_hash
+    from openshift.dynamic.exceptions import KubernetesValidateMissing
+    HAS_K8S_CONFIG_HASH = True
+except ImportError:
+    K8S_CONFIG_HASH_IMP_ERR = traceback.format_exc()
+    HAS_K8S_CONFIG_HASH = False
+
+HAS_K8S_APPLY = None
+try:
+    from openshift.dynamic.apply import apply_object
+    HAS_K8S_APPLY = True
+except ImportError:
+    HAS_K8S_APPLY = False
 
 try:
     import urllib3
@@ -416,6 +437,320 @@ class K8sAnsibleMixin(object):
             if self.namespace:
                 implicit_definition['metadata']['namespace'] = self.namespace
             self.resource_definitions = [implicit_definition]
+
+    def check_library_version(self):
+        validate = self.params.get('validate')
+        if validate:
+            if LooseVersion(self.openshift_version) < LooseVersion("0.8.0"):
+                self.fail_json(msg="openshift >= 0.8.0 is required for validate")
+        self.append_hash = self.params.get('append_hash')
+        if self.append_hash:
+            if not HAS_K8S_CONFIG_HASH:
+                self.fail_json(msg=missing_required_lib("openshift >= 0.7.2", reason="for append_hash"),
+                               exception=K8S_CONFIG_HASH_IMP_ERR)
+        if self.params['merge_type']:
+            if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
+                self.fail_json(msg=missing_required_lib("openshift >= 0.6.2", reason="for merge_type"))
+        self.apply = self.params.get('apply', False)
+        if self.apply:
+            if not HAS_K8S_APPLY:
+                self.fail_json(msg=missing_required_lib("openshift >= 0.9.2", reason="for apply"))
+
+    def flatten_list_kind(self, list_resource, definitions):
+        flattened = []
+        parent_api_version = list_resource.group_version if list_resource else None
+        parent_kind = list_resource.kind[:-4] if list_resource else None
+        for definition in definitions.get('items', []):
+            resource = self.find_resource(definition.get('kind', parent_kind), definition.get('apiVersion', parent_api_version), fail=True)
+            flattened.append((resource, self.set_defaults(resource, definition)))
+        return flattened
+
+    def execute_module(self):
+        changed = False
+        results = []
+        try:
+            self.client = self.get_api_client()
+        # Hopefully the kubernetes client will provide its own exception class one day
+        except (urllib3.exceptions.RequestError) as e:
+            self.fail_json(msg="Couldn't connect to Kubernetes: %s" % str(e))
+
+        flattened_definitions = []
+        for definition in self.resource_definitions:
+            if definition is None:
+                continue
+            kind = definition.get('kind', self.kind)
+            api_version = definition.get('apiVersion', self.api_version)
+            if kind and kind.endswith('List'):
+                resource = self.find_resource(kind, api_version, fail=False)
+                flattened_definitions.extend(self.flatten_list_kind(resource, definition))
+            else:
+                resource = self.find_resource(kind, api_version, fail=True)
+                flattened_definitions.append((resource, definition))
+
+        for (resource, definition) in flattened_definitions:
+            kind = definition.get('kind', self.kind)
+            api_version = definition.get('apiVersion', self.api_version)
+            definition = self.set_defaults(resource, definition)
+            self.warnings = []
+            if self.params['validate'] is not None:
+                self.warnings = self.validate(definition)
+            result = self.perform_action(resource, definition)
+            result['warnings'] = self.warnings
+            changed = changed or result['changed']
+            results.append(result)
+
+        if len(results) == 1:
+            self.exit_json(**results[0])
+
+        self.exit_json(**{
+            'changed': changed,
+            'result': {
+                'results': results
+            }
+        })
+
+    def validate(self, resource):
+        def _prepend_resource_info(resource, msg):
+            return "%s %s: %s" % (resource['kind'], resource['metadata']['name'], msg)
+
+        try:
+            warnings, errors = self.client.validate(resource, self.params['validate'].get('version'), self.params['validate'].get('strict'))
+        except KubernetesValidateMissing:
+            self.fail_json(msg="kubernetes-validate python library is required to validate resources")
+
+        if errors and self.params['validate']['fail_on_error']:
+            self.fail_json(msg="\n".join([_prepend_resource_info(resource, error) for error in errors]))
+        else:
+            return [_prepend_resource_info(resource, msg) for msg in warnings + errors]
+
+    def set_defaults(self, resource, definition):
+        definition['kind'] = resource.kind
+        definition['apiVersion'] = resource.group_version
+        metadata = definition.get('metadata', {})
+        if self.name and not metadata.get('name'):
+            metadata['name'] = self.name
+        if resource.namespaced and self.namespace and not metadata.get('namespace'):
+            metadata['namespace'] = self.namespace
+        definition['metadata'] = metadata
+        return definition
+
+    def perform_action(self, resource, definition):
+        result = {'changed': False, 'result': {}}
+        state = self.params.get('state', None)
+        force = self.params.get('force', False)
+        name = definition['metadata'].get('name')
+        namespace = definition['metadata'].get('namespace')
+        existing = None
+        wait = self.params.get('wait')
+        wait_sleep = self.params.get('wait_sleep')
+        wait_timeout = self.params.get('wait_timeout')
+        wait_condition = None
+        if self.params.get('wait_condition') and self.params['wait_condition'].get('type'):
+            wait_condition = self.params['wait_condition']
+
+        self.remove_aliases()
+
+        try:
+            # ignore append_hash for resources other than ConfigMap and Secret
+            if self.append_hash and definition['kind'] in ['ConfigMap', 'Secret']:
+                name = '%s-%s' % (name, generate_hash(definition))
+                definition['metadata']['name'] = name
+            params = dict(name=name)
+            if namespace:
+                params['namespace'] = namespace
+            existing = resource.get(**params)
+        except NotFoundError:
+            # Remove traceback so that it doesn't show up in later failures
+            try:
+                sys.exc_clear()
+            except AttributeError:
+                # no sys.exc_clear on python3
+                pass
+        except ForbiddenError as exc:
+            if definition['kind'] in ['Project', 'ProjectRequest'] and state != 'absent':
+                return self.create_project_request(definition)
+            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc.body),
+                           error=exc.status, status=exc.status, reason=exc.reason)
+        except DynamicApiError as exc:
+            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc.body),
+                           error=exc.status, status=exc.status, reason=exc.reason)
+        except Exception as exc:
+            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(to_native(exc)),
+                           error='', status='', reason='')
+
+        if state == 'absent':
+            result['method'] = "delete"
+            if not existing:
+                # The object already does not exist
+                return result
+            else:
+                # Delete the object
+                result['changed'] = True
+                if not self.check_mode:
+                    try:
+                        k8s_obj = resource.delete(**params)
+                        result['result'] = k8s_obj.to_dict()
+                    except DynamicApiError as exc:
+                        self.fail_json(msg="Failed to delete object: {0}".format(exc.body),
+                                       error=exc.status, status=exc.status, reason=exc.reason)
+                    if wait:
+                        success, resource, duration = self.wait(resource, definition, wait_sleep, wait_timeout, 'absent')
+                        result['duration'] = duration
+                        if not success:
+                            self.fail_json(msg="Resource deletion timed out", **result)
+                return result
+        else:
+            if self.apply:
+                if self.check_mode:
+                    ignored, patch = apply_object(resource, definition)
+                    if existing:
+                        k8s_obj = dict_merge(existing.to_dict(), patch)
+                    else:
+                        k8s_obj = patch
+                else:
+                    try:
+                        k8s_obj = resource.apply(definition, namespace=namespace).to_dict()
+                    except DynamicApiError as exc:
+                        msg = "Failed to apply object: {0}".format(exc.body)
+                        if self.warnings:
+                            msg += "\n" + "\n    ".join(self.warnings)
+                        self.fail_json(msg=msg, error=exc.status, status=exc.status, reason=exc.reason)
+                success = True
+                result['result'] = k8s_obj
+                if wait and not self.check_mode:
+                    success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
+                if existing:
+                    existing = existing.to_dict()
+                else:
+                    existing = {}
+                match, diffs = self.diff_objects(existing, result['result'])
+                result['changed'] = not match
+                result['diff'] = diffs
+                result['method'] = 'apply'
+                if not success:
+                    self.fail_json(msg="Resource apply timed out", **result)
+                return result
+
+            if not existing:
+                if self.check_mode:
+                    k8s_obj = definition
+                else:
+                    try:
+                        k8s_obj = resource.create(definition, namespace=namespace).to_dict()
+                    except ConflictError:
+                        # Some resources, like ProjectRequests, can't be created multiple times,
+                        # because the resources that they create don't match their kind
+                        # In this case we'll mark it as unchanged and warn the user
+                        self.warn("{0} was not found, but creating it returned a 409 Conflict error. This can happen \
+                                  if the resource you are creating does not directly create a resource of the same kind.".format(name))
+                        return result
+                    except DynamicApiError as exc:
+                        msg = "Failed to create object: {0}".format(exc.body)
+                        if self.warnings:
+                            msg += "\n" + "\n    ".join(self.warnings)
+                        self.fail_json(msg=msg, error=exc.status, status=exc.status, reason=exc.reason)
+                success = True
+                result['result'] = k8s_obj
+                if wait and not self.check_mode:
+                    success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
+                result['changed'] = True
+                result['method'] = 'create'
+                if not success:
+                    self.fail_json(msg="Resource creation timed out", **result)
+                return result
+
+            match = False
+            diffs = []
+
+            if existing and force:
+                if self.check_mode:
+                    k8s_obj = definition
+                else:
+                    try:
+                        k8s_obj = resource.replace(definition, name=name, namespace=namespace, append_hash=self.append_hash).to_dict()
+                    except DynamicApiError as exc:
+                        msg = "Failed to replace object: {0}".format(exc.body)
+                        if self.warnings:
+                            msg += "\n" + "\n    ".join(self.warnings)
+                        self.fail_json(msg=msg, error=exc.status, status=exc.status, reason=exc.reason)
+                match, diffs = self.diff_objects(existing.to_dict(), k8s_obj)
+                success = True
+                result['result'] = k8s_obj
+                if wait and not self.check_mode:
+                    success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
+                match, diffs = self.diff_objects(existing.to_dict(), result['result'])
+                result['changed'] = not match
+                result['method'] = 'replace'
+                result['diff'] = diffs
+                if not success:
+                    self.fail_json(msg="Resource replacement timed out", **result)
+                return result
+
+            # Differences exist between the existing obj and requested params
+            if self.check_mode:
+                k8s_obj = dict_merge(existing.to_dict(), definition)
+            else:
+                if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
+                    k8s_obj, error = self.patch_resource(resource, definition, existing, name,
+                                                         namespace)
+                else:
+                    for merge_type in self.params['merge_type'] or ['strategic-merge', 'merge']:
+                        k8s_obj, error = self.patch_resource(resource, definition, existing, name,
+                                                             namespace, merge_type=merge_type)
+                        if not error:
+                            break
+                if error:
+                    self.fail_json(**error)
+
+            success = True
+            result['result'] = k8s_obj
+            if wait and not self.check_mode:
+                success, result['result'], result['duration'] = self.wait(resource, definition, wait_sleep, wait_timeout, condition=wait_condition)
+            match, diffs = self.diff_objects(existing.to_dict(), result['result'])
+            result['changed'] = not match
+            result['method'] = 'patch'
+            result['diff'] = diffs
+
+            if not success:
+                self.fail_json(msg="Resource update timed out", **result)
+            return result
+
+    def patch_resource(self, resource, definition, existing, name, namespace, merge_type=None):
+        try:
+            params = dict(name=name, namespace=namespace)
+            if merge_type:
+                params['content_type'] = 'application/{0}-patch+json'.format(merge_type)
+            k8s_obj = resource.patch(definition, **params).to_dict()
+            match, diffs = self.diff_objects(existing.to_dict(), k8s_obj)
+            error = {}
+            return k8s_obj, {}
+        except DynamicApiError as exc:
+            msg = "Failed to patch object: {0}".format(exc.body)
+            if self.warnings:
+                msg += "\n" + "\n    ".join(self.warnings)
+            error = dict(msg=msg, error=exc.status, status=exc.status, reason=exc.reason, warnings=self.warnings)
+            return None, error
+        except Exception as exc:
+            msg = "Failed to patch object: {0}".format(exc)
+            if self.warnings:
+                msg += "\n" + "\n    ".join(self.warnings)
+            error = dict(msg=msg, error=to_native(exc), status='', reason='', warnings=self.warnings)
+            return None, error
+
+    def create_project_request(self, definition):
+        definition['kind'] = 'ProjectRequest'
+        result = {'changed': False, 'result': {}}
+        resource = self.find_resource('ProjectRequest', definition['apiVersion'], fail=True)
+        if not self.check_mode:
+            try:
+                k8s_obj = resource.create(definition)
+                result['result'] = k8s_obj.to_dict()
+            except DynamicApiError as exc:
+                self.fail_json(msg="Failed to create object: {0}".format(exc.body),
+                               error=exc.status, status=exc.status, reason=exc.reason)
+        result['changed'] = True
+        result['method'] = 'create'
+        return result
 
 
 class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):

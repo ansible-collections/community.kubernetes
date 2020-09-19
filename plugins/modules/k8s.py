@@ -260,11 +260,82 @@ result:
        sample: 48
 '''
 
-from ansible_collections.community.kubernetes.plugins.module_utils.raw import KubernetesRawModule
+import copy
+
+from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+    K8sAnsibleMixin, COMMON_ARG_SPEC, NAME_ARG_SPEC, RESOURCE_ARG_SPEC, AUTH_ARG_SPEC)
+
+
+class KubernetesModule(K8sAnsibleMixin):
+
+    @property
+    def validate_spec(self):
+        return dict(
+            fail_on_error=dict(type='bool'),
+            version=dict(),
+            strict=dict(type='bool', default=True)
+        )
+
+    @property
+    def condition_spec(self):
+        return dict(
+            type=dict(),
+            status=dict(default=True, choices=[True, False, "Unknown"]),
+            reason=dict()
+        )
+
+    @property
+    def argspec(self):
+        argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
+        argument_spec.update(copy.deepcopy(NAME_ARG_SPEC))
+        argument_spec.update(copy.deepcopy(RESOURCE_ARG_SPEC))
+        argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
+        argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
+        argument_spec['wait'] = dict(type='bool', default=False)
+        argument_spec['wait_sleep'] = dict(type='int', default=5)
+        argument_spec['wait_timeout'] = dict(type='int', default=120)
+        argument_spec['wait_condition'] = dict(type='dict', default=None, options=self.condition_spec)
+        argument_spec['validate'] = dict(type='dict', default=None, options=self.validate_spec)
+        argument_spec['append_hash'] = dict(type='bool', default=False)
+        argument_spec['apply'] = dict(type='bool', default=False)
+        return argument_spec
+
+    def __init__(self, *args, k8s_kind=None, **kwargs):
+        mutually_exclusive = [
+            ('resource_definition', 'src'),
+            ('merge_type', 'apply'),
+        ]
+
+        module = AnsibleModule(
+            argument_spec=self.argspec,
+            mutually_exclusive=mutually_exclusive,
+            supports_check_mode=True,
+        )
+
+        self.module = module
+        self.check_mode = self.module.check_mode
+        self.params = self.module.params
+        self.fail_json = self.module.fail_json
+        self.fail = self.module.fail_json
+        self.exit_json = self.module.exit_json
+
+        super(KubernetesModule, self).__init__(*args, **kwargs)
+
+        self.client = None
+        self.warnings = []
+
+        self.kind = k8s_kind or self.params.get('kind')
+        self.api_version = self.params.get('api_version')
+        self.name = self.params.get('name')
+        self.namespace = self.params.get('namespace')
+
+        self.check_library_version()
+        self.set_resource_definitions()
 
 
 def main():
-    KubernetesRawModule().execute_module()
+    KubernetesModule().execute_module()
 
 
 if __name__ == '__main__':
