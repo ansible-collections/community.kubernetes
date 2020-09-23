@@ -27,6 +27,7 @@
     - include_tasks: tasks/full.yml
     - include_tasks: tasks/exec.yml
     - include_tasks: tasks/log.yml
+    - include_tasks: tasks/info.yml
 
   roles:
     - helm

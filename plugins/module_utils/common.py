@@ -158,6 +158,21 @@ AUTH_ARG_SPEC = {
     },
 }
 
+WAIT_ARG_SPEC = dict(
+    wait=dict(type='bool', default=False),
+    wait_sleep=dict(type='int', default=5),
+    wait_timeout=dict(type='int', default=120),
+    wait_condition=dict(
+        type='dict',
+        default=None,
+        options=dict(
+            type=dict(),
+            status=dict(default=True, choices=[True, False, "Unknown"]),
+            reason=dict()
+        )
+    )
+)
+
 # Map kubernetes-client parameters to ansible parameters
 AUTH_ARG_MAP = {
     'kubeconfig': 'kubeconfig',
@@ -249,16 +264,34 @@ class K8sAnsibleMixin(object):
             if fail:
                 self.fail(msg='Failed to find exact match for {0}.{1} by [kind, name, singularName, shortNames]'.format(api_version, kind))
 
-    def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None):
+    def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None,
+                         wait=False, wait_sleep=5, wait_timeout=120, state='present', condition=None):
         resource = self.find_resource(kind, api_version)
         if not resource:
             return dict(resources=[])
+
+        if not label_selectors:
+            label_selectors = []
+        if not field_selectors:
+            field_selectors = []
+
         try:
             result = resource.get(name=name,
                                   namespace=namespace,
                                   label_selector=','.join(label_selectors),
-                                  field_selector=','.join(field_selectors)).to_dict()
-        except openshift.dynamic.exceptions.NotFoundError:
+                                  field_selector=','.join(field_selectors))
+            satisfied_by = []
+            if wait and result['kind'].endswith('List') and hasattr(result, 'items'):
+                # We have a list of ResourceInstance
+                for resource_instance in result.get('items'):
+                    success, res, duration = self.wait(resource, resource_instance, sleep=wait_sleep, timeout=wait_timeout)
+                    if not success:
+                        self.fail(msg="Failed to gather information about %s(s)" % result.get('kind')[:-4])
+                    satisfied_by.append(res)
+                return dict(resources=satisfied_by)
+            else:
+                result = result.to_dict()
+        except (openshift.dynamic.exceptions.BadRequestError, openshift.dynamic.exceptions.NotFoundError):
             return dict(resources=[])
 
         if 'items' in result:
