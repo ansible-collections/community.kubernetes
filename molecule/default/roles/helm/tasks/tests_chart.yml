@@ -258,6 +258,25 @@
     that:
       - install is changed
 
+- name: "Install {{ chart_test }} from {{ source }} with values_files"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: values-files-test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+    values_files:
+      - files/values.yaml
+  register: install
+
+- name: "Assert that {{ chart_test }} chart has var from {{ source }}"
+  assert:
+    that:
+      - install is changed
+      - install.status.status | lower == 'deployed'
+      - install.status.chart == "{{ chart_test }}-{{ chart_test_version }}"
+      - "install.status['values'].revisionHistoryLimit == 0"
+
 - name: Remove helm namespace
   k8s:
     api_version: v1

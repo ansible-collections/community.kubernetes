@@ -165,6 +165,14 @@ EXAMPLES = r'''
     chart_version: 5.0.12
     values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
 
+- name: Deploy Grafana chart using values files on target
+  community.kubernetes.helm:
+    name: test
+    chart_ref: stable/grafana
+    release_namespace: monitoring
+    values_files:
+      - /path/to/values.yaml
+
 - name: Remove test release and waiting suppression ending
   community.kubernetes.helm:
     name: test
