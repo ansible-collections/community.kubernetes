@@ -489,7 +489,7 @@ def main():
         module.exit_json(
             changed=changed,
             command=helm_cmd,
-            status=check_status
+            status=check_status,
             stdout='',
             stderr='',
         )
