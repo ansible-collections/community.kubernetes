@@ -46,7 +46,8 @@
       assert:
         that:
           - wait_info is successful
-          - wait_info.changed is false
+          - not wait_info.changed
+          - wait_info.resources[0].status.phase == "Running"
 
     - name: Remove Pod
       k8s:
@@ -63,7 +64,7 @@
       assert:
         that:
           - short_wait_remove_pod is successful
-          - short_wait_remove_pod.changed is true
+          - short_wait_remove_pod.changed
 
     - name: Create multiple pod with initContainer
       k8s:
@@ -120,7 +121,9 @@
       assert:
         that:
           - wait_info is successful
-          - wait_info.changed is false
+          - not wait_info.changed
+          - wait_info.resources[0].status.phase == "Running"
+          - wait_info.resources[1].status.phase == "Running"
 
     - name: "Remove Pod {{ multi_pod_one }}"
       k8s:
@@ -137,7 +140,7 @@
       assert:
         that:
           - multi_pod_one_remove is successful
-          - multi_pod_one_remove.changed is true
+          - multi_pod_one_remove.changed
 
     - name: "Remove Pod {{ multi_pod_two }}"
       k8s:
@@ -154,7 +157,7 @@
       assert:
         that:
           - multi_pod_two_remove is successful
-          - multi_pod_two_remove.changed is true
+          - multi_pod_two_remove.changed
 
   always:
     - name: Remove namespace
