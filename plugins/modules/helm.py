@@ -344,6 +344,7 @@ def fetch_chart_info(command, chart_ref):
 
     return yaml.safe_load(out)
 
+
 def deploy(command, release_name, release_values, chart_name, wait,
            wait_timeout, disable_hook, force, values_files, atomic=False,
            create_namespace=False, replace=False):
@@ -382,18 +383,6 @@ def deploy(command, release_name, release_values, chart_name, wait,
     if values_files:
         for value_file in values_files:
             deploy_command += " --values=" + value_file
-
-    if release_values != {}:
-        try:
-            import tempfile
-        except ImportError:
-            module.fail_json(
-                msg=missing_required_lib("tempfile"),
-                exception=traceback.format_exc(),
-                stdout='',
-                stderr='',
-                command='',
-            )
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
