@@ -17,7 +17,6 @@
   assert:
     that:
       - can_i_create_namespaces is successful
-      - (can_i_create_namespaces.resources | length) == 1
-      - can_i_create_namespaces.resources.0.status is defined
-      - can_i_create_namespaces.resources.0.status.allowed is defined
-      - can_i_create_namespaces.resources.0.status.allowed
+      - can_i_create_namespaces.result.status is defined
+      - can_i_create_namespaces.result.status.allowed is defined
+      - can_i_create_namespaces.result.status.allowed
