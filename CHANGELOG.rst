@@ -6,7 +6,7 @@ Kubernetes Collection Release Notes
 
 
 v1.0.0 (July 28 2020)
-======
+=====================
 
 Major Changes
 -------------
@@ -48,7 +48,7 @@ New Modules
 - helm_plugin_info - Gather information about Helm plugins
 
 v0.11.1 (July 1 2020)
-=======
+=====================
 
 Major Changes
 -------------
@@ -87,7 +87,7 @@ Bugfixes
 - raw - handle condition when definition is none (https://github.com/ansible-collections/community.kubernetes/pull/139).
 
 v0.11.0 (May 4 2020)
-=======
+====================
 
 Major Changes
 -------------
@@ -116,7 +116,7 @@ New Modules
 - helm_repository - Add and remove Helm repository
 
 v0.10.0 (March 23 2020)
-=======
+=======================
 
 Major Changes
 -------------
@@ -150,7 +150,7 @@ New Modules
 - k8s_log - Fetch logs from Kubernetes resources
 
 v0.9.0 (February 5 2020)
-======
+========================
 
 Major Changes
 -------------
