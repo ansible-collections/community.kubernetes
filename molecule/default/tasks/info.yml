@@ -1,0 +1,167 @@
+---
+- block:
+    - set_fact:
+        wait_namespace: wait
+        k8s_pod_name: pod-info-1
+        multi_pod_one: multi-pod-1
+        multi_pod_two: multi-pod-2
+
+    - name: Ensure namespace exists
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ wait_namespace }}"
+
+    - name: Add a simple pod with initContainer
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            name: "{{ k8s_pod_name }}"
+            namespace: "{{ wait_namespace }}"
+          spec:
+            initContainers:
+              - name: init-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 20']
+            containers:
+              - name: utilitypod-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 360']
+
+    - name: Wait and gather information about new pod
+      k8s_info:
+        name: "{{ k8s_pod_name }}"
+        kind: Pod
+        namespace: "{{ wait_namespace }}"
+        wait: yes
+        wait_sleep: 5
+        wait_timeout: 400
+      register: wait_info
+
+    - name: Assert that pod creation succeeded
+      assert:
+        that:
+          - wait_info is successful
+          - not wait_info.changed
+          - wait_info.resources[0].status.phase == "Running"
+
+    - name: Remove Pod
+      k8s:
+        api_version: v1
+        kind: Pod
+        name: "{{ k8s_pod_name }}"
+        namespace: "{{ wait_namespace }}"
+        state: absent
+        wait: yes
+      ignore_errors: yes
+      register: short_wait_remove_pod
+
+    - name: Check if pod is removed
+      assert:
+        that:
+          - short_wait_remove_pod is successful
+          - short_wait_remove_pod.changed
+
+    - name: Create multiple pod with initContainer
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            labels:
+              run: multi-box
+            name: "{{ multi_pod_one }}"
+            namespace: "{{ wait_namespace }}"
+          spec:
+            initContainers:
+              - name: init-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 25']
+            containers:
+              - name: multi-pod-01
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 360']
+
+    - name: Create another pod with same label as previous pod
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Pod
+          metadata:
+            labels:
+              run: multi-box
+            name: "{{ multi_pod_two }}"
+            namespace: "{{ wait_namespace }}"
+          spec:
+            initContainers:
+              - name: init-02
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 25']
+            containers:
+              - name: multi-pod-02
+                image: python:3.7-alpine
+                command: ['sh', '-c', 'sleep 360']
+
+    - name: Wait and gather information about new pods
+      k8s_info:
+        kind: Pod
+        namespace: "{{ wait_namespace }}"
+        wait: yes
+        wait_sleep: 5
+        wait_timeout: 400
+        label_selectors:
+          - run == multi-box
+      register: wait_info
+
+    - name: Assert that pod creation succeeded
+      assert:
+        that:
+          - wait_info is successful
+          - not wait_info.changed
+          - wait_info.resources[0].status.phase == "Running"
+          - wait_info.resources[1].status.phase == "Running"
+
+    - name: "Remove Pod {{ multi_pod_one }}"
+      k8s:
+        api_version: v1
+        kind: Pod
+        name: "{{ multi_pod_one }}"
+        namespace: "{{ wait_namespace }}"
+        state: absent
+        wait: yes
+      ignore_errors: yes
+      register: multi_pod_one_remove
+
+    - name: "Check if {{ multi_pod_one }} pod is removed"
+      assert:
+        that:
+          - multi_pod_one_remove is successful
+          - multi_pod_one_remove.changed
+
+    - name: "Remove Pod {{ multi_pod_two }}"
+      k8s:
+        api_version: v1
+        kind: Pod
+        name: "{{ multi_pod_two }}"
+        namespace: "{{ wait_namespace }}"
+        state: absent
+        wait: yes
+      ignore_errors: yes
+      register: multi_pod_two_remove
+
+    - name: "Check if {{ multi_pod_two }} pod is removed"
+      assert:
+        that:
+          - multi_pod_two_remove is successful
+          - multi_pod_two_remove.changed
+
+  always:
+    - name: Remove namespace
+      k8s:
+        kind: Namespace
+        name: "{{ wait_namespace }}"
+        state: absent

@@ -81,6 +81,20 @@ try:
 except ImportError:
     from ansible.module_utils.common.dict_transformations import recursive_diff
 
+try:
+    try:
+        # >=0.10
+        from openshift.dynamic.resource import ResourceInstance
+    except ImportError:
+        # <0.10
+        from openshift.dynamic.client import ResourceInstance
+    HAS_K8S_INSTANCE_HELPER = True
+    k8s_import_exception = None
+except ImportError as e:
+    HAS_K8S_INSTANCE_HELPER = False
+    k8s_import_exception = e
+    K8S_IMP_ERR = traceback.format_exc()
+
 
 def list_dict_str(value):
     if isinstance(value, (list, dict, string_types)):
@@ -157,6 +171,21 @@ AUTH_ARG_SPEC = {
         'type': 'bool',
     },
 }
+
+WAIT_ARG_SPEC = dict(
+    wait=dict(type='bool', default=False),
+    wait_sleep=dict(type='int', default=5),
+    wait_timeout=dict(type='int', default=120),
+    wait_condition=dict(
+        type='dict',
+        default=None,
+        options=dict(
+            type=dict(),
+            status=dict(default=True, choices=[True, False, "Unknown"]),
+            reason=dict()
+        )
+    )
+)
 
 # Map kubernetes-client parameters to ansible parameters
 AUTH_ARG_MAP = {
@@ -249,22 +278,46 @@ class K8sAnsibleMixin(object):
             if fail:
                 self.fail(msg='Failed to find exact match for {0}.{1} by [kind, name, singularName, shortNames]'.format(api_version, kind))
 
-    def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None):
+    def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None,
+                         wait=False, wait_sleep=5, wait_timeout=120, state='present', condition=None):
         resource = self.find_resource(kind, api_version)
         if not resource:
             return dict(resources=[])
+
+        if not label_selectors:
+            label_selectors = []
+        if not field_selectors:
+            field_selectors = []
+
         try:
             result = resource.get(name=name,
                                   namespace=namespace,
                                   label_selector=','.join(label_selectors),
-                                  field_selector=','.join(field_selectors)).to_dict()
-        except openshift.dynamic.exceptions.NotFoundError:
+                                  field_selector=','.join(field_selectors))
+            if wait:
+                satisfied_by = []
+                if isinstance(result, ResourceInstance):
+                    # We have a list of ResourceInstance
+                    resource_list = result.get('items', [])
+                    if not resource_list:
+                        resource_list = [result]
+
+                    for resource_instance in resource_list:
+                        success, res, duration = self.wait(resource, resource_instance,
+                                                           sleep=wait_sleep, timeout=wait_timeout,
+                                                           state=state, condition=condition)
+                        if not success:
+                            self.fail(msg="Failed to gather information about %s(s) even"
+                                          " after waiting for %s seconds" % (res.get('kind'), duration))
+                        satisfied_by.append(res)
+                    return dict(resources=satisfied_by)
+            result = result.to_dict()
+        except (openshift.dynamic.exceptions.BadRequestError, openshift.dynamic.exceptions.NotFoundError):
             return dict(resources=[])
 
         if 'items' in result:
             return dict(resources=result['items'])
-        else:
-            return dict(resources=[result])
+        return dict(resources=[result])
 
     def remove_aliases(self):
         """
@@ -330,8 +383,7 @@ class K8sAnsibleMixin(object):
                 if predicate(response):
                     if response:
                         return True, response.to_dict(), _wait_for_elapsed()
-                    else:
-                        return True, {}, _wait_for_elapsed()
+                    return True, {}, _wait_for_elapsed()
                 time.sleep(sleep)
             except NotFoundError:
                 if state == 'absent':
@@ -440,21 +492,20 @@ class K8sAnsibleMixin(object):
 
     def check_library_version(self):
         validate = self.params.get('validate')
-        if validate:
-            if LooseVersion(self.openshift_version) < LooseVersion("0.8.0"):
-                self.fail_json(msg="openshift >= 0.8.0 is required for validate")
+        if validate and LooseVersion(self.openshift_version) < LooseVersion("0.8.0"):
+            self.fail_json(msg="openshift >= 0.8.0 is required for validate")
         self.append_hash = self.params.get('append_hash')
-        if self.append_hash:
-            if not HAS_K8S_CONFIG_HASH:
-                self.fail_json(msg=missing_required_lib("openshift >= 0.7.2", reason="for append_hash"),
-                               exception=K8S_CONFIG_HASH_IMP_ERR)
-        if self.params['merge_type']:
-            if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
-                self.fail_json(msg=missing_required_lib("openshift >= 0.6.2", reason="for merge_type"))
+        if self.append_hash and not HAS_K8S_CONFIG_HASH:
+            self.fail_json(msg=missing_required_lib("openshift >= 0.7.2", reason="for append_hash"),
+                           exception=K8S_CONFIG_HASH_IMP_ERR)
+        if self.params['merge_type'] and LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
+            self.fail_json(msg=missing_required_lib("openshift >= 0.6.2", reason="for merge_type"))
         self.apply = self.params.get('apply', False)
-        if self.apply:
-            if not HAS_K8S_APPLY:
-                self.fail_json(msg=missing_required_lib("openshift >= 0.9.2", reason="for apply"))
+        if self.apply and not HAS_K8S_APPLY:
+            self.fail_json(msg=missing_required_lib("openshift >= 0.9.2", reason="for apply"))
+        wait = self.params.get('wait', False)
+        if wait and not HAS_K8S_INSTANCE_HELPER:
+            self.fail_json(msg=missing_required_lib("openshift >= 0.4.0", reason="for wait"))
 
     def flatten_list_kind(self, list_resource, definitions):
         flattened = []
