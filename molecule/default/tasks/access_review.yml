@@ -1,0 +1,22 @@
+---
+- name: Create a SelfSubjectAccessReview resource
+  register: can_i_create_namespaces
+  ignore_errors: yes
+  k8s:
+    state: present
+    definition:
+      apiVersion: authorization.k8s.io/v1
+      kind: SelfSubjectAccessReview
+      spec:
+        resourceAttributes:
+          group: v1
+          resource: Namespace
+          verb: create
+
+- name: Assert that the SelfSubjectAccessReview request succeded
+  assert:
+    that:
+      - can_i_create_namespaces is successful
+      - can_i_create_namespaces.result.status is defined
+      - can_i_create_namespaces.result.status.allowed is defined
+      - can_i_create_namespaces.result.status.allowed

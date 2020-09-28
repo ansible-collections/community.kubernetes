@@ -38,7 +38,7 @@ try:
     from openshift.dynamic import DynamicClient
     from openshift.dynamic.exceptions import (
         ResourceNotFoundError, ResourceNotUniqueError, NotFoundError, DynamicApiError,
-        ConflictError, ForbiddenError)
+        ConflictError, ForbiddenError, MethodNotAllowedError)
     HAS_K8S_MODULE_HELPER = True
     k8s_import_exception = None
 except ImportError as e:
@@ -610,7 +610,7 @@ class K8sAnsibleMixin(object):
             if namespace:
                 params['namespace'] = namespace
             existing = resource.get(**params)
-        except NotFoundError:
+        except (NotFoundError, MethodNotAllowedError):
             # Remove traceback so that it doesn't show up in later failures
             try:
                 sys.exc_clear()
