@@ -96,6 +96,30 @@ options:
     - Requires openshift >= 0.9.2
     - mutually exclusive with C(merge_type)
     type: bool
+  template:
+    description:
+    - Provide a valid YAML template definition file for an object when creating or updating.
+    - Value can be provided as string or dictionary.
+    - Mutually exclusive with C(src) and C(resource_definition).
+    - Template files needs to be present on the Ansible Controller's file system.
+    - Additional parameters can be specified using dictionary.
+    - 'Valid additional parameters - '
+    - 'C(newline_sequence) (str): Specify the newline sequence to use for templating files.
+      valid choices are "\n", "\r", "\r\n". Default value "\n".'
+    - 'C(block_start_string) (str): The string marking the beginning of a block.
+      Default value "{%".'
+    - 'C(block_end_string) (str): The string marking the end of a block.
+      Default value "%}".'
+    - 'C(variable_start_string) (str): The string marking the beginning of a print statement.
+      Default value "{{".'
+    - 'C(variable_end_string) (str): The string marking the end of a print statement.
+      Default value "}}".'
+    - 'C(trim_blocks) (bool): Determine when newlines should be removed from blocks. When set to C(yes) the first newline
+       after a block is removed (block, not variable tag!). Default value is true.'
+    - 'C(lstrip_blocks) (bool): Determine when leading spaces and tabs should be stripped.
+      When set to C(yes) leading spaces and tabs are stripped from the start of a line to a block.
+      This functionality requires Jinja 2.7 or newer. Default value is false.'
+    type: raw
 
 requirements:
   - "python >= 2.7"
@@ -159,6 +183,19 @@ EXAMPLES = r'''
   community.kubernetes.k8s:
     state: present
     definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
+
+- name: Read definition template file from the Ansible controller file system
+  community.kubernetes.k8s:
+    state: present
+    template: '/testing/deployment.j2'
+
+- name: Read definition template file from the Ansible controller file system
+  community.kubernetes.k8s:
+    state: present
+    template:
+      path: '/testing/deployment.j2'
+      variable_start_string: '[['
+      variable_end_string: ']]'
 
 - name: fail on validation errors
   community.kubernetes.k8s:
@@ -242,12 +279,15 @@ class KubernetesModule(K8sAnsibleMixin):
         argument_spec['validate'] = dict(type='dict', default=None, options=self.validate_spec)
         argument_spec['append_hash'] = dict(type='bool', default=False)
         argument_spec['apply'] = dict(type='bool', default=False)
+        argument_spec['template'] = dict(type='raw', default=None)
         return argument_spec
 
     def __init__(self, *args, k8s_kind=None, **kwargs):
         mutually_exclusive = [
             ('resource_definition', 'src'),
             ('merge_type', 'apply'),
+            ('template', 'resource_definition'),
+            ('template', 'src'),
         ]
 
         module = AnsibleModule(
