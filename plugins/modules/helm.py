@@ -482,7 +482,7 @@ def main():
     if module.check_mode:
         check_status = {'values': {
             "current": release_status['values'],
-            "proposed": release_values
+            "declared": release_values
         }}
 
         module.exit_json(
