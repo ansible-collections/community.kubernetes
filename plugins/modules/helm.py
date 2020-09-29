@@ -503,9 +503,15 @@ def main():
             changed = True
 
     if module.check_mode:
+        check_status = {'values': {
+            "current": release_status['values'],
+            "declared": release_values
+        }}
+
         module.exit_json(
             changed=changed,
             command=helm_cmd,
+            status=check_status,
             stdout='',
             stderr='',
         )
