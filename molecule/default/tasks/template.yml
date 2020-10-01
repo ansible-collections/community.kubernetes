@@ -132,20 +132,32 @@
         that:
           - r is successful
 
+    - name: Create pods using multi-resource template
+      community.kubernetes.k8s:
+        template:
+          path: "pod_template_three.j2"
+        wait: yes
+      vars:
+        k8s_pod_name_one: pod-5
+        k8s_pod_name_two: pod-6
+        k8s_pod_namespace: "{{ template_namespace }}"
+      register: r
+
+    - name: Assert that pod creation succeeded using template
+      assert:
+        that:
+          - r is successful
+
     - name: Remove Pod (Cleanup)
       k8s:
         api_version: v1
         kind: Pod
-        name: "{{ item }}"
+        name: "pod-{{ item }}"
         namespace: "{{ template_namespace }}"
         state: absent
         wait: yes
       ignore_errors: yes
-      with_items:
-        - pod-1
-        - pod-2
-        - pod-3
-        - pod-4
+      loop: "{{ range(1, 7) | list }}"
 
   always:
     - name: Remove namespace (Cleanup)
