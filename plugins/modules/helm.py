@@ -521,7 +521,8 @@ def main():
             changed = True
 
         elif force or release_values != release_status['values'] \
-                or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
+                or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"] \
+                or chart_info['appVersion'] != release_status["app_version"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                               disable_hook, force, values_files=values_files, atomic=atomic,
                               create_namespace=create_namespace, replace=replace)

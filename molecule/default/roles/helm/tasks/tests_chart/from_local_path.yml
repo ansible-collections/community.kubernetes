@@ -18,6 +18,44 @@
     chart_source: "/tmp/helm_test_repo/stable/{{ chart_test }}/"
     chart_source_upgrade: "/tmp/helm_test_repo_upgrade/stable/{{ chart_test }}/"
 
+- name: Test appVersion idempotence
+  vars:
+    chart_test: "test-chart"
+    chart_test_version: "0.1.0"
+    chart_test_version_upgrade: "0.1.0"
+    chart_test_app_version: "v1"
+    chart_test_upgrade_app_version: "v2"
+  block:
+    - name: Copy test chart
+      copy:
+        src: "{{ chart_test }}"
+        dest: "/tmp/helm_test_appversion/"
+
+    # create package with appVersion v1
+    - name: "Package chart into archive with appVersion {{ chart_test_app_version }}"
+      command: "{{ helm_binary }} package --app-version {{ chart_test_app_version }} /tmp/helm_test_appversion/{{ chart_test }}"
+    - name: "Move appVersion {{ chart_test_app_version }} chart archive"
+      copy:
+        remote_src: true
+        src: "test-chart-{{ chart_test_version }}.tgz"
+        dest: "/tmp/helm_test_appversion/{{ chart_test }}-{{ chart_test_app_version }}-{{ chart_test_version }}.tgz"
+
+    # create package with appVersion v2
+    - name: "Package chart into archive with appVersion {{ chart_test_upgrade_app_version }}"
+      command: "{{ helm_binary }} package --app-version {{ chart_test_upgrade_app_version }} /tmp/helm_test_appversion/{{ chart_test }}"
+    - name: "Move appVersion {{ chart_test_upgrade_app_version }} chart archive"
+      copy:
+        remote_src: true
+        src: "test-chart-{{ chart_test_version }}.tgz"
+        dest: "/tmp/helm_test_appversion/{{ chart_test }}-{{ chart_test_upgrade_app_version }}-{{ chart_test_version }}.tgz"
+
+    - name: Install Chart from local path
+      include_tasks: "../tests_chart.yml"
+      vars:
+        source: local_path
+        chart_source: "/tmp/helm_test_appversion/{{ chart_test }}-{{ chart_test_app_version }}-{{ chart_test_version }}.tgz"
+        chart_source_upgrade: "/tmp/helm_test_appversion/{{ chart_test }}-{{ chart_test_upgrade_app_version }}-{{ chart_test_version }}.tgz"
+
 - name: Remove clone repos
   file:
     path: "{{ item }}"
@@ -25,3 +63,4 @@
   with_items:
     - /tmp/helm_test_repo
     - /tmp/helm_test_repo_upgrade
+    - /tmp/helm_test_appversion
