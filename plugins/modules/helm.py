@@ -73,6 +73,17 @@ options:
     default: {}
     aliases: [ values ]
     type: dict
+  values_files:
+    description:
+        - Value files to pass to chart.
+        - Paths will be read from the target host's filesystem, not the host running ansible.
+        - values_files option is evaluated before values option if both are used.
+        - Paths are evaluated in the order the paths are specified.
+    required: false
+    default: []
+    type: list
+    elements: str
+    version_added: '1.1.0'
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
@@ -154,6 +165,14 @@ EXAMPLES = r'''
     chart_ref: stable/grafana
     chart_version: 5.0.12
     values: "{{ lookup('template', 'somefile.yaml') | from_yaml }}"
+
+- name: Deploy Grafana chart using values files on target
+  community.kubernetes.helm:
+    name: test
+    chart_ref: stable/grafana
+    release_namespace: monitoring
+    values_files:
+      - /path/to/values.yaml
 
 - name: Remove test release and waiting suppression ending
   community.kubernetes.helm:
@@ -328,8 +347,8 @@ def fetch_chart_info(command, chart_ref):
 
 
 def deploy(command, release_name, release_values, chart_name, wait,
-           wait_timeout, disable_hook, force, atomic=False, create_namespace=False,
-           replace=False):
+           wait_timeout, disable_hook, force, values_files, atomic=False,
+           create_namespace=False, replace=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -361,6 +380,10 @@ def deploy(command, release_name, release_values, chart_name, wait,
 
     if create_namespace:
         deploy_command += " --create-namespace"
+
+    if values_files:
+        for value_file in values_files:
+            deploy_command += " --values=" + value_file
 
     if release_values != {}:
         fd, path = tempfile.mkstemp(suffix='.yml')
@@ -403,6 +426,7 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
             release_state=dict(default='present', choices=['present', 'absent'], aliases=['state']),
             release_values=dict(type='dict', default={}, aliases=['values']),
+            values_files=dict(type='list', default=[], elements='str'),
             update_repo_cache=dict(type='bool', default=False),
 
             # Helm options
@@ -437,6 +461,7 @@ def main():
     release_namespace = module.params.get('release_namespace')
     release_state = module.params.get('release_state')
     release_values = module.params.get('release_values')
+    values_files = module.params.get('values_files')
     update_repo_cache = module.params.get('update_repo_cache')
 
     # Helm options
@@ -491,15 +516,15 @@ def main():
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, False, atomic=atomic, create_namespace=create_namespace,
-                              replace=replace)
+                              disable_hook, False, values_files=values_files, atomic=atomic,
+                              create_namespace=create_namespace, replace=replace)
             changed = True
 
         elif force or release_values != release_status['values'] \
                 or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force, atomic=atomic, create_namespace=create_namespace,
-                              replace=replace)
+                              disable_hook, force, values_files=values_files, atomic=atomic,
+                              create_namespace=create_namespace, replace=replace)
             changed = True
 
     if module.check_mode:
