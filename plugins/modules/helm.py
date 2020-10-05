@@ -83,6 +83,7 @@ options:
     default: []
     type: list
     elements: str
+    version_added: '1.1.0'
   update_repo_cache:
     description:
       - Run C(helm repo update) before the operation. Can be run as part of the package installation or as a separate step.
