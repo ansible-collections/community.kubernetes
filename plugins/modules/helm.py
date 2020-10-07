@@ -520,12 +520,21 @@ def main():
                               create_namespace=create_namespace, replace=replace)
             changed = True
 
-        elif force or release_values != release_status['values'] \
-                or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"]:
-            helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
-                              disable_hook, force, values_files=values_files, atomic=atomic,
-                              create_namespace=create_namespace, replace=replace)
-            changed = True
+        else:
+            # the 'appVersion' specification is optional in a chart
+            chart_app_version = chart_info.get('appVersion', None)
+            released_app_version = release_status.get('app_version', None)
+
+            # when deployed without an 'appVersion' chart value the 'helm list' command will return the entry `app_version: ""`
+            appversion_is_same = (chart_app_version == released_app_version) or (chart_app_version is None and released_app_version == "")
+
+            if force or release_values != release_status['values'] \
+                    or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"] \
+                    or not appversion_is_same:
+                helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
+                                  disable_hook, force, values_files=values_files, atomic=atomic,
+                                  create_namespace=create_namespace, replace=replace)
+                changed = True
 
     if module.check_mode:
         check_status = {'values': {
