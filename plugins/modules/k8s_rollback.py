@@ -17,7 +17,11 @@ author:
 description:
   - Use the OpenShift Python client to perform the Rollback.
   - Authenticate using either a config file, certificates, password or token.
+<<<<<<< HEAD
   - Similar to the C(kubectl rollout undo) command.
+=======
+  - Similar to the `kubectl rollout undo` command.
+>>>>>>> 19fda21... Another embedded docs clarifications in k8s_rollback
 options:
   label_selectors:
     description: List of label selectors to use to filter results.
