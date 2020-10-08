@@ -179,17 +179,12 @@ EXAMPLES = r'''
     state: present
     definition: "{{ lookup('file', '/testing/deployment.yml') | from_yaml }}"
 
-- name: Read definition file from the Ansible controller file system after Jinja templating
-  community.kubernetes.k8s:
-    state: present
-    definition: "{{ lookup('template', '/testing/deployment.yml') | from_yaml }}"
-
 - name: Read definition template file from the Ansible controller file system
   community.kubernetes.k8s:
     state: present
     template: '/testing/deployment.j2'
 
-- name: Read definition template file from the Ansible controller file system
+- name: Read definition template file from the Ansible controller file system that uses custom start/end strings
   community.kubernetes.k8s:
     state: present
     template:

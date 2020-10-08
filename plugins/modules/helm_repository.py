@@ -11,7 +11,7 @@ DOCUMENTATION = r'''
 ---
 module: helm_repository
 
-short_description: Add and remove Helm repository
+short_description: Manage Helm repositories.
 
 version_added: "0.11.0"
 
@@ -59,7 +59,7 @@ options:
   repo_state:
     choices: ['present', 'absent']
     description:
-      - Desirated state of repository.
+      - Desired state of repository.
     required: false
     default: present
     aliases: [ state ]
@@ -71,6 +71,11 @@ EXAMPLES = r'''
   community.kubernetes.helm_repository:
     name: stable
     repo_url: https://kubernetes-charts.storage.googleapis.com
+
+- name: Add Red Hat Helm charts repository
+  community.kubernetes.helm_repository:
+    name: redhat-charts
+    repo_url: https://redhat-developer.github.com/redhat-helm-charts
 '''
 
 RETURN = r''' # '''
