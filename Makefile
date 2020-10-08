@@ -27,16 +27,16 @@ test-integration:
 test-molecule:
 	molecule test
 
-downstream-test-sanity: 
+downstream-test-sanity:
 	./utils/downstream.sh -s
 
-downstream-test-integration: 
+downstream-test-integration:
 	./utils/downstream.sh -i
 
-downstream-test-molecule: 
+downstream-test-molecule:
 	./utils/downstream.sh -m
 
-downstream-build: 
+downstream-build:
 	./utils/downstream.sh -b
 
 downstream-release:

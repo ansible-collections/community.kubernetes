@@ -45,7 +45,7 @@ f_prep()
         molecule
     )
 
-    # Temp build dir 
+    # Temp build dir
     _tmp_dir=$(mktemp -d)
     _build_dir="${_tmp_dir}/ansible_collections/kubernetes/core"
     mkdir -p "${_build_dir}"
@@ -167,10 +167,10 @@ f_release_option()
 {
     f_log_info "${FUNCNAME[0]}"
     f_common_steps
-    pushd "${_build_dir}" || return 
+    pushd "${_build_dir}" || return
         f_log_info "RELEASE WD: ${PWD}"
         make release
-    popd || return 
+    popd || return
     f_cleanup
 }
 
@@ -179,10 +179,10 @@ f_build_option()
 {
     f_log_info "${FUNCNAME[0]}"
     f_common_steps
-    pushd "${_build_dir}" || return 
+    pushd "${_build_dir}" || return
         f_log_info "BUILD WD: ${PWD}"
         make build
-    popd || return 
+    popd || return
     f_copy_collection_to_working_dir
     f_cleanup
 }
@@ -197,22 +197,22 @@ fi
 while getopts ":simrb" option
 do
   case $option in
-    s) 
+    s)
         f_test_sanity_option
         ;;
-    i) 
+    i)
         f_test_integration_option
         ;;
-    m) 
+    m)
         f_test_molecule_option
         ;;
-    r) 
+    r)
         f_release_option
         ;;
-    b) 
+    b)
         f_build_option
         ;;
-    *) 
+    *)
         printf "ERROR: Unimplemented option chosen.\n"
         f_show_help
         f_exit 1

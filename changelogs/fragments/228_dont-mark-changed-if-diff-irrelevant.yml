@@ -1,0 +1,3 @@
+---
+minor_changes:
+  - common - Do not mark task as changed when diff is irrelevant (https://github.com/ansible-collections/community.kubernetes/pull/228).

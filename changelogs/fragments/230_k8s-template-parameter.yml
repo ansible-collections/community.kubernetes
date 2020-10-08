@@ -1,0 +1,3 @@
+---
+major_changes:
+  - k8s - Add support for template parameter (https://github.com/ansible-collections/community.kubernetes/pull/230).

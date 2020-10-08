@@ -1,0 +1,3 @@
+---
+bugfixes:
+  - k8s (inventory) - Set the connection plugin and transport separately (https://github.com/ansible-collections/community.kubernetes/pull/208).
