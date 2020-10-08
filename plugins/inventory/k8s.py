@@ -14,8 +14,9 @@ DOCUMENTATION = '''
     short_description: Kubernetes (K8s) inventory source
 
     description:
-      - Fetch containers and services for one or more clusters
-      - Groups by cluster name, namespace, namespace_services, namespace_pods, and labels
+      - Fetch containers and services for one or more clusters.
+      - Groups by cluster name, namespace, namespace_services, namespace_pods, and labels.
+      - Uses the kubectl connection plugin to access the Kubernetes cluster.
       - Uses k8s.(yml|yaml) YAML configuration file to set parameter values.
 
     options:
