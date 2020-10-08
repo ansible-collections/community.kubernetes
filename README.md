@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/ansible-collections/community.kubernetes/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/community.kubernetes/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.kubernetes)](https://codecov.io/gh/ansible-collections/community.kubernetes)
 
-This repo hosts the `community.kubernetes` Ansible Collection.
+This repo hosts the `community.kubernetes` (a.k.a. `kubernetes.core`) Ansible Collection.
 
 The collection includes a variety of Ansible content to help automate the management of applications in Kubernetes and OpenShift clusters, as well as the provisioning and maintenance of clusters themselves.
 
@@ -158,8 +158,19 @@ Releases are automatically built and pushed to Ansible Galaxy for any new tag. B
     1. Run `antsibull-changelog release`.
   1. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
   1. Tag the version in Git and push to GitHub.
+  1. Manually build and release the `kubernetes.core` collection (see following section).
 
 After the version is published, verify it exists on the [Kubernetes Collection Galaxy page](https://galaxy.ansible.com/community/kubernetes).
+
+### Publishing `kubernetes.core`
+
+Until the contents of repository are moved into a new `kubernetes.core` repository on GitHub, this repository is the source of both the `kubernetes.core` and `community.kubernetes` repositories on Ansible Galaxy.
+
+To publish the `kubernetes.core` collection on Ansible Galaxy, do the following:
+
+  1. Run `make downstream-release`.
+
+The process for uploading a supported release to Automation Hub is documented separately.
 
 ## More Information
 
