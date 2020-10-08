@@ -103,12 +103,14 @@ f_create_collection_dir_structure()
     do
         cp -r "./${d_name}" "${_build_dir}/${d_name}"
     done
-    for exclude_file in "${_file_exclude[@]}";
-    do
-        if [[ -f "${_build_dir}/${exclude_file}" ]]; then
-            rm -f "${_build_dir}/${exclude_file}"
-        fi
-    done
+    if [ -n "${_file_exclude:-}" ]; then
+        for exclude_file in "${_file_exclude[@]}";
+        do
+            if [[ -f "${_build_dir}/${exclude_file}" ]]; then
+                rm -f "${_build_dir}/${exclude_file}"
+            fi
+        done
+    fi
 }
 
 f_copy_collection_to_working_dir()
