@@ -48,7 +48,7 @@ EXAMPLES = r'''
 RETURN = r'''
 rollback_info:
   description:
-  - The rollbacked object.
+  - The object that was rolled back.
   returned: success
   type: complex
   contains:
