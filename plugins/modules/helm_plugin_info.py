@@ -39,7 +39,7 @@ EXAMPLES = r'''
 - name: Gather Helm plugin info
   community.kubernetes.helm_plugin_info:
 
-- name: Gather Helm plugin info
+- name: Gather Helm env plugin info
   community.kubernetes.helm_plugin_info:
     plugin_name: env
 '''
