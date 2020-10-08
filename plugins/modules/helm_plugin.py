@@ -17,7 +17,7 @@ author:
 requirements:
   - "helm (https://github.com/helm/helm/releases)"
 description:
-  -  Install, uninstall Helm plugins.
+  -  Manages Helm plugins.
 options:
   release_namespace:
     description:
@@ -29,8 +29,8 @@ options:
 #Helm options
   state:
     description:
-      - If C(state=present), Helm plugin will be installed.
-      - If C(state=absent), Helm plugin will be uninstalled.
+      - If C(state=present) the Helm plugin will be installed.
+      - If C(state=absent) the Helm plugin will be removed.
     choices: [ absent, present ]
     default: present
     type: str
@@ -61,7 +61,7 @@ EXAMPLES = r'''
     plugin_path: https://domain/path/to/plugin.tar.gz
     state: present
 
-- name: Uninstall Helm env plugin
+- name: Remove Helm env plugin
   community.kubernetes.helm_plugin:
     plugin_name: env
     state: absent
