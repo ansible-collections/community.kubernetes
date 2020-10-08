@@ -12,7 +12,7 @@ module: k8s_cluster_info
 
 version_added: "0.11.1"
 
-short_description: Describe Kubernetes (K8s) API available and their respective versions
+short_description: Describe Kubernetes (K8s) cluster, APIs available and their respective versions
 
 author:
     - Abhijeet Kasurde (@Akasurde)
@@ -28,6 +28,7 @@ options:
     - Invalidate cache before retrieving information about cluster.
     type: bool
     default: True
+
 extends_documentation_fragment:
   - community.kubernetes.k8s_auth_options
 
@@ -46,7 +47,6 @@ EXAMPLES = r'''
   community.kubernetes.k8s_cluster_info:
     invalidate_cache: False
   register: api_status
-
 '''
 
 RETURN = r'''
