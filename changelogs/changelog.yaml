@@ -245,3 +245,10 @@ releases:
     - 252_connection-plugin-fqcn-fix.yml
     - 93_helm-multiple-values-files.yml
     release_date: '2020-10-08'
+  1.1.1:
+    changes:
+      bugfixes:
+      - k8s - Fix sanity test 'compile' failing because of positional args (https://github.com/ansible-collections/community.kubernetes/issues/260).
+    fragments:
+    - 260_k8s-positional-args.yml
+    release_date: '2020-10-09'
