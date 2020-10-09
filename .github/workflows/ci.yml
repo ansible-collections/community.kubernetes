@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.6']
+        python_version: ['2.7', '3.7']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -37,6 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Our old integration tests fail under newer Python versions.
         python_version: ['3.6']
     steps:
       - name: Check out code
@@ -113,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['3.6']
+        python_version: ['3.7']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -136,6 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # Our old integration tests fail under newer Python versions.
         python_version: ['3.6']
     steps:
       - name: Check out code
