@@ -9,7 +9,7 @@
 #       - All functions are prefixed with f_ so it's obvious where they come
 #         from when in use throughout the script
 
-DOWNSTREAM_VERSION="1.1.0"
+DOWNSTREAM_VERSION="1.1.1"
 KEEP_DOWNSTREAM_TMPDIR="${KEEP_DOWNSTREAM_TMPDIR:-''}"
 
 
@@ -72,6 +72,7 @@ f_text_sub()
     sed -i.bak "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
     sed -i.bak "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
     find "${_build_dir}" -type f -exec sed -i.bak "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    sed -i "s/a\.k\.a\. \`kubernetes\.core\`/formerly known as \`community\.kubernetes\`/" "${_build_dir}/README.md";
     find "${_build_dir}" -type f -name "*.bak" -delete
 }
 
