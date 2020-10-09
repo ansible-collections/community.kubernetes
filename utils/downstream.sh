@@ -9,7 +9,7 @@
 #       - All functions are prefixed with f_ so it's obvious where they come
 #         from when in use throughout the script
 
-DOWNSTREAM_VERSION="1.0.0"
+DOWNSTREAM_VERSION="1.1.0"
 KEEP_DOWNSTREAM_TMPDIR="${KEEP_DOWNSTREAM_TMPDIR:-''}"
 
 
@@ -64,14 +64,14 @@ f_show_help()
 f_text_sub()
 {
     # Switch FQCN and dependent components
-    sed -i "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
-    sed -i "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
-    sed -i "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
-    sed -i "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
-    sed -i "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
-    sed -i "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
-    sed -i "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
-    find "${_build_dir}" -type f -exec sed -i "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    sed -i '' "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
+    sed -i '' "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
+    sed -i '' "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
+    sed -i '' "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
+    sed -i '' "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
+    sed -i '' "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
+    sed -i '' "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
+    find "${_build_dir}" -type f -exec sed -i '' "s/community\.kubernetes/kubernetes\.core/g" {} \;
 }
 
 f_cleanup()
