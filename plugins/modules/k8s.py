@@ -277,7 +277,7 @@ class KubernetesModule(K8sAnsibleMixin):
         argument_spec['template'] = dict(type='raw', default=None)
         return argument_spec
 
-    def __init__(self, *args, k8s_kind=None, **kwargs):
+    def __init__(self, k8s_kind=None, *args, **kwargs):
         mutually_exclusive = [
             ('resource_definition', 'src'),
             ('merge_type', 'apply'),
