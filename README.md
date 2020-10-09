@@ -172,7 +172,7 @@ Until the contents of repository are moved into a new `kubernetes.core` reposito
 
 To publish the `kubernetes.core` collection on Ansible Galaxy, do the following:
 
-  1. Run `make downstream-release`.
+  1. Run `make downstream-release` (on macOS, add `LC_ALL=C` before the command).
 
 The process for uploading a supported release to Automation Hub is documented separately.
 

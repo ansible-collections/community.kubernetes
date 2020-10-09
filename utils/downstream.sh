@@ -64,14 +64,15 @@ f_show_help()
 f_text_sub()
 {
     # Switch FQCN and dependent components
-    sed -i '' "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
-    sed -i '' "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
-    sed -i '' "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
-    sed -i '' "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
-    sed -i '' "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
-    sed -i '' "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
-    sed -i '' "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
-    find "${_build_dir}" -type f -exec sed -i '' "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    sed -i.bak "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
+    sed -i.bak "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
+    sed -i.bak "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
+    sed -i.bak "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
+    find "${_build_dir}" -type f -exec sed -i.bak "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    find "${_build_dir}" -type f -name "*.bak" -delete
 }
 
 f_cleanup()
