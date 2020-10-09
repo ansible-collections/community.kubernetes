@@ -9,7 +9,7 @@
 #       - All functions are prefixed with f_ so it's obvious where they come
 #         from when in use throughout the script
 
-DOWNSTREAM_VERSION="1.0.0"
+DOWNSTREAM_VERSION="1.1.0"
 KEEP_DOWNSTREAM_TMPDIR="${KEEP_DOWNSTREAM_TMPDIR:-''}"
 
 
@@ -64,14 +64,15 @@ f_show_help()
 f_text_sub()
 {
     # Switch FQCN and dependent components
-    sed -i "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
-    sed -i "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
-    sed -i "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
-    sed -i "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
-    sed -i "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
-    sed -i "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
-    sed -i "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
-    find "${_build_dir}" -type f -exec sed -i "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    sed -i.bak "s/community-kubernetes/kubernetes-core/" "${_build_dir}/Makefile"
+    sed -i.bak "s/community\/kubernetes/kubernetes\/core/" "${_build_dir}/Makefile"
+    sed -i.bak "s/^VERSION\:/VERSION: ${DOWNSTREAM_VERSION}/" "${_build_dir}/Makefile"
+    sed -i.bak "s/community.kubernetes/kubernetes.core/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/name\:.*$/name: core/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/namespace\:.*$/namespace: kubernetes/" "${_build_dir}/galaxy.yml"
+    sed -i.bak "s/^version\:.*$/version: ${DOWNSTREAM_VERSION}/" "${_build_dir}/galaxy.yml"
+    find "${_build_dir}" -type f -exec sed -i.bak "s/community\.kubernetes/kubernetes\.core/g" {} \;
+    find "${_build_dir}" -type f -name "*.bak" -delete
 }
 
 f_cleanup()
@@ -103,12 +104,14 @@ f_create_collection_dir_structure()
     do
         cp -r "./${d_name}" "${_build_dir}/${d_name}"
     done
-    for exclude_file in "${_file_exclude[@]}";
-    do
-        if [[ -f "${_build_dir}/${exclude_file}" ]]; then
-            rm -f "${_build_dir}/${exclude_file}"
-        fi
-    done
+    if [ -n "${_file_exclude:-}" ]; then
+        for exclude_file in "${_file_exclude[@]}";
+        do
+            if [[ -f "${_build_dir}/${exclude_file}" ]]; then
+                rm -f "${_build_dir}/${exclude_file}"
+            fi
+        done
+    fi
 }
 
 f_copy_collection_to_working_dir()
