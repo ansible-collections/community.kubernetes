@@ -118,10 +118,10 @@ except ImportError:
     # ImportError are managed by the common module already.
     pass
 
-from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
 from ansible.module_utils._text import to_native
 from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    K8sAnsibleMixin, AUTH_ARG_SPEC
+    AUTH_ARG_SPEC
 )
 
 try:
@@ -132,75 +132,72 @@ except ImportError:
     pass
 
 
-class KubernetesExecCommand(K8sAnsibleMixin):
+def argspec():
+    spec = copy.deepcopy(AUTH_ARG_SPEC)
+    spec['namespace'] = dict(type='str', required=True)
+    spec['pod'] = dict(type='str', required=True)
+    spec['container'] = dict(type='str')
+    spec['command'] = dict(type='str', required=True)
+    return spec
 
-    def __init__(self):
-        module = AnsibleModule(
-            argument_spec=self.argspec,
-            supports_check_mode=True,
-        )
-        self.module = module
-        self.params = self.module.params
-        self.fail_json = self.module.fail_json
-        super(KubernetesExecCommand, self).__init__()
 
-    @property
-    def argspec(self):
-        spec = copy.deepcopy(AUTH_ARG_SPEC)
-        spec['namespace'] = dict(type='str', required=True)
-        spec['pod'] = dict(type='str', required=True)
-        spec['container'] = dict(type='str')
-        spec['command'] = dict(type='str', required=True)
-        return spec
+def execute_module(module, k8s_ansible_mixin):
 
-    def execute_module(self):
-        # Load kubernetes.client.Configuration
-        self.get_api_client()
-        api = core_v1_api.CoreV1Api()
+    # Load kubernetes.client.Configuration
+    api = core_v1_api.CoreV1Api()
 
-        # hack because passing the container as None breaks things
-        optional_kwargs = {}
-        if self.params.get('container'):
-            optional_kwargs['container'] = self.params['container']
-        try:
-            resp = stream(
-                api.connect_get_namespaced_pod_exec,
-                self.params["pod"],
-                self.params["namespace"],
-                command=shlex.split(self.params["command"]),
-                stdout=True,
-                stderr=True,
-                stdin=False,
-                tty=False,
-                _preload_content=False, **optional_kwargs)
-        except Exception as e:
-            self.module.fail_json(msg="Failed to execute on pod %s"
-                                      " due to : %s" % (self.params.get('pod'), to_native(e)))
-        stdout, stderr, rc = [], [], 0
-        while resp.is_open():
-            resp.update(timeout=1)
-            if resp.peek_stdout():
-                stdout.append(resp.read_stdout())
-            if resp.peek_stderr():
-                stderr.append(resp.read_stderr())
-        err = resp.read_channel(3)
-        err = yaml.safe_load(err)
-        if err['status'] == 'Success':
-            rc = 0
-        else:
-            rc = int(err['details']['causes'][0]['message'])
+    # hack because passing the container as None breaks things
+    optional_kwargs = {}
+    if module.params.get('container'):
+        optional_kwargs['container'] = module.params['container']
+    try:
+        resp = stream(
+            api.connect_get_namespaced_pod_exec,
+            module.params["pod"],
+            module.params["namespace"],
+            command=shlex.split(module.params["command"]),
+            stdout=True,
+            stderr=True,
+            stdin=False,
+            tty=False,
+            _preload_content=False, **optional_kwargs)
+    except Exception as e:
+        module.fail_json(msg="Failed to execute on pod %s"
+                             " due to : %s" % (module.params.get('pod'), to_native(e)))
+    stdout, stderr, rc = [], [], 0
+    while resp.is_open():
+        resp.update(timeout=1)
+        if resp.peek_stdout():
+            stdout.append(resp.read_stdout())
+        if resp.peek_stderr():
+            stderr.append(resp.read_stderr())
+    err = resp.read_channel(3)
+    err = yaml.safe_load(err)
+    if err['status'] == 'Success':
+        rc = 0
+    else:
+        rc = int(err['details']['causes'][0]['message'])
 
-        self.module.exit_json(
-            # Some command might change environment, but ultimately failing at end
-            changed=True,
-            stdout="".join(stdout),
-            stderr="".join(stderr),
-            return_code=rc
-        )
+    module.exit_json(
+        # Some command might change environment, but ultimately failing at end
+        changed=True,
+        stdout="".join(stdout),
+        stderr="".join(stderr),
+        return_code=rc
+    )
 
 
 def main():
-    KubernetesExecCommand().execute_module()
+    module = AnsibleModule(
+        argument_spec=argspec(),
+        supports_check_mode=True,
+    )
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        K8sAnsibleMixin, get_api_client)
+
+    k8s_ansible_mixin = K8sAnsibleMixin()
+    k8s_ansible_mixin.client = get_api_client(module=module)
+    execute_module(module, k8s_ansible_mixin)
 
 
 if __name__ == '__main__':
