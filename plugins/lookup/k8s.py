@@ -198,7 +198,7 @@ from ansible.errors import AnsibleError
 from ansible.module_utils.common._collections_compat import KeysView
 from ansible.plugins.lookup import LookupBase
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin
+from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin, get_api_client
 
 
 try:
@@ -235,7 +235,7 @@ class KubernetesLookup(K8sAnsibleMixin):
 
     def run(self, terms, variables=None, **kwargs):
         self.params = kwargs
-        self.client = self.get_api_client()
+        self.client = get_api_client()
 
         cluster_info = kwargs.get('cluster_info')
         if cluster_info == 'version':

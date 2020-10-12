@@ -118,11 +118,129 @@ result:
        sample: 48
 '''
 
-from ansible_collections.community.kubernetes.plugins.module_utils.scale import KubernetesAnsibleScaleModule
+import copy
+
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC)
+
+
+SCALE_ARG_SPEC = {
+    'replicas': {'type': 'int', 'required': True},
+    'current_replicas': {'type': 'int'},
+    'resource_version': {},
+    'wait': {'type': 'bool', 'default': True},
+    'wait_timeout': {'type': 'int', 'default': 20},
+}
+
+
+def execute_module(module, k8s_ansible_mixin,):
+    k8s_ansible_mixin.set_resource_definitions(module)
+
+    definition = k8s_ansible_mixin.resource_definitions[0]
+
+    name = definition['metadata']['name']
+    namespace = definition['metadata'].get('namespace')
+    api_version = definition['apiVersion']
+    kind = definition['kind']
+    current_replicas = module.params.get('current_replicas')
+    replicas = module.params.get('replicas')
+    resource_version = module.params.get('resource_version')
+
+    wait = module.params.get('wait')
+    wait_time = module.params.get('wait_timeout')
+    existing = None
+    existing_count = None
+    return_attributes = dict(changed=False, result=dict(), diff=dict())
+    if wait:
+        return_attributes['duration'] = 0
+
+    resource = k8s_ansible_mixin.find_resource(kind, api_version, fail=True)
+
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import NotFoundError
+
+    try:
+        existing = resource.get(name=name, namespace=namespace)
+        return_attributes['result'] = existing.to_dict()
+    except NotFoundError as exc:
+        module.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc),
+                         error=exc.value.get('status'))
+
+    if module.params['kind'] == 'job':
+        existing_count = existing.spec.parallelism
+    elif hasattr(existing.spec, 'replicas'):
+        existing_count = existing.spec.replicas
+
+    if existing_count is None:
+        module.fail_json(msg='Failed to retrieve the available count for the requested object.')
+
+    if resource_version and resource_version != existing.metadata.resourceVersion:
+        module.exit_json(**return_attributes)
+
+    if current_replicas is not None and existing_count != current_replicas:
+        module.exit_json(**return_attributes)
+
+    if existing_count != replicas:
+        return_attributes['changed'] = True
+        if not module.check_mode:
+            if module.params['kind'] == 'job':
+                existing.spec.parallelism = replicas
+                return_attributes['result'] = resource.patch(existing.to_dict()).to_dict()
+            else:
+                return_attributes = scale(module, k8s_ansible_mixin, resource, existing, replicas, wait, wait_time)
+
+    module.exit_json(**return_attributes)
+
+
+def argspec():
+    args = copy.deepcopy(SCALE_ARG_SPEC)
+    args.update(RESOURCE_ARG_SPEC)
+    args.update(NAME_ARG_SPEC)
+    args.update(AUTH_ARG_SPEC)
+    return args
+
+
+def scale(module, k8s_ansible_mixin, resource, existing_object, replicas, wait, wait_time):
+    name = existing_object.metadata.name
+    namespace = existing_object.metadata.namespace
+    kind = existing_object.kind
+
+    if not hasattr(resource, 'scale'):
+        module.fail_json(
+            msg="Cannot perform scale on resource of kind {0}".format(resource.kind)
+        )
+
+    scale_obj = {'kind': kind, 'metadata': {'name': name, 'namespace': namespace}, 'spec': {'replicas': replicas}}
+
+    existing = resource.get(name=name, namespace=namespace)
+
+    try:
+        resource.scale.patch(body=scale_obj)
+    except Exception as exc:
+        module.fail_json(msg="Scale request failed: {0}".format(exc))
+
+    k8s_obj = resource.get(name=name, namespace=namespace).to_dict()
+    match, diffs = k8s_ansible_mixin.diff_objects(existing.to_dict(), k8s_obj)
+    result = dict()
+    result['result'] = k8s_obj
+    result['changed'] = not match
+    result['diff'] = diffs
+
+    if wait:
+        success, result['result'], result['duration'] = k8s_ansible_mixin.wait(resource, scale_obj, 5, wait_time)
+        if not success:
+            module.fail_json(msg="Resource scaling timed out", **result)
+    return result
 
 
 def main():
-    KubernetesAnsibleScaleModule().execute_module()
+    module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        K8sAnsibleMixin, get_api_client)
+
+    k8s_ansible_mixin = K8sAnsibleMixin()
+    k8s_ansible_mixin.client = get_api_client(module=module)
+    execute_module(module, k8s_ansible_mixin)
 
 
 if __name__ == '__main__':

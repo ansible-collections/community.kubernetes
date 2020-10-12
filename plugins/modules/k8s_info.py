@@ -148,58 +148,50 @@ resources:
 
 import copy
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    K8sAnsibleMixin, AUTH_ARG_SPEC, WAIT_ARG_SPEC)
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_SPEC, WAIT_ARG_SPEC)
 
 
-class KubernetesInfoModule(K8sAnsibleMixin):
+def execute_module(module, k8s_ansible_mixin):
+    facts = k8s_ansible_mixin.kubernetes_facts(
+        module.params["kind"],
+        module.params["api_version"],
+        name=module.params["name"],
+        namespace=module.params["namespace"],
+        label_selectors=module.params["label_selectors"],
+        field_selectors=module.params["field_selectors"],
+        wait=module.params["wait"],
+        wait_sleep=module.params["wait_sleep"],
+        wait_timeout=module.params["wait_timeout"],
+        condition=module.params["wait_condition"],
+    )
+    module.exit_json(changed=False, **facts)
 
-    def __init__(self, *args, **kwargs):
-        module = AnsibleModule(
-            argument_spec=self.argspec,
-            supports_check_mode=True,
+
+def argspec():
+    args = copy.deepcopy(AUTH_ARG_SPEC)
+    args.update(WAIT_ARG_SPEC)
+    args.update(
+        dict(
+            kind=dict(required=True),
+            api_version=dict(default='v1', aliases=['api', 'version']),
+            name=dict(),
+            namespace=dict(),
+            label_selectors=dict(type='list', elements='str', default=[]),
+            field_selectors=dict(type='list', elements='str', default=[]),
         )
-        self.module = module
-        self.params = self.module.params
-        self.fail_json = self.module.fail_json
-        self.exit_json = self.module.exit_json
-        super(KubernetesInfoModule, self).__init__()
-
-    def execute_module(self):
-        self.client = self.get_api_client()
-
-        self.exit_json(changed=False,
-                       **self.kubernetes_facts(self.params['kind'],
-                                               self.params['api_version'],
-                                               name=self.params['name'],
-                                               namespace=self.params['namespace'],
-                                               label_selectors=self.params['label_selectors'],
-                                               field_selectors=self.params['field_selectors'],
-                                               wait=self.params['wait'],
-                                               wait_sleep=self.params['wait_sleep'],
-                                               wait_timeout=self.params['wait_timeout'],
-                                               condition=self.params['wait_condition']))
-
-    @property
-    def argspec(self):
-        args = copy.deepcopy(AUTH_ARG_SPEC)
-        args.update(WAIT_ARG_SPEC)
-        args.update(
-            dict(
-                kind=dict(required=True),
-                api_version=dict(default='v1', aliases=['api', 'version']),
-                name=dict(),
-                namespace=dict(),
-                label_selectors=dict(type='list', elements='str', default=[]),
-                field_selectors=dict(type='list', elements='str', default=[]),
-            )
-        )
-        return args
+    )
+    return args
 
 
 def main():
-    KubernetesInfoModule().execute_module()
+    module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        K8sAnsibleMixin, get_api_client)
+
+    k8s_ansible_mixin = K8sAnsibleMixin()
+    k8s_ansible_mixin.client = get_api_client(module=module)
+    execute_module(module, k8s_ansible_mixin)
 
 
 if __name__ == '__main__':

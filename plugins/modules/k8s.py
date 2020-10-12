@@ -250,72 +250,68 @@ result:
 
 import copy
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    K8sAnsibleMixin, COMMON_ARG_SPEC, NAME_ARG_SPEC, RESOURCE_ARG_SPEC, AUTH_ARG_SPEC, WAIT_ARG_SPEC)
+
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC, WAIT_ARG_SPEC, NAME_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
 
 
-class KubernetesModule(K8sAnsibleMixin):
+def validate_spec():
+    return dict(
+        fail_on_error=dict(type='bool'),
+        version=dict(),
+        strict=dict(type='bool', default=True)
+    )
 
-    @property
-    def validate_spec(self):
-        return dict(
-            fail_on_error=dict(type='bool'),
-            version=dict(),
-            strict=dict(type='bool', default=True)
-        )
 
-    @property
-    def argspec(self):
-        argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
-        argument_spec.update(copy.deepcopy(NAME_ARG_SPEC))
-        argument_spec.update(copy.deepcopy(RESOURCE_ARG_SPEC))
-        argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
-        argument_spec.update(copy.deepcopy(WAIT_ARG_SPEC))
-        argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
-        argument_spec['validate'] = dict(type='dict', default=None, options=self.validate_spec)
-        argument_spec['append_hash'] = dict(type='bool', default=False)
-        argument_spec['apply'] = dict(type='bool', default=False)
-        argument_spec['template'] = dict(type='raw', default=None)
-        return argument_spec
+def argspec():
+    argument_spec = copy.deepcopy(COMMON_ARG_SPEC)
+    argument_spec.update(copy.deepcopy(NAME_ARG_SPEC))
+    argument_spec.update(copy.deepcopy(RESOURCE_ARG_SPEC))
+    argument_spec.update(copy.deepcopy(AUTH_ARG_SPEC))
+    argument_spec.update(copy.deepcopy(WAIT_ARG_SPEC))
+    argument_spec['merge_type'] = dict(type='list', elements='str', choices=['json', 'merge', 'strategic-merge'])
+    argument_spec['validate'] = dict(type='dict', default=None, options=validate_spec())
+    argument_spec['append_hash'] = dict(type='bool', default=False)
+    argument_spec['apply'] = dict(type='bool', default=False)
+    argument_spec['template'] = dict(type='raw', default=None)
+    return argument_spec
 
-    def __init__(self, k8s_kind=None, *args, **kwargs):
-        mutually_exclusive = [
-            ('resource_definition', 'src'),
-            ('merge_type', 'apply'),
-            ('template', 'resource_definition'),
-            ('template', 'src'),
-        ]
 
-        module = AnsibleModule(
-            argument_spec=self.argspec,
-            mutually_exclusive=mutually_exclusive,
-            supports_check_mode=True,
-        )
+def execute_module(module, k8s_ansible_mixin):
+    k8s_ansible_mixin.module = module
+    k8s_ansible_mixin.argspec = module.argument_spec
+    k8s_ansible_mixin.check_mode = k8s_ansible_mixin.module.check_mode
+    k8s_ansible_mixin.params = k8s_ansible_mixin.module.params
+    k8s_ansible_mixin.fail_json = k8s_ansible_mixin.module.fail_json
+    k8s_ansible_mixin.fail = k8s_ansible_mixin.module.fail_json
+    k8s_ansible_mixin.exit_json = k8s_ansible_mixin.module.exit_json
+    k8s_ansible_mixin.warnings = []
 
-        self.module = module
-        self.check_mode = self.module.check_mode
-        self.params = self.module.params
-        self.fail_json = self.module.fail_json
-        self.fail = self.module.fail_json
-        self.exit_json = self.module.exit_json
+    k8s_ansible_mixin.kind = k8s_ansible_mixin.params.get('kind')
+    k8s_ansible_mixin.api_version = k8s_ansible_mixin.params.get('api_version')
+    k8s_ansible_mixin.name = k8s_ansible_mixin.params.get('name')
+    k8s_ansible_mixin.namespace = k8s_ansible_mixin.params.get('namespace')
 
-        super(KubernetesModule, self).__init__(*args, **kwargs)
-
-        self.client = None
-        self.warnings = []
-
-        self.kind = k8s_kind or self.params.get('kind')
-        self.api_version = self.params.get('api_version')
-        self.name = self.params.get('name')
-        self.namespace = self.params.get('namespace')
-
-        self.check_library_version()
-        self.set_resource_definitions()
+    k8s_ansible_mixin.check_library_version()
+    k8s_ansible_mixin.set_resource_definitions(module)
+    k8s_ansible_mixin.execute_module()
 
 
 def main():
-    KubernetesModule().execute_module()
+    mutually_exclusive = [
+        ('resource_definition', 'src'),
+        ('merge_type', 'apply'),
+        ('template', 'resource_definition'),
+        ('template', 'src'),
+    ]
+    module = AnsibleModule(argument_spec=argspec(), mutually_exclusive=mutually_exclusive, supports_check_mode=True)
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        K8sAnsibleMixin, get_api_client)
+
+    k8s_ansible_mixin = K8sAnsibleMixin()
+    k8s_ansible_mixin.client = get_api_client(module=module)
+    execute_module(module, k8s_ansible_mixin)
 
 
 if __name__ == '__main__':
