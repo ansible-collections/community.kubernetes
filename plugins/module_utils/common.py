@@ -22,9 +22,11 @@ import time
 import os
 import traceback
 import sys
+from functools import lru_cache
 from datetime import datetime
 from distutils.version import LooseVersion
 
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_MAP, AUTH_ARG_SPEC)
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
@@ -135,73 +137,71 @@ NAME_ARG_SPEC = {
     },
 }
 
-AUTH_ARG_SPEC = {
-    'kubeconfig': {
-        'type': 'path',
-    },
-    'context': {},
-    'host': {},
-    'api_key': {
-        'no_log': True,
-    },
-    'username': {},
-    'password': {
-        'no_log': True,
-    },
-    'validate_certs': {
-        'type': 'bool',
-        'aliases': ['verify_ssl'],
-    },
-    'ca_cert': {
-        'type': 'path',
-        'aliases': ['ssl_ca_cert'],
-    },
-    'client_cert': {
-        'type': 'path',
-        'aliases': ['cert_file'],
-    },
-    'client_key': {
-        'type': 'path',
-        'aliases': ['key_file'],
-    },
-    'proxy': {
-        'type': 'str',
-    },
-    'persist_config': {
-        'type': 'bool',
-    },
-}
 
-WAIT_ARG_SPEC = dict(
-    wait=dict(type='bool', default=False),
-    wait_sleep=dict(type='int', default=5),
-    wait_timeout=dict(type='int', default=120),
-    wait_condition=dict(
-        type='dict',
-        default=None,
-        options=dict(
-            type=dict(),
-            status=dict(default=True, choices=[True, False, "Unknown"]),
-            reason=dict()
-        )
-    )
-)
+@lru_cache()
+def get_api_client(module=None, **auth_params):
+    auth_params = auth_params or {}
+    auth = {}
 
-# Map kubernetes-client parameters to ansible parameters
-AUTH_ARG_MAP = {
-    'kubeconfig': 'kubeconfig',
-    'context': 'context',
-    'host': 'host',
-    'api_key': 'api_key',
-    'username': 'username',
-    'password': 'password',
-    'verify_ssl': 'validate_certs',
-    'ssl_ca_cert': 'ca_cert',
-    'cert_file': 'client_cert',
-    'key_file': 'client_key',
-    'proxy': 'proxy',
-    'persist_config': 'persist_config',
-}
+    def _raise_or_fail(exc, msg):
+        if module:
+            module.fail(msg % to_native(exc))
+        else:
+            raise
+
+    # If authorization variables aren't defined, look for them in environment variables
+    for true_name, arg_name in AUTH_ARG_MAP.items():
+        if auth_params.get(arg_name) is None:
+            env_value = os.getenv('K8S_AUTH_{0}'.format(arg_name.upper()), None) or os.getenv('K8S_AUTH_{0}'.format(true_name.upper()), None)
+            if env_value is not None:
+                if AUTH_ARG_SPEC[arg_name].get('type') == 'bool':
+                    env_value = env_value.lower() not in ['0', 'false', 'no']
+                auth[true_name] = env_value
+        else:
+            auth[true_name] = auth_params[arg_name]
+
+    def auth_set(*names):
+        return all([auth.get(name) for name in names])
+
+    if auth_set('username', 'password', 'host') or auth_set('api_key', 'host'):
+        # We have enough in the parameters to authenticate, no need to load incluster or kubeconfig
+        pass
+    elif auth_set('kubeconfig') or auth_set('context'):
+        try:
+            kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+        except Exception as err:
+            _raise_or_fail(err, 'Failed to load kubeconfig due to %s')
+
+    else:
+        # First try to do incluster config, then kubeconfig
+        try:
+            kubernetes.config.load_incluster_config()
+        except kubernetes.config.ConfigException:
+            try:
+                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
+            except Exception as err:
+                _raise_or_fail(err, 'Failed to load kubeconfig due to %s')
+
+    # Override any values in the default configuration with Ansible parameters
+    # As of kubernetes-client v12.0.0, get_default_copy() is required here
+    try:
+        configuration = kubernetes.client.Configuration().get_default_copy()
+    except AttributeError:
+        configuration = kubernetes.client.Configuration()
+
+    for key, value in iteritems(auth):
+        if key in AUTH_ARG_MAP.keys() and value is not None:
+            if key == 'api_key':
+                setattr(configuration, key, {'authorization': "Bearer {0}".format(value)})
+            else:
+                setattr(configuration, key, value)
+
+    try:
+        return DynamicClient(kubernetes.client.ApiClient(configuration))
+    except Exception as err:
+        _raise_or_fail(err, 'Failed to get client due to %s')
+
+    return DynamicClient(kubernetes.client.ApiClient(configuration))
 
 
 class K8sAnsibleMixin(object):
@@ -214,62 +214,6 @@ class K8sAnsibleMixin(object):
 
         if not HAS_YAML:
             self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
-
-    def get_api_client(self, **auth_params):
-        auth_params = auth_params or getattr(self, 'params', {})
-        auth = {}
-
-        # If authorization variables aren't defined, look for them in environment variables
-        for true_name, arg_name in AUTH_ARG_MAP.items():
-            if auth_params.get(arg_name) is None:
-                env_value = os.getenv('K8S_AUTH_{0}'.format(arg_name.upper()), None) or os.getenv('K8S_AUTH_{0}'.format(true_name.upper()), None)
-                if env_value is not None:
-                    if AUTH_ARG_SPEC[arg_name].get('type') == 'bool':
-                        env_value = env_value.lower() not in ['0', 'false', 'no']
-                    auth[true_name] = env_value
-            else:
-                auth[true_name] = auth_params[arg_name]
-
-        def auth_set(*names):
-            return all([auth.get(name) for name in names])
-
-        if auth_set('username', 'password', 'host') or auth_set('api_key', 'host'):
-            # We have enough in the parameters to authenticate, no need to load incluster or kubeconfig
-            pass
-        elif auth_set('kubeconfig') or auth_set('context'):
-            try:
-                kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
-            except Exception as err:
-                self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
-        else:
-            # First try to do incluster config, then kubeconfig
-            try:
-                kubernetes.config.load_incluster_config()
-            except kubernetes.config.ConfigException:
-                try:
-                    kubernetes.config.load_kube_config(auth.get('kubeconfig'), auth.get('context'), persist_config=auth.get('persist_config'))
-                except Exception as err:
-                    self.fail(msg='Failed to load kubeconfig due to %s' % to_native(err))
-
-        # Override any values in the default configuration with Ansible parameters
-        # As of kubernetes-client v12.0.0, get_default_copy() is required here
-        try:
-            configuration = kubernetes.client.Configuration().get_default_copy()
-        except AttributeError:
-            configuration = kubernetes.client.Configuration()
-
-        for key, value in iteritems(auth):
-            if key in AUTH_ARG_MAP.keys() and value is not None:
-                if key == 'api_key':
-                    setattr(configuration, key, {'authorization': "Bearer {0}".format(value)})
-                else:
-                    setattr(configuration, key, value)
-
-        kubernetes.client.Configuration.set_default(configuration)
-        try:
-            return DynamicClient(kubernetes.client.ApiClient(configuration))
-        except Exception as err:
-            self.fail(msg='Failed to get client due to %s' % to_native(err))
 
     def find_resource(self, kind, api_version, fail=False):
         for attribute in ['kind', 'name', 'singular_name']:
@@ -525,7 +469,7 @@ class K8sAnsibleMixin(object):
         changed = False
         results = []
         try:
-            self.client = self.get_api_client()
+            self.client = get_api_client()
         # Hopefully the kubernetes client will provide its own exception class one day
         except (urllib3.exceptions.RequestError) as e:
             self.fail_json(msg="Couldn't connect to Kubernetes: %s" % str(e))

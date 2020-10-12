@@ -23,7 +23,7 @@ import copy
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin)
+    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin, get_api_client)
 
 try:
     from openshift.dynamic.exceptions import NotFoundError
@@ -73,7 +73,7 @@ class KubernetesAnsibleScaleModule(K8sAnsibleMixin):
     def execute_module(self):
         definition = self.resource_definitions[0]
 
-        self.client = self.get_api_client()
+        self.client = get_api_client()
 
         name = definition['metadata']['name']
         namespace = definition['metadata'].get('namespace')
