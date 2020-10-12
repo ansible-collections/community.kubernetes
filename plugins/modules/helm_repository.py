@@ -78,7 +78,38 @@ EXAMPLES = r'''
     repo_url: https://redhat-developer.github.com/redhat-helm-charts
 '''
 
-RETURN = r''' # '''
+RETURN = r'''
+stdout:
+  type: str
+  description: Full `helm` command stdout, in case you want to display it or examine the event log
+  returned: always
+  sample: '"bitnami" has been added to your repositories'
+stdout_lines:
+  type: list
+  description: Full `helm` command stdout in list, in case you want to display it or examine the event log
+  returned: always
+  sample: ["\"bitnami\" has been added to your repositories"]
+stderr:
+  type: str
+  description: Full `helm` command stderr, in case you want to display it or examine the event log
+  returned: always
+  sample: ''
+stderr_lines:
+  type: list
+  description: Full `helm` command stderr in list, in case you want to display it or examine the event log
+  returned: always
+  sample: [""]
+command:
+  type: str
+  description: Full `helm` command built by this module, in case you want to re-run the command outside the module or debug a problem.
+  returned: always
+  sample: '/usr/local/bin/helm repo add bitnami https://charts.bitnami.com/bitnami'
+msg:
+  type: str
+  description: Error message returned by `helm` command
+  returned: on failure
+  sample: 'Repository already have a repository named bitnami'
+'''
 
 import traceback
 
