@@ -27,6 +27,24 @@
       - install_fail is failed
       - "'Error: create: failed to create: namespaces \"' + helm_namespace + '\" not found' in install_fail.stderr"
 
+- name: "Install {{ chart_test }} from {{ source }} in check mode"
+  helm:
+    binary_path: "{{ helm_binary }}"
+    name: test
+    chart_ref: "{{ chart_source }}"
+    chart_version: "{{ chart_source_version | default(omit) }}"
+    namespace: "{{ helm_namespace }}"
+    create_namespace: true
+  register: install_check_mode
+  check_mode: true
+
+- name: "Assert that {{ chart_test }} chart is installed from {{ source }} in check mode"
+  assert:
+    that:
+      - install_check_mode is changed
+      - install_check_mode.status is defined
+      - install_check_mode.status.values is defined
+
 - name: "Install {{ chart_test }} from {{ source }}"
   helm:
     binary_path: "{{ helm_binary }}"
