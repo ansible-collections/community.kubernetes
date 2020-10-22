@@ -537,10 +537,15 @@ def main():
                 changed = True
 
     if module.check_mode:
-        check_status = {'values': {
-            "current": release_status['values'],
-            "declared": release_values
-        }}
+        check_status = {
+            'values': {
+                "current": {},
+                "declared": {},
+            }
+        }
+        if release_status:
+            check_status['values']['current'] = release_status['values']
+            check_status['values']['declared'] = release_status
 
         module.exit_json(
             changed=changed,
