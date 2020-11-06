@@ -5,9 +5,10 @@
         name: "{{ playbook_namespace }}"
         kind: Namespace
 
-    - copy:
-        src: files
-        dest: "{{ remote_tmp_dir }}"
+    # If the host uses SELinux, we need to have the system selinux module
+    # in the virtualenv, otherwise the copy module will be broken.
+    # We instead use the cp command to avoid that.
+    - command: cp -r files {{ remote_tmp_dir }}
 
     - name: incredibly simple ConfigMap
       k8s:
