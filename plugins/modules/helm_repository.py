@@ -67,10 +67,10 @@ options:
 '''
 
 EXAMPLES = r'''
-- name: Add default repository
+- name: Add a repository
   community.kubernetes.helm_repository:
     name: stable
-    repo_url: https://kubernetes-charts.storage.googleapis.com
+    repo_url: https://kubernetes.github.io/ingress-nginx
 
 - name: Add Red Hat Helm charts repository
   community.kubernetes.helm_repository:

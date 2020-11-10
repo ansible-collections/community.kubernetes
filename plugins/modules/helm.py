@@ -149,7 +149,7 @@ EXAMPLES = r'''
 - name: Add stable chart repo
   community.kubernetes.helm_repository:
     name: stable
-    repo_url: "https://kubernetes-charts.storage.googleapis.com"
+    repo_url: "https://kubernetes.github.io/ingress-nginx"
 
 - name: Deploy latest version of Grafana chart inside monitoring namespace with values
   community.kubernetes.helm:
@@ -193,10 +193,10 @@ EXAMPLES = r'''
     release_namespace: monitoring
 
 # From url
-- name: Deploy Grafana chart on 5.0.12 from url
+- name: Deploy Grafana chart on 5.6.0 from url
   community.kubernetes.helm:
     name: test
-    chart_ref: "https://kubernetes-charts.storage.googleapis.com/grafana-5.0.12.tgz"
+    chart_ref: "https://github.com/grafana/helm-charts/releases/download/grafana-5.6.0/grafana-5.6.0.tgz"
     release_namespace: monitoring
 '''
 
