@@ -10,19 +10,19 @@
       debug:
         var: output
 
-    # TODO: See https://github.com/ansible-collections/community.kubernetes/issues/24
-    # - name: Setting validate_certs to true causes a failure
-    #   k8s:
-    #     name: testing
-    #     kind: Namespace
-    #     validate_certs: yes
-    #   ignore_errors: yes
-    #   register: output
-    #
-    # - name: assert that validate_certs caused a failure (and therefore was correctly translated to verify_ssl)
-    #   assert:
-    #     that:
-    #       - output is failed
+    - name: Setting validate_certs to true causes a failure
+      k8s:
+        name: testing
+        kind: Namespace
+        validate_certs: yes
+        ca_cert: /dev/null  # invalid CA certificate
+      ignore_errors: yes
+      register: output
+
+    - name: assert that validate_certs caused a failure (and therefore was correctly translated to verify_ssl)
+      assert:
+        that:
+          - output is failed
 
     - name: Ensure k8s_info works with empty resources
       k8s_info:
