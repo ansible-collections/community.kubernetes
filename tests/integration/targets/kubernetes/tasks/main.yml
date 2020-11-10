@@ -73,20 +73,26 @@
   no_log: yes
 
 # Test graceful failure for older versions of openshift
+- name: Get the Python version
+  setup:
+    filter: ansible_python_version
 
-- pip:
-    name:
-      - openshift==0.6.0
-      - kubernetes==6.0.0
-      - coverage
-    virtualenv: "{{ virtualenv }}"
-    virtualenv_command: "{{ virtualenv_command }}"
-    virtualenv_site_packages: no
+- when: ansible_python_version is version('3.7', '<')
+  block:
+    - pip:
+        name:
+          - openshift==0.6.0
+          - kubernetes==6.0.0
+          - coverage
+        virtualenv: "{{ virtualenv }}"
+        virtualenv_command: "{{ virtualenv_command }}"
+        virtualenv_site_packages: no
 
-- include_tasks: older_openshift_fail.yml
-  vars:
-    ansible_python_interpreter: "{{ virtualenv_interpreter }}"
-    playbook_namespace: ansible-test-k8s-older-openshift
+    - include_tasks: older_openshift_fail.yml
+      vars:
+        ansible_python_interpreter: "{{ virtualenv_interpreter }}"
+        playbook_namespace: ansible-test-k8s-older-openshift
+
 
 - file:
     path: "{{ virtualenv }}"
