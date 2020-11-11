@@ -152,17 +152,17 @@ There are also integration tests in the `molecule` directory which are meant to 
 Releases are automatically built and pushed to Ansible Galaxy for any new tag. Before tagging a release, make sure to do the following:
 
   1. Update the version in the following places:
-    a. The `version` in `galaxy.yml`
-    b. This README's `requirements.yml` example
-    c. The `DOWNSTREAM_VERSION` in `utils/downstream.sh`
-    d. The `VERSION` in `Makefile`
-  1. Update the CHANGELOG:
-    1. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
-    1. Make sure there are fragments for all known changes in `changelogs/fragments`.
-    1. Run `antsibull-changelog release`.
-  1. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
-  1. Tag the version in Git and push to GitHub.
-  1. Manually build and release the `kubernetes.core` collection (see following section).
+     1. The `version` in `galaxy.yml`
+     2. This README's `requirements.yml` example
+     3. The `DOWNSTREAM_VERSION` in `utils/downstream.sh`
+     4. The `VERSION` in `Makefile`
+  2. Update the CHANGELOG:
+     1. Make sure you have [`antsibull-changelog`](https://pypi.org/project/antsibull-changelog/) installed.
+     2. Make sure there are fragments for all known changes in `changelogs/fragments`.
+     3. Run `antsibull-changelog release`.
+  3. Commit the changes and create a PR with the changes. Wait for tests to pass, then merge it once they have.
+  4. Tag the version in Git and push to GitHub.
+  5. Manually build and release the `kubernetes.core` collection (see following section).
 
 After the version is published, verify it exists on the [Kubernetes Collection Galaxy page](https://galaxy.ansible.com/community/kubernetes).
 
