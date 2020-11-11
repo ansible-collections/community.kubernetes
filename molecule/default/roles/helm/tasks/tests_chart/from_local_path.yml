@@ -15,10 +15,11 @@
   include_tasks: "../tests_chart.yml"
   vars:
     source: local_path
+    chart_test: "{{ chart_test_local_path }}"
     chart_source: "/tmp/helm_test_repo/stable/{{ chart_test_local_path }}/"
     chart_source_upgrade: "/tmp/helm_test_repo_upgrade/stable/{{ chart_test_local_path }}/"
     chart_test_version: "{{ chart_test_version_local_path }}"
-    chart_source_version_upgrade: "{{ chart_test_version_upgrade_local_path }}"
+    chart_test_version_upgrade: "{{ chart_test_version_upgrade_local_path }}"
 
 - name: Test appVersion idempotence
   vars:
