@@ -4,12 +4,14 @@
     repo: "{{ chart_test_git_repo }}"
     dest: /tmp/helm_test_repo
     version: 631eb8413f6728962439488f48d7d6fbb954a6db
+    depth: 1
 
 - name: Git clone stable repo upgrade
   git:
     repo: "{{ chart_test_git_repo }}"
     dest: /tmp/helm_test_repo_upgrade
     version: d37b5025ffc8be49699898369fbb59661e2a8ffb
+    depth: 1
 
 - name: Install Chart from local path
   include_tasks: "../tests_chart.yml"
