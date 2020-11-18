@@ -116,7 +116,7 @@ api_found:
   description:
   - Whether the specified api_version and kind were successfully mapped to an existing API on the targeted cluster.
   returned: always
-  type: boolean
+  type: bool
 resources:
   description:
   - The object(s) that exists
