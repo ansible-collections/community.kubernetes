@@ -288,7 +288,7 @@ class K8sAnsibleMixin(object):
         resource = self.find_resource(kind, api_version)
         api_found = bool(resource)
         if not api_found:
-            return dict(resources=[], msg='Failed to resource with apiVersion "{0}" and kind "{1}"'.format(api_version, kind), api_found=False)
+            return dict(resources=[], msg='Failed to find API for resource with apiVersion "{0}" and kind "{1}"'.format(api_version, kind), api_found=False)
 
         if not label_selectors:
             label_selectors = []
