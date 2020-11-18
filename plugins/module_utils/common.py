@@ -290,7 +290,6 @@ class K8sAnsibleMixin(object):
         if not api_found:
             return dict(resources=[], msg='Failed to resource with apiVersion "{0}" and kind "{1}"'.format(api_version, kind), api_found=False)
 
-
         if not label_selectors:
             label_selectors = []
         if not field_selectors:
