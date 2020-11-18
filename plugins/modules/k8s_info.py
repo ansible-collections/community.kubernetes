@@ -112,6 +112,11 @@ EXAMPLES = r'''
 '''
 
 RETURN = r'''
+api_found:
+  description:
+  - Whether the specified api_version and kind were successfully mapped to an existing API on the targeted cluster.
+  returned: always
+  type: boolean
 resources:
   description:
   - The object(s) that exists
