@@ -31,8 +31,8 @@
     - include_tasks: tasks/access_review.yml
     - include_tasks: tasks/rollback.yml
 
-  roles:
-    - helm
+  # roles:
+  #   - helm
 
   post_tasks:
     - name: Ensure namespace exists
