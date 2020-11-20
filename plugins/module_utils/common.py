@@ -22,7 +22,6 @@ import time
 import os
 import traceback
 import sys
-from functools import lru_cache
 from datetime import datetime
 from distutils.version import LooseVersion
 
@@ -138,10 +137,18 @@ NAME_ARG_SPEC = {
 }
 
 
-@lru_cache()
 def get_api_client(module=None, **auth_params):
     auth_params = auth_params or {}
     auth = {}
+
+    import hashlib
+    m = hashlib.sha256()
+    for i in AUTH_ARG_MAP:
+        m.update(str(auth_params.get(i)).encode())
+    digest = m.hexdigest()
+    if digest in get_api_client._pool:
+        client = get_api_client._pool[digest]
+        return client
 
     def _raise_or_fail(exc, msg):
         if module:
@@ -201,7 +208,12 @@ def get_api_client(module=None, **auth_params):
     except Exception as err:
         _raise_or_fail(err, 'Failed to get client due to %s')
 
-    return DynamicClient(kubernetes.client.ApiClient(configuration))
+    client = DynamicClient(kubernetes.client.ApiClient(configuration))
+    get_api_client._pool[digest] = client
+    return client
+
+
+get_api_client._pool = {}
 
 
 class K8sAnsibleMixin(object):
