@@ -97,46 +97,6 @@ except ImportError as e:
     K8S_IMP_ERR = traceback.format_exc()
 
 
-def list_dict_str(value):
-    if isinstance(value, (list, dict, string_types)):
-        return value
-    raise TypeError
-
-
-ARG_ATTRIBUTES_BLACKLIST = ('property_path',)
-
-COMMON_ARG_SPEC = {
-    'state': {
-        'default': 'present',
-        'choices': ['present', 'absent'],
-    },
-    'force': {
-        'type': 'bool',
-        'default': False,
-    },
-}
-
-RESOURCE_ARG_SPEC = {
-    'resource_definition': {
-        'type': list_dict_str,
-        'aliases': ['definition', 'inline']
-    },
-    'src': {
-        'type': 'path',
-    },
-}
-
-NAME_ARG_SPEC = {
-    'kind': {},
-    'name': {},
-    'namespace': {},
-    'api_version': {
-        'default': 'v1',
-        'aliases': ['api', 'version'],
-    },
-}
-
-
 def get_api_client(module=None, **auth_params):
     auth_params = auth_params or {}
     auth = {}

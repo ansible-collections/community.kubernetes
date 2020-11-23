@@ -252,9 +252,8 @@ from ansible_collections.cloud.common.plugins.module_utils.turbo.module import (
     AnsibleTurboModule as AnsibleModule,
 )
 
-from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    COMMON_ARG_SPEC, NAME_ARG_SPEC, RESOURCE_ARG_SPEC)
-from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_SPEC, WAIT_ARG_SPEC)
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC, WAIT_ARG_SPEC, NAME_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
 
 
 def validate_spec():

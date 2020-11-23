@@ -22,9 +22,10 @@ __metaclass__ = type
 import copy
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC)
 from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    AUTH_ARG_SPEC, RESOURCE_ARG_SPEC, NAME_ARG_SPEC, K8sAnsibleMixin, get_api_client)
-
+    K8sAnsibleMixin, get_api_client)
 try:
     from openshift.dynamic.exceptions import NotFoundError
 except ImportError:
