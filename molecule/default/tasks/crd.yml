@@ -36,7 +36,8 @@
         - name: Recreate custom resource definition with merge_type
           k8s:
             definition: "{{ lookup('file', kubernetes_role_path + '/files/crd-resource.yml') }}"
-            merge_type: merge
+            merge_type:
+              - merge
             namespace: crd
           register: recreate_crd_with_merge
 
