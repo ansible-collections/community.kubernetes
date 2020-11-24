@@ -52,9 +52,9 @@ options:
         - The value of the status field in your desired condition.
         - For example, if a C(Deployment) is paused, the C(Progressing) C(type) will have the C(Unknown) status.
         choices:
-        - True
-        - False
-        - Unknown
+        - "True"
+        - "False"
+        - "Unknown"
         default: "True"
       reason:
         type: str

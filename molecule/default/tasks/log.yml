@@ -87,7 +87,7 @@
         wait_timeout: 120
         wait_condition:
           type: Complete
-          status: True
+          status: 'True'
         definition:
           apiVersion: batch/v1
           kind: Job
@@ -136,7 +136,7 @@
         wait_timeout: 120
         wait_condition:
           type: Complete
-          status: 'True'
+          status: True
         definition:
           apiVersion: batch/v1
           kind: Job

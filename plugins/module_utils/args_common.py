@@ -54,7 +54,7 @@ WAIT_ARG_SPEC = dict(
         default=None,
         options=dict(
             type=dict(),
-            status=dict(default=True, choices=[True, False, "Unknown"]),
+            status=dict(default='True', choices=['True', 'False', 'Unknown']),
             reason=dict()
         )
     )
