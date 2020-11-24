@@ -342,6 +342,8 @@ class K8sAnsibleMixin(object):
             if not resource.status or not resource.status.conditions:
                 return False
             match = [x for x in resource.status.conditions if x.type == condition['type']]
+            import q
+            q(match)
             if not match:
                 return False
             # There should never be more than one condition of a specific type

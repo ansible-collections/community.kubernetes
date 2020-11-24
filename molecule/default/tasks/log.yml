@@ -87,7 +87,7 @@
         wait_timeout: 120
         wait_condition:
           type: Complete
-          status: 'True'
+          status: True
         definition:
           apiVersion: batch/v1
           kind: Job
@@ -115,6 +115,43 @@
     - name: verify the log was successfully retrieved
       assert:
         that: job_logs.log_lines[0] == "7"
+
+  always:
+    - name: ensure that namespace is removed
+      k8s:
+        kind: Namespace
+        name: k8s-log
+        state: absent
+
+- block:
+    - name: ensure that k8s-log namespace exists
+      k8s:
+        kind: Namespace
+        name: k8s-log
+
+    - name: Create a job that calculates 7 (v2)
+      k8s:
+        state: present
+        wait: yes
+        wait_timeout: 120
+        wait_condition:
+          type: Complete
+          status: 'True'
+        definition:
+          apiVersion: batch/v1
+          kind: Job
+          metadata:
+            name: int-log
+            namespace: k8s-log
+          spec:
+            template:
+              spec:
+                containers:
+                  - name: busybox
+                    image: busybox
+                    command: ["echo", "7"]
+                restartPolicy: Never
+            backoffLimit: 4
 
   always:
     - name: ensure that namespace is removed
