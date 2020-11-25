@@ -30,6 +30,8 @@ from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
 from ansible.module_utils._text import to_native
 from ansible.module_utils.common.dict_transformations import dict_merge
+from ansible.module_utils.parsing.convert_bool import boolean
+
 
 K8S_IMP_ERR = None
 try:
@@ -181,7 +183,7 @@ WAIT_ARG_SPEC = dict(
         default=None,
         options=dict(
             type=dict(),
-            status=dict(default=True, choices=[True, False, "Unknown"]),
+            status=dict(type='str', default="True", choices=["True", "False", "Unknown"]),
             reason=dict()
         )
     )
@@ -438,7 +440,7 @@ class K8sAnsibleMixin(object):
                         return match.reason == condition['reason']
                 return False
             status = True if match.status == 'True' else False
-            if status == condition['status']:
+            if status == boolean(condition['status']):
                 if condition.get('reason'):
                     return match.reason == condition['reason']
                 return True
