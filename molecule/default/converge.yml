@@ -20,19 +20,19 @@
       assert:
         that: (pod_list.resources | count) > 5
 
-    # - include_tasks: tasks/delete.yml
-    # - include_tasks: tasks/scale.yml
-    # - include_tasks: tasks/apply.yml
-    # - include_tasks: tasks/waiter.yml
-    # - include_tasks: tasks/full.yml
-    # - include_tasks: tasks/exec.yml
+    - include_tasks: tasks/delete.yml
+    - include_tasks: tasks/scale.yml
+    - include_tasks: tasks/apply.yml
+    - include_tasks: tasks/waiter.yml
+    - include_tasks: tasks/full.yml
+    - include_tasks: tasks/exec.yml
     - include_tasks: tasks/log.yml
     - include_tasks: tasks/cluster_info.yml
     - include_tasks: tasks/access_review.yml
     - include_tasks: tasks/rollback.yml
 
-  # roles:
-  #   - helm
+  roles:
+    - helm
 
   post_tasks:
     - name: Ensure namespace exists
