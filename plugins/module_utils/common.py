@@ -288,8 +288,9 @@ class K8sAnsibleMixin(object):
     def kubernetes_facts(self, kind, api_version, name=None, namespace=None, label_selectors=None, field_selectors=None,
                          wait=False, wait_sleep=5, wait_timeout=120, state='present', condition=None):
         resource = self.find_resource(kind, api_version)
-        if not resource:
-            return dict(resources=[])
+        api_found = bool(resource)
+        if not api_found:
+            return dict(resources=[], msg='Failed to find API for resource with apiVersion "{0}" and kind "{1}"'.format(api_version, kind), api_found=False)
 
         if not label_selectors:
             label_selectors = []
@@ -317,14 +318,14 @@ class K8sAnsibleMixin(object):
                             self.fail(msg="Failed to gather information about %s(s) even"
                                           " after waiting for %s seconds" % (res.get('kind'), duration))
                         satisfied_by.append(res)
-                    return dict(resources=satisfied_by)
+                    return dict(resources=satisfied_by, api_found=True)
             result = result.to_dict()
         except (openshift.dynamic.exceptions.BadRequestError, openshift.dynamic.exceptions.NotFoundError):
-            return dict(resources=[])
+            return dict(resources=[], api_found=True)
 
         if 'items' in result:
-            return dict(resources=result['items'])
-        return dict(resources=[result])
+            return dict(resources=result['items'], api_found=True)
+        return dict(resources=[result], api_found=True)
 
     def remove_aliases(self):
         """

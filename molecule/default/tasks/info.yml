@@ -159,6 +159,29 @@
           - multi_pod_two_remove is successful
           - multi_pod_two_remove.changed
 
+    - name: "Look for existing API"
+      k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+      register: existing_api
+
+    - name: Check if we informed the user the api does exist
+      assert:
+        that:
+          - existing_api.api_found
+
+    - name: "Look for non-existent API"
+      k8s_info:
+        api_version: pleasedonotcreatethisresource.example.com/v7
+        kind: DoesNotExist
+      register: dne_api
+
+    - name: Check if we informed the user the api does not exist
+      assert:
+        that:
+          - not dne_api.resources
+          - not dne_api.api_found
+
   always:
     - name: Remove namespace
       k8s:
