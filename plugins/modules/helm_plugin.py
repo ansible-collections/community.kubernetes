@@ -96,6 +96,7 @@ rc:
 '''
 
 from ansible.module_utils.basic import AnsibleModule, env_fallback
+from ansible_collections.community.kubernetes.plugins.module_utils.helm import run_helm
 
 
 def main():
@@ -109,6 +110,12 @@ def main():
             # Helm options
             context=dict(type='str', aliases=['kube_context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
             kubeconfig=dict(type='path', aliases=['kubeconfig_path'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
+
+            # Generic auth key
+            host=dict(type='str', fallback=(env_fallback, ['K8S_AUTH_HOST'])),
+            ca_cert=dict(type='path', aliases=['ssl_ca_cert'], fallback=(env_fallback, ['K8S_AUTH_SSL_CA_CERT'])),
+            validate_certs=dict(type='bool', default=True, aliases=['verify_ssl'], fallback=(env_fallback, ['K8S_AUTH_VERIFY_SSL'])),
+            api_key=dict(type='str', no_log=True, fallback=(env_fallback, ['K8S_AUTH_API_KEY']))
         ),
         supports_check_mode=True,
         required_if=[
@@ -116,17 +123,16 @@ def main():
             ("state", "absent", ("plugin_name",)),
         ],
         mutually_exclusive=[
-            ['plugin_name', 'plugin_path'],
+            ('plugin_name', 'plugin_path'),
+            ("context", "ca_cert"),
+            ("context", "validate_certs"),
+            ("kubeconfig", "ca_cert"),
+            ("kubeconfig", "validate_certs")
         ],
     )
 
     bin_path = module.params.get('binary_path')
-    release_namespace = module.params.get('release_namespace')
     state = module.params.get('state')
-
-    # Helm options
-    kube_context = module.params.get('context')
-    kubeconfig_path = module.params.get('kubeconfig')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
@@ -137,18 +143,10 @@ def main():
 
     helm_cmd_common += " plugin"
 
-    if kube_context is not None:
-        helm_cmd_common += " --kube-context " + kube_context
-
-    if kubeconfig_path is not None:
-        helm_cmd_common += " --kubeconfig " + kubeconfig_path
-
-    helm_cmd_common += " --namespace=" + release_namespace
-
     if state == 'present':
         helm_cmd_common += " install %s" % module.params.get('plugin_path')
         if not module.check_mode:
-            rc, out, err = module.run_command(helm_cmd_common)
+            rc, out, err = run_helm(module, helm_cmd_common, fails_on_error=False)
         else:
             rc, out, err = (0, '', '')
 
@@ -183,7 +181,7 @@ def main():
     elif state == 'absent':
         plugin_name = module.params.get('plugin_name')
         helm_plugin_list = helm_cmd_common + " list"
-        rc, out, err = module.run_command(helm_plugin_list)
+        rc, out, err = run_helm(module, helm_plugin_list)
         if rc != 0 or (out == '' and err == ''):
             module.fail_json(
                 msg="Failed to get Helm plugin info",
@@ -206,7 +204,7 @@ def main():
             if found:
                 helm_uninstall_cmd = "%s uninstall %s" % (helm_cmd_common, plugin_name)
                 if not module.check_mode:
-                    rc, out, err = module.run_command(helm_uninstall_cmd)
+                    rc, out, err = run_helm(module, helm_uninstall_cmd, fails_on_error=False)
                 else:
                     rc, out, err = (0, '', '')
 

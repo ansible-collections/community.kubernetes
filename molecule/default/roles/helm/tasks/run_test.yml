@@ -12,6 +12,9 @@
 - name: "Install {{ helm_version }}"
   include_tasks: install.yml
 
+- name: "Ensure we honor the environment variables"
+  include_tasks: test_read_envvars.yml
+
 - name: tests_repository
   include_tasks: tests_repository.yml
 
