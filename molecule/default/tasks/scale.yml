@@ -64,7 +64,7 @@
         field_selectors:
           - status.phase=Running
       register: scale_down_deploy_pods
-      until: "{{ scale_down_deploy_pods.resources | length == 0 }}"
+      until: scale_down_deploy_pods.resources | length == 0
       retries: 6
       delay: 5
 
@@ -193,7 +193,7 @@
       register: scale_down_no_wait_pods
       retries: 6
       delay: 5
-      until: "{{ scale_down_no_wait_pods.resources | length == 1 }}"
+      until: scale_down_no_wait_pods.resources | length == 1
 
     - name: Ensure that scale down without wait worked
       assert:

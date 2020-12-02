@@ -249,7 +249,7 @@
         field_selectors:
           - status.phase=Running
       register: updated_deploy_pods
-      until: "{{ updated_deploy_pods.resources[0].spec.containers[0].image.endswith(':2') }}"
+      until: updated_deploy_pods.resources[0].spec.containers[0].image.endswith(':2')
       retries: 6
       delay: 5
 
