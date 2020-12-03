@@ -43,9 +43,11 @@ class ActionModule(ActionBase):
         del tmp  # tmp no longer has any effect
 
         new_module_args = copy.deepcopy(self._task.args)
+
         kubeconfig = self._task.args.get('kubeconfig', None)
-        # find the file in the expected search path
-        if kubeconfig:
+        remote_kubeconfig = self._task.args.get('remote_kubeconfig', False)
+        # find the kubeconfig in the expected search path
+        if kubeconfig and not remote_kubeconfig:
             try:
                 # find in expected paths
                 kubeconfig = self._find_needle('files', kubeconfig)
@@ -55,14 +57,20 @@ class ActionModule(ActionBase):
                 result['exception'] = traceback.format_exc()
                 return result
 
-        if kubeconfig:
             # decrypt kubeconfig found
             actual_file = self._loader.get_real_file(kubeconfig, decrypt=True)
             new_module_args['kubeconfig'] = actual_file
 
         # find the file in the expected search path
         src = self._task.args.get('src', None)
+        remote_src = self._task.args.get('remote_src', False)
+
         if src:
+            if remote_src:
+                # src is on remote node
+                result.update(self._execute_module(module_name=self._task.action, task_vars=task_vars))
+                return self._ensure_invocation(result)
+
             try:
                 # find in expected paths
                 src = self._find_needle('files', src)
@@ -117,10 +125,6 @@ class ActionModule(ActionBase):
             else:
                 raise AnsibleActionFail("Error while reading template file - "
                                         "a string or dict for template expected, but got %s instead" % type(template))
-            try:
-                source = self._find_needle('templates', template_path)
-            except AnsibleError as e:
-                raise AnsibleActionFail(to_text(e))
 
             # Option `lstrip_blocks' was added in Jinja2 version 2.7.
             if lstrip_blocks:
@@ -142,6 +146,11 @@ class ActionModule(ActionBase):
                 newline_sequence = allowed_sequences[wrong_sequences.index(newline_sequence)]
             elif newline_sequence not in allowed_sequences:
                 raise AnsibleActionFail("newline_sequence needs to be one of: \n, \r or \r\n")
+
+            try:
+                source = self._find_needle('templates', template_path)
+            except AnsibleError as e:
+                raise AnsibleActionFail(to_text(e))
 
             # Get vault decrypted tmp file
             try:

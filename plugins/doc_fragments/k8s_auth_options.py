@@ -28,6 +28,13 @@ options:
       configuration file from I(~/.kube/config.json). Can also be specified via K8S_AUTH_KUBECONFIG environment
       variable.
     type: path
+  remote_kubeconfig:
+    description:
+    - Set to C(yes) to indicate the I(kubeconfig) file is already on the remote system and not local to the Ansible controller.
+    - Auto decryption of remote Kubeconfig file does not work.
+    type: bool
+    default: False
+    version_added: "1.2.0"
   context:
     description:
     - The name of a context found in the config file. Can also be specified via K8S_AUTH_CONTEXT environment variable.

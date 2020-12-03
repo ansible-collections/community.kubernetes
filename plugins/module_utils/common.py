@@ -125,6 +125,10 @@ RESOURCE_ARG_SPEC = {
     'src': {
         'type': 'path',
     },
+    'remote_src': {
+        'type': 'bool',
+        'default': False,
+    },
 }
 
 NAME_ARG_SPEC = {
@@ -140,6 +144,10 @@ NAME_ARG_SPEC = {
 AUTH_ARG_SPEC = {
     'kubeconfig': {
         'type': 'path',
+    },
+    'remote_kubeconfig': {
+        'type': 'bool',
+        'default': False,
     },
     'context': {},
     'host': {},

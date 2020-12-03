@@ -30,4 +30,11 @@ options:
       I(resource_definition). See Examples below.
     - Mutually exclusive with I(template) in case of M(k8s) module.
     type: path
+  remote_src:
+    description:
+    - Set to C(yes) to indicate the I(src) file is already on the remote system and not local to the Ansible controller.
+    - This is not valid for I(template) parameter.
+    type: bool
+    default: False
+    version_added: "1.2.0"
 '''
