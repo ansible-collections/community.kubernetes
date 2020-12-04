@@ -151,7 +151,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install ansible base (devel branch)
-        run: pip install "ansible>=2.9.0,<2.10.0"
+        run: pip install "ansible>=2.9.0,<2.10.0" pip==20.3.1
 
       - name: Run integration tests on Python ${{ matrix.python_version }}
         run: make downstream-test-integration
