@@ -42,12 +42,18 @@ class ActionModule(ActionBase):
         result = super(ActionModule, self).run(tmp, task_vars)
         del tmp  # tmp no longer has any effect
 
+        # Check current transport connection and depending upon
+        # look for kubeconfig and src
+        # 'local' => look files on Ansible Controller
+        # Transport other than 'local' => look files on remote node
+        remote_transport = self._connection.transport != 'local'
+
         new_module_args = copy.deepcopy(self._task.args)
 
         kubeconfig = self._task.args.get('kubeconfig', None)
-        remote_kubeconfig = self._task.args.get('remote_kubeconfig', False)
         # find the kubeconfig in the expected search path
-        if kubeconfig and not remote_kubeconfig:
+        if kubeconfig and not remote_transport:
+            # kubeconfig is local
             try:
                 # find in expected paths
                 kubeconfig = self._find_needle('files', kubeconfig)
@@ -63,14 +69,14 @@ class ActionModule(ActionBase):
 
         # find the file in the expected search path
         src = self._task.args.get('src', None)
-        remote_src = self._task.args.get('remote_src', False)
 
         if src:
-            if remote_src:
+            if remote_transport:
                 # src is on remote node
                 result.update(self._execute_module(module_name=self._task.action, task_vars=task_vars))
                 return self._ensure_invocation(result)
 
+            # src is local
             try:
                 # find in expected paths
                 src = self._find_needle('files', src)
