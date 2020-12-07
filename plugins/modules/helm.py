@@ -432,8 +432,8 @@ def main():
             # Helm options
             disable_hook=dict(type='bool', default=False),
             force=dict(type='bool', default=False),
-            kube_context=dict(type='str', aliases=['context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
-            kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
+            context=dict(type='str', aliases=['kube_context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kubeconfig=dict(type='path', aliases=['kubeconfig_path'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
             purge=dict(type='bool', default=True),
             wait=dict(type='bool', default=False),
             wait_timeout=dict(type='str'),
@@ -467,8 +467,8 @@ def main():
     # Helm options
     disable_hook = module.params.get('disable_hook')
     force = module.params.get('force')
-    kube_context = module.params.get('kube_context')
-    kubeconfig_path = module.params.get('kubeconfig_path')
+    kube_context = module.params.get('context')
+    kubeconfig_path = module.params.get('kubeconfig')
     purge = module.params.get('purge')
     wait = module.params.get('wait')
     wait_timeout = module.params.get('wait_timeout')

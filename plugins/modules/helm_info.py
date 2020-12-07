@@ -163,8 +163,8 @@ def main():
             release_namespace=dict(type='str', required=True, aliases=['namespace']),
 
             # Helm options
-            kube_context=dict(type='str', aliases=['context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
-            kubeconfig_path=dict(type='path', aliases=['kubeconfig'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
+            context=dict(type='str', aliases=['kube_context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
+            kubeconfig=dict(type='path', aliases=['kubeconfig_path'], fallback=(env_fallback, ['K8S_AUTH_KUBECONFIG'])),
         ),
         supports_check_mode=True,
     )
@@ -177,8 +177,8 @@ def main():
     release_namespace = module.params.get('release_namespace')
 
     # Helm options
-    kube_context = module.params.get('kube_context')
-    kubeconfig_path = module.params.get('kubeconfig_path')
+    kube_context = module.params.get('context')
+    kubeconfig_path = module.params.get('kubeconfig')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
