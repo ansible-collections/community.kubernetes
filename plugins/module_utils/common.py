@@ -441,7 +441,7 @@ class K8sAnsibleMixin(object):
                         return match.reason == condition['reason']
                 return False
             status = True if match.status == 'True' else False
-            if status == boolean(condition['status']):
+            if status == boolean(condition['status'], strict=False):
                 if condition.get('reason'):
                     return match.reason == condition['reason']
                 return True
