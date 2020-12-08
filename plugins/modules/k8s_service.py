@@ -81,6 +81,7 @@ options:
       ignoring properties that are automatically generated
     - C(apply) works better with Services than 'force=yes'
     - mutually exclusive with C(merge_type)
+    default: False
     type: bool
 
 requirements:

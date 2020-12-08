@@ -87,6 +87,7 @@ options:
       will only work if the same object is passed with state=absent (alternatively, just use state=absent with the name including
       the generated hash and append_hash=no)
     - Requires openshift >= 0.7.2
+    default: False
     type: bool
   apply:
     description:
@@ -95,6 +96,7 @@ options:
     - C(apply) works better with Services than 'force=yes'
     - Requires openshift >= 0.9.2
     - mutually exclusive with C(merge_type)
+    default: False
     type: bool
   template:
     description:
