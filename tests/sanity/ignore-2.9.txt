@@ -1,5 +1,3 @@
-plugins/modules/helm.py validate-modules:parameter-type-not-in-doc
-plugins/modules/helm_info.py validate-modules:parameter-type-not-in-doc
 plugins/modules/k8s.py validate-modules:parameter-type-not-in-doc
 plugins/modules/k8s_scale.py validate-modules:parameter-type-not-in-doc
 plugins/modules/k8s_service.py validate-modules:parameter-type-not-in-doc
