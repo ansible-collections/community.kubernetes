@@ -633,8 +633,8 @@ class K8sAnsibleMixin(object):
         except DynamicApiError as exc:
             self.fail_json(msg='Failed to retrieve requested object: {0}'.format(exc.body),
                            error=exc.status, status=exc.status, reason=exc.reason)
-        except Exception as exc:
-            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(to_native(exc)),
+        except ValueError as value_exc:
+            self.fail_json(msg='Failed to retrieve requested object: {0}'.format(to_native(value_exc)),
                            error='', status='', reason='')
 
         if state == 'absent':
@@ -708,6 +708,11 @@ class K8sAnsibleMixin(object):
                         if self.warnings:
                             msg += "\n" + "\n    ".join(self.warnings)
                         self.fail_json(msg=msg, error=exc.status, status=exc.status, reason=exc.reason)
+                    except Exception as exc:
+                        msg = "Failed to create object: {0}".format(exc)
+                        if self.warnings:
+                            msg += "\n" + "\n    ".join(self.warnings)
+                        self.fail_json(msg=msg, error='', status='', reason='')
                 success = True
                 result['result'] = k8s_obj
                 if wait and not self.check_mode:
