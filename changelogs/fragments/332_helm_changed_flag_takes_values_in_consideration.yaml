@@ -1,0 +1,3 @@
+---
+bugfixes:
+- helm - ``release_values`` makes ansible always show changed state (https://github.com/ansible-collections/community.kubernetes/issues/274)
