@@ -121,8 +121,7 @@ except ImportError:
     IMP_YAML = False
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
-
-module = None
+from ansible_collections.community.kubernetes.plugins.module_utils.helm import run_helm
 
 
 # Get repository from all repositories added
@@ -135,10 +134,10 @@ def get_repository(state, repo_name):
 
 
 # Get repository status
-def get_repository_status(command, repository_name):
+def get_repository_status(module, command, repository_name):
     list_command = command + " repo list --output=yaml"
 
-    rc, out, err = module.run_command(list_command)
+    rc, out, err = run_helm(module, list_command, fails_on_error=False)
 
     # no repo => rc=1 and 'no repositories to show' in output
     if rc == 1 and "no repositories to show" in err:
@@ -208,7 +207,7 @@ def main():
     else:
         helm_cmd = module.get_bin_path('helm', required=True)
 
-    repository_status = get_repository_status(helm_cmd, repo_name)
+    repository_status = get_repository_status(module, helm_cmd, repo_name)
 
     if repo_state == "absent" and repository_status is not None:
         helm_cmd = delete_repository(helm_cmd, repo_name)
@@ -225,7 +224,7 @@ def main():
     elif not changed:
         module.exit_json(changed=False, repo_name=repo_name, repo_url=repo_url)
 
-    rc, out, err = module.run_command(helm_cmd)
+    rc, out, err = run_helm(module, helm_cmd)
 
     if repo_password is not None:
         helm_cmd = helm_cmd.replace(repo_password, '******')

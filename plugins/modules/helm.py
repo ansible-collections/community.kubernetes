@@ -266,34 +266,7 @@ except ImportError:
     IMP_YAML = False
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib, env_fallback
-
-module = None
-
-
-def exec_command(command):
-    rc, out, err = module.run_command(command)
-    if rc != 0:
-        module.fail_json(
-            msg="Failure when executing Helm command. Exited {0}.\nstdout: {1}\nstderr: {2}".format(rc, out, err),
-            stdout=out,
-            stderr=err,
-            command=command,
-        )
-    return rc, out, err
-
-
-def get_values(command, release_name):
-    """
-    Get Values from deployed release
-    """
-
-    get_command = command + " get values --output=yaml " + release_name
-
-    rc, out, err = exec_command(get_command)
-    # Helm 3 return "null" string when no values are set
-    if out.rstrip("\n") == "null":
-        return {}
-    return yaml.safe_load(out)
+from ansible_collections.community.kubernetes.plugins.module_utils.helm import run_helm, get_values
 
 
 def get_release(state, release_name):
@@ -308,40 +281,40 @@ def get_release(state, release_name):
     return None
 
 
-def get_release_status(command, release_name):
+def get_release_status(module, command, release_name):
     """
     Get Release state from deployed release
     """
 
     list_command = command + " list --output=yaml --filter " + release_name
 
-    rc, out, err = exec_command(list_command)
+    rc, out, err = run_helm(module, list_command)
 
     release = get_release(yaml.safe_load(out), release_name)
 
     if release is None:  # not install
         return None
 
-    release['values'] = get_values(command, release_name)
+    release['values'] = get_values(module, command, release_name)
 
     return release
 
 
-def run_repo_update(command):
+def run_repo_update(module, command):
     """
     Run Repo update
     """
     repo_update_command = command + " repo update"
-    rc, out, err = exec_command(repo_update_command)
+    rc, out, err = run_helm(module, repo_update_command)
 
 
-def fetch_chart_info(command, chart_ref):
+def fetch_chart_info(module, command, chart_ref):
     """
     Get chart info
     """
     inspect_command = command + " show chart " + chart_ref
 
-    rc, out, err = exec_command(inspect_command)
+    rc, out, err = run_helm(module, inspect_command)
 
     return yaml.safe_load(out)
 
@@ -440,10 +413,22 @@ def main():
             atomic=dict(type='bool', default=False),
             create_namespace=dict(type='bool', default=False),
             replace=dict(type='bool', default=False),
+
+            # Generic auth key
+            host=dict(type='str', fallback=(env_fallback, ['K8S_AUTH_HOST'])),
+            ca_cert=dict(type='path', aliases=['ssl_ca_cert'], fallback=(env_fallback, ['K8S_AUTH_SSL_CA_CERT'])),
+            validate_certs=dict(type='bool', default=True, aliases=['verify_ssl'], fallback=(env_fallback, ['K8S_AUTH_VERIFY_SSL'])),
+            api_key=dict(type='str', no_log=True, fallback=(env_fallback, ['K8S_AUTH_API_KEY']))
         ),
         required_if=[
             ('release_state', 'present', ['release_name', 'chart_ref']),
             ('release_state', 'absent', ['release_name'])
+        ],
+        mutually_exclusive=[
+            ("context", "ca_cert"),
+            ("context", "validate_certs"),
+            ("kubeconfig", "ca_cert"),
+            ("kubeconfig", "validate_certs")
         ],
         supports_check_mode=True,
     )
@@ -458,7 +443,6 @@ def main():
     chart_repo_url = module.params.get('chart_repo_url')
     chart_version = module.params.get('chart_version')
     release_name = module.params.get('release_name')
-    release_namespace = module.params.get('release_namespace')
     release_state = module.params.get('release_state')
     release_values = module.params.get('release_values')
     values_files = module.params.get('values_files')
@@ -467,8 +451,6 @@ def main():
     # Helm options
     disable_hook = module.params.get('disable_hook')
     force = module.params.get('force')
-    kube_context = module.params.get('context')
-    kubeconfig_path = module.params.get('kubeconfig')
     purge = module.params.get('purge')
     wait = module.params.get('wait')
     wait_timeout = module.params.get('wait_timeout')
@@ -481,19 +463,11 @@ def main():
     else:
         helm_cmd_common = module.get_bin_path('helm', required=True)
 
-    if kube_context is not None:
-        helm_cmd_common += " --kube-context " + kube_context
-
-    if kubeconfig_path is not None:
-        helm_cmd_common += " --kubeconfig " + kubeconfig_path
-
     if update_repo_cache:
-        run_repo_update(helm_cmd_common)
-
-    helm_cmd_common += " --namespace=" + release_namespace
+        run_repo_update(module, helm_cmd_common)
 
     # Get real/deployed release status
-    release_status = get_release_status(helm_cmd_common, release_name)
+    release_status = get_release_status(module, helm_cmd_common, release_name)
 
     # keep helm_cmd_common for get_release_status in module_exit_json
     helm_cmd = helm_cmd_common
@@ -512,7 +486,7 @@ def main():
             helm_cmd += " --repo=" + chart_repo_url
 
         # Fetch chart info to have real version and real name for chart_ref from archive, folder or url
-        chart_info = fetch_chart_info(helm_cmd, chart_ref)
+        chart_info = fetch_chart_info(module, helm_cmd, chart_ref)
 
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
@@ -563,13 +537,13 @@ def main():
             command=helm_cmd,
         )
 
-    rc, out, err = exec_command(helm_cmd)
+    rc, out, err = run_helm(module, helm_cmd)
 
     module.exit_json(
         changed=changed,
         stdout=out,
         stderr=err,
-        status=get_release_status(helm_cmd_common, release_name),
+        status=get_release_status(module, helm_cmd_common, release_name),
         command=helm_cmd,
     )
 
