@@ -189,6 +189,35 @@ WAIT_ARG_SPEC = dict(
     )
 )
 
+DELETE_OPTS_ARG_SPEC = {
+    'kind': {
+        'type': 'str',
+        'default': 'DeleteOptions',
+    },
+    'apiVersion': {
+        'type': 'str',
+        'default': 'v1',
+    },
+    'propagationPolicy': {
+        'choices': ['Foreground', 'Background', 'Orphan'],
+    },
+    'gracePeriodSeconds': {
+        'type': 'int',
+    },
+    'preconditions': {
+        'type': 'dict',
+        'options': {
+            'resourceVersion': {
+                'type': 'str',
+            },
+            'uid': {
+                'type': 'str',
+            }
+        }
+    }
+}
+
+
 # Map kubernetes-client parameters to ansible parameters
 AUTH_ARG_MAP = {
     'kubeconfig': 'kubeconfig',
@@ -594,6 +623,7 @@ class K8sAnsibleMixin(object):
         return definition
 
     def perform_action(self, resource, definition):
+        delete_options = self.params.get('delete_options')
         result = {'changed': False, 'result': {}}
         state = self.params.get('state', None)
         force = self.params.get('force', False)
@@ -646,6 +676,8 @@ class K8sAnsibleMixin(object):
                 # Delete the object
                 result['changed'] = True
                 if not self.check_mode:
+                    if delete_options:
+                        params['body'] = delete_options
                     try:
                         k8s_obj = resource.delete(**params)
                         result['result'] = k8s_obj.to_dict()

@@ -34,6 +34,7 @@ extends_documentation_fragment:
   - community.kubernetes.k8s_resource_options
   - community.kubernetes.k8s_auth_options
   - community.kubernetes.k8s_wait_options
+  - community.kubernetes.k8s_delete_options
 
 notes:
   - If your OpenShift Python library is not 0.9.0 or newer and you are trying to
@@ -252,7 +253,8 @@ import copy
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    K8sAnsibleMixin, COMMON_ARG_SPEC, NAME_ARG_SPEC, RESOURCE_ARG_SPEC, AUTH_ARG_SPEC, WAIT_ARG_SPEC)
+    K8sAnsibleMixin, COMMON_ARG_SPEC, NAME_ARG_SPEC, RESOURCE_ARG_SPEC, AUTH_ARG_SPEC,
+    WAIT_ARG_SPEC, DELETE_OPTS_ARG_SPEC)
 
 
 class KubernetesModule(K8sAnsibleMixin):
@@ -277,6 +279,7 @@ class KubernetesModule(K8sAnsibleMixin):
         argument_spec['append_hash'] = dict(type='bool', default=False)
         argument_spec['apply'] = dict(type='bool', default=False)
         argument_spec['template'] = dict(type='raw', default=None)
+        argument_spec['delete_options'] = dict(type='dict', default=None, options=copy.deepcopy(DELETE_OPTS_ARG_SPEC))
         return argument_spec
 
     def __init__(self, k8s_kind=None, *args, **kwargs):
