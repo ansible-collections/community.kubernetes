@@ -19,17 +19,6 @@ options:
     - Configure behavior when deleting an object.
     - Only used when I(state=absent).
     suboptions:
-      apiVersion:
-        type: str
-        description:
-        - Use to specify the API version.
-        default: v1
-      kind:
-        type: str
-        description:
-        - Specify the object type.
-        - If present this must be C(DeleteOptions).
-        default: DeleteOptions
       propagationPolicy:
         type: str
         description:

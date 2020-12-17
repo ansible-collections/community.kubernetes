@@ -60,8 +60,6 @@
         wait: yes
         wait_timeout: 100
         delete_options:
-          apiVersion: v1
-          kind: DeleteOptions
           propagationPolicy: Foreground
 
     - name: Test job's pod does not exist

@@ -190,14 +190,6 @@ WAIT_ARG_SPEC = dict(
 )
 
 DELETE_OPTS_ARG_SPEC = {
-    'kind': {
-        'type': 'str',
-        'default': 'DeleteOptions',
-    },
-    'apiVersion': {
-        'type': 'str',
-        'default': 'v1',
-    },
     'propagationPolicy': {
         'choices': ['Foreground', 'Background', 'Orphan'],
     },
@@ -677,7 +669,12 @@ class K8sAnsibleMixin(object):
                 result['changed'] = True
                 if not self.check_mode:
                     if delete_options:
-                        params['body'] = delete_options
+                        body = {
+                            'apiVersion': 'v1',
+                            'kind': 'DeleteOptions',
+                        }
+                        body.update(delete_options)
+                        params['body'] = body
                     try:
                         k8s_obj = resource.delete(**params)
                         result['result'] = k8s_obj.to_dict()
