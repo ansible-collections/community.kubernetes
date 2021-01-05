@@ -387,6 +387,18 @@ def delete(command, release_name, purge, disable_hook):
     return delete_command
 
 
+def load_values_files(values_files):
+    values = {}
+    for values_file in values_files or []:
+        with open(values_file, 'r') as fd:
+            content = yaml.safe_load(fd)
+            if not isinstance(content, dict):
+                continue
+            for k, v in content.items():
+                values[k] = v
+    return values
+
+
 def main():
     global module
     module = AnsibleModule(
@@ -502,7 +514,12 @@ def main():
             # when deployed without an 'appVersion' chart value the 'helm list' command will return the entry `app_version: ""`
             appversion_is_same = (chart_app_version == released_app_version) or (chart_app_version is None and released_app_version == "")
 
-            if force or release_values != release_status['values'] \
+            if values_files:
+                values_match = release_status['values'] == load_values_files(values_files)
+            else:
+                values_match = release_status['values'] == release_values
+
+            if force or not values_match \
                     or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"] \
                     or not appversion_is_same:
                 helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
