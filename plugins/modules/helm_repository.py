@@ -123,9 +123,11 @@ except ImportError:
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible_collections.community.kubernetes.plugins.module_utils.helm import run_helm
 
+
 # Remove trailing whitespaces
 def remove_trailing_spaces(parameter):
     return parameter.strip(" ")
+
 
 # Get repository from all repositories added
 def get_repository(state, repo_name):
