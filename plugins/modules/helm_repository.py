@@ -126,7 +126,8 @@ from ansible_collections.community.kubernetes.plugins.module_utils.helm import r
 
 # Remove trailing whitespaces
 def remove_trailing_spaces(parameter):
-    return parameter.strip(" ")
+    if parameter is not None:
+        return parameter.strip(" ")
 
 
 # Get repository from all repositories added
