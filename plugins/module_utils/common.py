@@ -632,14 +632,6 @@ class K8sAnsibleMixin(object):
 
         self.remove_aliases()
 
-        def _encode_stringdata(definition):
-            if definition['kind'] == 'Secret' and 'stringData' in definition:
-                for k, v in definition['stringData'].items():
-                    encoded = base64.b64encode(to_bytes(v))
-                    definition.setdefault('data', {})[k] = to_text(encoded)
-                del definition['stringData']
-            return definition
-
         try:
             # ignore append_hash for resources other than ConfigMap and Secret
             if self.append_hash and definition['kind'] in ['ConfigMap', 'Secret']:
@@ -867,3 +859,12 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
 
         self.warn("class KubernetesAnsibleModule is deprecated"
                   " and will be removed in 2.0.0. Please use K8sAnsibleMixin instead.")
+
+
+def _encode_stringdata(definition):
+    if definition['kind'] == 'Secret' and 'stringData' in definition:
+        for k, v in definition['stringData'].items():
+            encoded = base64.b64encode(to_bytes(v))
+            definition.setdefault('data', {})[k] = to_text(encoded)
+        del definition['stringData']
+    return definition
