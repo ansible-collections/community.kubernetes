@@ -124,6 +124,12 @@ from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible_collections.community.kubernetes.plugins.module_utils.helm import run_helm
 
 
+# Remove trailing whitespaces
+def remove_trailing_spaces(parameter):
+    if parameter is not None:
+        return parameter.strip(" ")
+
+
 # Get repository from all repositories added
 def get_repository(state, repo_name):
     if state is not None:
@@ -195,12 +201,12 @@ def main():
 
     changed = False
 
-    bin_path = module.params.get('binary_path')
-    repo_name = module.params.get('repo_name')
-    repo_url = module.params.get('repo_url')
-    repo_username = module.params.get('repo_username')
-    repo_password = module.params.get('repo_password')
-    repo_state = module.params.get('repo_state')
+    bin_path = remove_trailing_spaces(module.params.get('binary_path'))
+    repo_name = remove_trailing_spaces(module.params.get('repo_name'))
+    repo_url = remove_trailing_spaces(module.params.get('repo_url'))
+    repo_username = remove_trailing_spaces(module.params.get('repo_username'))
+    repo_password = remove_trailing_spaces(module.params.get('repo_password'))
+    repo_state = remove_trailing_spaces(module.params.get('repo_state'))
 
     if bin_path is not None:
         helm_cmd = bin_path
