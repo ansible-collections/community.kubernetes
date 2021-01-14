@@ -761,6 +761,81 @@
         that:
           - deploy_after_serviceaccount_removal is failed
 
+    - name: Add a secret
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: apply-secret
+            namespace: "{{ apply_namespace }}"
+          type: Opaque
+          stringData:
+            foo: bar
+      register: k8s_secret
+
+    - name: Check secret was created
+      assert:
+        that:
+          - k8s_secret is changed
+          - k8s_secret.result.data.foo
+
+    - name: Add same secret
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: apply-secret
+            namespace: "{{ apply_namespace }}"
+          type: Opaque
+          stringData:
+            foo: bar
+      register: k8s_secret
+
+    - name: Check nothing changed
+      assert:
+        that:
+          - k8s_secret is not changed
+
+    - name: Add same secret with check mode on
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: apply-secret
+            namespace: "{{ apply_namespace }}"
+          type: Opaque
+          stringData:
+            foo: bar
+      check_mode: yes
+      register: k8s_secret
+
+    - name: Check nothing changed
+      assert:
+        that:
+          - k8s_secret is not changed
+
+    - name: Add same secret with check mode on using data
+      k8s:
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: apply-secret
+            namespace: "{{ apply_namespace }}"
+          type: Opaque
+          data:
+            foo: YmFy
+      check_mode: yes
+      register: k8s_secret
+
+    - name: Check nothing changed
+      assert:
+        that:
+          - k8s_secret is not changed
+
   always:
     - name: Remove namespace
       k8s:

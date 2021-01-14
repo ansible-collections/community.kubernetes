@@ -18,6 +18,7 @@
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
+import base64
 import time
 import os
 import traceback
@@ -28,7 +29,7 @@ from distutils.version import LooseVersion
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
-from ansible.module_utils._text import to_native
+from ansible.module_utils._text import to_native, to_bytes, to_text
 from ansible.module_utils.common.dict_transformations import dict_merge
 from ansible.module_utils.parsing.convert_bool import boolean
 
@@ -690,7 +691,7 @@ class K8sAnsibleMixin(object):
         else:
             if self.apply:
                 if self.check_mode:
-                    ignored, patch = apply_object(resource, definition)
+                    ignored, patch = apply_object(resource, _encode_stringdata(definition))
                     if existing:
                         k8s_obj = dict_merge(existing.to_dict(), patch)
                     else:
@@ -721,7 +722,7 @@ class K8sAnsibleMixin(object):
 
             if not existing:
                 if self.check_mode:
-                    k8s_obj = definition
+                    k8s_obj = _encode_stringdata(definition)
                 else:
                     try:
                         k8s_obj = resource.create(definition, namespace=namespace).to_dict()
@@ -757,7 +758,7 @@ class K8sAnsibleMixin(object):
 
             if existing and force:
                 if self.check_mode:
-                    k8s_obj = definition
+                    k8s_obj = _encode_stringdata(definition)
                 else:
                     try:
                         k8s_obj = resource.replace(definition, name=name, namespace=namespace, append_hash=self.append_hash).to_dict()
@@ -781,7 +782,7 @@ class K8sAnsibleMixin(object):
 
             # Differences exist between the existing obj and requested params
             if self.check_mode:
-                k8s_obj = dict_merge(existing.to_dict(), definition)
+                k8s_obj = dict_merge(existing.to_dict(), _encode_stringdata(definition))
             else:
                 if LooseVersion(self.openshift_version) < LooseVersion("0.6.2"):
                     k8s_obj, error = self.patch_resource(resource, definition, existing, name,
@@ -858,3 +859,12 @@ class KubernetesAnsibleModule(AnsibleModule, K8sAnsibleMixin):
 
         self.warn("class KubernetesAnsibleModule is deprecated"
                   " and will be removed in 2.0.0. Please use K8sAnsibleMixin instead.")
+
+
+def _encode_stringdata(definition):
+    if definition['kind'] == 'Secret' and 'stringData' in definition:
+        for k, v in definition['stringData'].items():
+            encoded = base64.b64encode(to_bytes(v))
+            definition.setdefault('data', {})[k] = to_text(encoded)
+        del definition['stringData']
+    return definition
