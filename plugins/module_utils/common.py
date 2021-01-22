@@ -19,10 +19,10 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import base64
-import time
 import os
-import traceback
 import sys
+import time
+import traceback
 from datetime import datetime
 from distutils.version import LooseVersion
 
@@ -30,9 +30,10 @@ from ansible_collections.community.kubernetes.plugins.module_utils.args_common i
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.six import iteritems, string_types
-from ansible.module_utils._text import to_native, to_bytes, to_text
+from ansible.module_utils._text import to_bytes, to_native, to_text
 from ansible.module_utils.common.dict_transformations import dict_merge
 from ansible.module_utils.parsing.convert_bool import boolean
+from ansible.utils.path import unfrackpath
 
 
 K8S_IMP_ERR = None
@@ -293,18 +294,37 @@ class K8sAnsibleMixin(object):
                     if alias in self.params:
                         self.params.pop(alias)
 
+    def is_directory(self, path):
+        path = unfrackpath(path, follow=False)
+        return os.path.isdir(to_bytes(path, errors='surrogate_or_strict'))
+
+    def list_directory(self, path):
+        path = unfrackpath(path, follow=False)
+        return os.listdir(path)
+
+    def read_yaml(self, path):
+        result = []
+        try:
+            with open(path, 'r') as f:
+                return list(yaml.safe_load_all(f))
+        except (IOError, yaml.YAMLError) as exc:
+            self.fail(msg="Error loading resource_definition: {0}".format(exc))
+        return result
+
     def load_resource_definitions(self, src):
         """ Load the requested src path """
         result = None
         path = os.path.normpath(src)
         if not os.path.exists(path):
             self.fail(msg="Error accessing {0}. Does the file exist?".format(path))
-        try:
-            with open(path, 'r') as f:
-                result = list(yaml.safe_load_all(f))
-        except (IOError, yaml.YAMLError) as exc:
-            self.fail(msg="Error loading resource_definition: {0}".format(exc))
-        return result
+        if self.is_directory(path):
+            result = []
+            for filename in self.list_directory(path):
+                extension = os.path.splitext(filename)[1]
+                if extension in ('.yml', '.yaml'):
+                    result.extend(self.read_yaml(os.path.join(path, filename)))
+            return result
+        return self.read_yaml(path)
 
     def diff_objects(self, existing, new):
         result = dict()

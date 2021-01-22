@@ -1,0 +1,2 @@
+minor_changes:
+- k8s - add support src directory which holds resource definition files (https://github.com/ansible-collections/community.kubernetes/pull/350).

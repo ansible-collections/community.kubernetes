@@ -1,0 +1,23 @@
+---
+- block:
+    - name: Create resources using directory
+      k8s:
+        src: ../templates/multidocument
+        state: present
+      register: deploy_ns
+
+    - name: Verify that namespaces are created
+      assert:
+        that:
+          - deploy_ns.changed
+
+    - name: Delete resources using directory
+      k8s:
+        src: ../templates/multidocument
+        state: absent
+      register: delete_ns
+
+    - name: Verify that namespaces are deleted
+      assert:
+        that:
+          - delete_ns.changed
