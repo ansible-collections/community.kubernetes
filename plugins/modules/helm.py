@@ -409,7 +409,7 @@ def has_plugin(command, plugin):
     for line in out.splitlines():
         if line.startswith("NAME"):
             continue
-        name, _ = line.split("\t", 1)
+        name, _rest = line.split("\t", 1)
         if name == plugin:
             return True
     return False
