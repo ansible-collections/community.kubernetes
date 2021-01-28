@@ -33,6 +33,10 @@
 - name: Test helm diff
   include_tasks: tests_helm_diff.yml
 
+# https://github.com/ansible-collections/community.kubernetes/issues/296
+- name: Test Skip CRDS feature in helm chart install
+  include_tasks: test_crds.yml
+
 - name: Clean helm install
   file:
     path: "{{ item }}"
