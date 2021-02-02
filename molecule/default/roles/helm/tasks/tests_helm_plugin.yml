@@ -2,7 +2,6 @@
 - name: Install env plugin in check mode
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: present
     plugin_path: https://github.com/adamreese/helm-env
   register: check_install_env
@@ -15,7 +14,6 @@
 - name: Install env plugin
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: present
     plugin_path: https://github.com/adamreese/helm-env
   register: install_env
@@ -27,7 +25,6 @@
 - name: Gather info about all plugin
   helm_plugin_info:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
   register: plugin_info
 
 - assert:
@@ -37,7 +34,6 @@
 - name: Install env plugin again
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: present
     plugin_path: https://github.com/adamreese/helm-env
   register: install_env
@@ -49,7 +45,6 @@
 - name: Uninstall env plugin in check mode
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: absent
     plugin_name: env
   register: check_uninstall_env
@@ -62,7 +57,6 @@
 - name: Uninstall env plugin
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: absent
     plugin_name: env
   register: uninstall_env
@@ -74,7 +68,6 @@
 - name: Uninstall env plugin again
   helm_plugin:
     binary_path: "{{ helm_binary }}"
-    namespace: "{{ helm_namespace }}"
     state: absent
     plugin_name: env
   register: uninstall_env

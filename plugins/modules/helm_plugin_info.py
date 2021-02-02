@@ -19,10 +19,10 @@ requirements:
 description:
   -  Gather information about Helm plugins installed in namespace.
 options:
+  # TODO: (akasurde) Remove this in version 2.0
   release_namespace:
     description:
       - Kubernetes namespace where the helm plugins are installed.
-    required: true
     type: str
     aliases: [ namespace ]
 
@@ -84,7 +84,7 @@ def main():
     module = AnsibleModule(
         argument_spec=dict(
             binary_path=dict(type='path'),
-            release_namespace=dict(type='str', required=True, aliases=['namespace']),
+            release_namespace=dict(type='str', aliases=['namespace']),
             plugin_name=dict(type='str',),
             # Helm options
             context=dict(type='str', aliases=['kube_context'], fallback=(env_fallback, ['K8S_AUTH_CONTEXT'])),
