@@ -30,6 +30,9 @@
 - name: Test helm plugin
   include_tasks: tests_helm_plugin.yml
 
+- name: Test helm diff
+  include_tasks: tests_helm_diff.yml
+
 - name: Clean helm install
   file:
     path: "{{ item }}"

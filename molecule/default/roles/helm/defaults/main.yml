@@ -16,3 +16,4 @@ chart_test_repo: "https://kubernetes.github.io/ingress-nginx"
 chart_test_git_repo: "http://github.com/helm/charts.git"
 chart_test_values:
   revisionHistoryLimit: 0
+  myValue: "changed"

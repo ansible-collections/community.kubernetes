@@ -399,6 +399,70 @@ def load_values_files(values_files):
     return values
 
 
+def has_plugin(command, plugin):
+    """
+    Check if helm plugin is installed.
+    """
+
+    cmd = command + " plugin list"
+    rc, out, err = run_helm(module, cmd)
+    for line in out.splitlines():
+        if line.startswith("NAME"):
+            continue
+        name, _rest = line.split("\t", 1)
+        if name == plugin:
+            return True
+    return False
+
+
+def helmdiff_check(module, helm_cmd, release_name, chart_ref, release_values,
+                   values_files=None, chart_version=None, replace=False):
+    """
+    Use helm diff to determine if a release would change by upgrading a chart.
+    """
+    cmd = helm_cmd + " diff upgrade"
+    cmd += " " + release_name
+    cmd += " " + chart_ref
+
+    if chart_version is not None:
+        cmd += " " + "--version=" + chart_version
+    if not replace:
+        cmd += " " + "--reset-values"
+
+    if release_values != {}:
+        fd, path = tempfile.mkstemp(suffix='.yml')
+        with open(path, 'w') as yaml_file:
+            yaml.dump(release_values, yaml_file, default_flow_style=False)
+        cmd += " -f=" + path
+
+    if values_files:
+        for values_file in values_files:
+            cmd += " -f=" + values_file
+
+    rc, out, err = run_helm(module, cmd)
+    return len(out.strip()) > 0
+
+
+def default_check(release_status, chart_info, values=None, values_files=None):
+    """
+    Use default check to determine if release would change by upgrading a chart.
+    """
+    # the 'appVersion' specification is optional in a chart
+    chart_app_version = chart_info.get('appVersion', None)
+    released_app_version = release_status.get('app_version', None)
+
+    # when deployed without an 'appVersion' chart value the 'helm list' command will return the entry `app_version: ""`
+    appversion_is_same = (chart_app_version == released_app_version) or (chart_app_version is None and released_app_version == "")
+
+    if values_files:
+        values_match = release_status['values'] == load_values_files(values_files)
+    else:
+        values_match = release_status['values'] == values
+    return not values_match \
+        or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"] \
+        or not appversion_is_same
+
+
 def main():
     global module
     module = AnsibleModule(
@@ -507,21 +571,16 @@ def main():
             changed = True
 
         else:
-            # the 'appVersion' specification is optional in a chart
-            chart_app_version = chart_info.get('appVersion', None)
-            released_app_version = release_status.get('app_version', None)
 
-            # when deployed without an 'appVersion' chart value the 'helm list' command will return the entry `app_version: ""`
-            appversion_is_same = (chart_app_version == released_app_version) or (chart_app_version is None and released_app_version == "")
-
-            if values_files:
-                values_match = release_status['values'] == load_values_files(values_files)
+            if has_plugin(helm_cmd_common, "diff") and not chart_repo_url:
+                would_change = helmdiff_check(module, helm_cmd_common, release_name, chart_ref,
+                                              release_values, values_files, chart_version, replace)
             else:
-                values_match = release_status['values'] == release_values
+                module.warn("The default idempotency check can fail to report changes in certain cases. "
+                            "Install helm diff for better results.")
+                would_change = default_check(release_status, chart_info, release_values, values_files)
 
-            if force or not values_match \
-                    or (chart_info['name'] + '-' + chart_info['version']) != release_status["chart"] \
-                    or not appversion_is_same:
+            if force or would_change:
                 helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                                   disable_hook, force, values_files=values_files, atomic=atomic,
                                   create_namespace=create_namespace, replace=replace)
