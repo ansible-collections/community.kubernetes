@@ -31,7 +31,9 @@ requirements:
   - "PyYAML >= 3.11"
 
 notes:
-- Return code C(return_code) for the command executed is added in output in version 1.0.0.
+  - Return code C(return_code) for the command executed is added in output in version 1.0.0.
+  - The authenticated user must have at least read access to the pods resource and write access to the pods/exec resource.
+
 options:
   proxy:
     description:
