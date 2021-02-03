@@ -209,6 +209,18 @@ EXAMPLES = r'''
     validate:
       fail_on_error: no
       strict: yes
+
+# Download and apply manifest
+- name: Download metrics-server manifest to the cluster.
+  ansible.builtin.get_url:
+    url: https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+    dest: ~/metrics-server.yaml
+    mode: '0664'
+
+- name: Apply metrics-server manifest to the cluster.
+  community.kubernetes.k8s:
+    state: present
+    src: ~/metrics-server.yaml
 '''
 
 RETURN = r'''
