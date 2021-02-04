@@ -407,10 +407,7 @@ def has_plugin(command, plugin):
     cmd = command + " plugin list"
     rc, out, err = run_helm(module, cmd)
     for line in out.splitlines():
-        if line.startswith("NAME"):
-            continue
-        name, _rest = line.split("\t", 1)
-        if name == plugin:
+        if line.lstrip().startswith(plugin):
             return True
     return False
 
