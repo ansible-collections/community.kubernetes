@@ -133,6 +133,12 @@ options:
     type: bool
     default: False
     version_added: "1.11.0"
+  skip_crds:
+    description:
+      - Skip custom resource definitions when installing or upgrading.
+    type: bool
+    default: False
+    version_added: "1.2.0"
 extends_documentation_fragment:
   - community.kubernetes.helm_common_options
 '''
@@ -321,7 +327,7 @@ def fetch_chart_info(module, command, chart_ref):
 
 def deploy(command, release_name, release_values, chart_name, wait,
            wait_timeout, disable_hook, force, values_files, atomic=False,
-           create_namespace=False, replace=False):
+           create_namespace=False, replace=False, skip_crds=False):
     """
     Install/upgrade/rollback release chart
     """
@@ -363,6 +369,9 @@ def deploy(command, release_name, release_values, chart_name, wait,
         with open(path, 'w') as yaml_file:
             yaml.dump(release_values, yaml_file, default_flow_style=False)
         deploy_command += " -f=" + path
+
+    if skip_crds:
+        deploy_command += " --skip-crds"
 
     deploy_command += " " + release_name + " " + chart_name
 
@@ -489,6 +498,7 @@ def main():
             atomic=dict(type='bool', default=False),
             create_namespace=dict(type='bool', default=False),
             replace=dict(type='bool', default=False),
+            skip_crds=dict(type='bool', default=False),
 
             # Generic auth key
             host=dict(type='str', fallback=(env_fallback, ['K8S_AUTH_HOST'])),
@@ -533,6 +543,7 @@ def main():
     atomic = module.params.get('atomic')
     create_namespace = module.params.get('create_namespace')
     replace = module.params.get('replace')
+    skip_crds = module.params.get('skip_crds')
 
     if bin_path is not None:
         helm_cmd_common = bin_path
@@ -567,7 +578,8 @@ def main():
         if release_status is None:  # Not installed
             helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                               disable_hook, False, values_files=values_files, atomic=atomic,
-                              create_namespace=create_namespace, replace=replace)
+                              create_namespace=create_namespace, replace=replace,
+                              skip_crds=skip_crds)
             changed = True
 
         else:
@@ -583,7 +595,8 @@ def main():
             if force or would_change:
                 helm_cmd = deploy(helm_cmd, release_name, release_values, chart_ref, wait, wait_timeout,
                                   disable_hook, force, values_files=values_files, atomic=atomic,
-                                  create_namespace=create_namespace, replace=replace)
+                                  create_namespace=create_namespace, replace=replace,
+                                  skip_crds=skip_crds)
                 changed = True
 
     if module.check_mode:
