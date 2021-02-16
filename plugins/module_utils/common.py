@@ -319,31 +319,58 @@ class K8sAnsibleMixin(object):
         if not field_selectors:
             field_selectors = []
 
+        result = None
         try:
-            result = resource.get(name=name,
-                                  namespace=namespace,
+            result = resource.get(name=name, namespace=namespace,
                                   label_selector=','.join(label_selectors),
                                   field_selector=','.join(field_selectors))
-            if wait:
-                satisfied_by = []
-                if isinstance(result, ResourceInstance):
-                    # We have a list of ResourceInstance
-                    resource_list = result.get('items', [])
-                    if not resource_list:
-                        resource_list = [result]
-
-                    for resource_instance in resource_list:
-                        success, res, duration = self.wait(resource, resource_instance,
-                                                           sleep=wait_sleep, timeout=wait_timeout,
-                                                           state=state, condition=condition)
-                        if not success:
-                            self.fail(msg="Failed to gather information about %s(s) even"
-                                          " after waiting for %s seconds" % (res.get('kind'), duration))
-                        satisfied_by.append(res)
-                    return dict(resources=satisfied_by, api_found=True)
-            result = result.to_dict()
-        except (openshift.dynamic.exceptions.BadRequestError, openshift.dynamic.exceptions.NotFoundError):
+        except openshift.dynamic.exceptions.BadRequestError:
             return dict(resources=[], api_found=True)
+        except openshift.dynamic.exceptions.NotFoundError:
+            if not wait or name is None:
+                return dict(resources=[], api_found=True)
+
+        if not wait:
+            result = result.to_dict()
+            if 'items' in result:
+                return dict(resources=result['items'], api_found=True)
+            return dict(resources=[result], api_found=True)
+
+        start = datetime.now()
+
+        def _elapsed():
+            return (datetime.now() - start).seconds
+
+        if result is None:
+            while _elapsed() < wait_timeout:
+                try:
+                    result = resource.get(name=name, namespace=namespace,
+                                          label_selector=','.join(label_selectors),
+                                          field_selector=','.join(field_selectors))
+                    break
+                except NotFoundError:
+                    pass
+                time.sleep(wait_sleep)
+            if result is None:
+                return dict(resources=[], api_found=True)
+
+        if isinstance(result, ResourceInstance):
+            satisfied_by = []
+            # We have a list of ResourceInstance
+            resource_list = result.get('items', [])
+            if not resource_list:
+                resource_list = [result]
+
+            for resource_instance in resource_list:
+                success, res, duration = self.wait(resource, resource_instance,
+                                                   sleep=wait_sleep, timeout=wait_timeout,
+                                                   state=state, condition=condition)
+                if not success:
+                    self.fail(msg="Failed to gather information about %s(s) even"
+                                  " after waiting for %s seconds" % (res.get('kind'), duration))
+                satisfied_by.append(res)
+            return dict(resources=satisfied_by, api_found=True)
+        result = result.to_dict()
 
         if 'items' in result:
             return dict(resources=result['items'], api_found=True)

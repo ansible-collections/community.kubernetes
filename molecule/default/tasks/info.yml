@@ -182,6 +182,24 @@
           - not dne_api.resources
           - not dne_api.api_found
 
+    - name: Start timer
+      set_fact:
+        start: "{{ lookup('pipe', 'date +%s') }}"
+
+    - name: Wait for non-existent pod to be created
+      k8s_info:
+        kind: Pod
+        name: does-not-exist
+        namespace: "{{ wait_namespace }}"
+        wait: yes
+        wait_timeout: 45
+      register: result
+
+    - name: Check that module waited
+      assert:
+        that:
+          - "{{ lookup('pipe', 'date +%s') }} - {{ start }} > 30"
+
   always:
     - name: Remove namespace
       k8s:
