@@ -334,6 +334,7 @@
 
     - assert:
         that:
+          - result is changed
           - result is not failed
           - result.rc == 0
           - result.command is match("{{ helm_binary }} template {{ chart_source }}")

@@ -208,7 +208,7 @@ def main():
 
     module.exit_json(
         failed=False,
-        changed=False,
+        changed=True,
         command=tmpl_cmd,
         stdout=out,
         stderr=err,
