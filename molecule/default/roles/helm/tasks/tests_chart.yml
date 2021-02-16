@@ -332,6 +332,12 @@
           - "{{ role_path }}/files/values.yaml"
       register: result
 
+    - assert:
+        that:
+          - result is not failed
+          - result.rc == 0
+          - result.command is match("{{ helm_binary }} template {{ chart_source }}")
+
     - name: Check templates created
       stat:
         path: "{{ temp_dir }}/{{ chart_test }}/templates"

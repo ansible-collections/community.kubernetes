@@ -29,7 +29,7 @@ options:
     type: path
   chart_ref:
     description:
-      - Chart reference with repo prefix.
+      - Chart reference with repo prefix, for example, C(nginx-stable/nginx-ingress).
       - Path to a packaged chart.
       - Path to an unpacked chart directory.
       - Absolute URL.
@@ -37,7 +37,7 @@ options:
     type: path
   chart_repo_url:
     description:
-      - Chart repository URL where to locate the requested chart.
+      - Chart repository URL where the requested chart is located.
     required: false
     type: str
   chart_version:
@@ -54,6 +54,7 @@ options:
   output_dir:
     description:
       - Output directory where templates will be written.
+      - If the directory already exists, it will be overwritten.
     required: false
     type: path
   release_values:
@@ -112,7 +113,7 @@ command:
   type: str
   description: Full C(helm) command run by this module, in case you want to re-run the command outside the module or debug a problem.
   returned: always
-  sample: helm upgrade ...
+  sample: helm template --output-dir mychart nginx-stable/nginx-ingress
 '''
 
 import tempfile
@@ -170,9 +171,11 @@ def main():
             release_values=dict(type='dict', default={}, aliases=['values']),
             values_files=dict(type='list', default=[], elements='str'),
             update_repo_cache=dict(type='bool', default=False)
-        )
+        ),
+        supports_check_mode=True
     )
 
+    check_mode = module.check_mode
     bin_path = module.params.get('binary_path')
     chart_ref = module.params.get('chart_ref')
     chart_repo_url = module.params.get('chart_repo_url')
@@ -197,7 +200,11 @@ def main():
                         release_values=release_values, values_files=values_files,
                         include_crds=include_crds)
 
-    rc, out, err = run_helm(module, tmpl_cmd)
+    if not check_mode:
+        rc, out, err = run_helm(module, tmpl_cmd)
+    else:
+        out = err = ""
+        rc = 0
 
     module.exit_json(
         failed=False,
