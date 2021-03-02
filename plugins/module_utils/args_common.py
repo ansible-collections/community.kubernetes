@@ -111,3 +111,23 @@ RESOURCE_ARG_SPEC = {
 }
 
 ARG_ATTRIBUTES_BLACKLIST = ('property_path',)
+
+DELETE_OPTS_ARG_SPEC = {
+    'propagationPolicy': {
+        'choices': ['Foreground', 'Background', 'Orphan'],
+    },
+    'gracePeriodSeconds': {
+        'type': 'int',
+    },
+    'preconditions': {
+        'type': 'dict',
+        'options': {
+            'resourceVersion': {
+                'type': 'str',
+            },
+            'uid': {
+                'type': 'str',
+            }
+        }
+    }
+}
