@@ -33,6 +33,7 @@ Click on the name of a plugin or module to view that content's documentation:
     - [helm_plugin](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin.py)
     - [helm_plugin_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin_info.py)
     - [helm_repository](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html)
+    - [heml_template](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_template.py)
 
 ## Installation and Usage
 
