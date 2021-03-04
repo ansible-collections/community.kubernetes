@@ -46,6 +46,9 @@ plugin_routing:
       redirect: community.kubernetes.k8s_info
     k8s_service:
       redirect: community.kubernetes.k8s_info
+  inventory:
+    openshift:
+      redirect: community.okd.openshift
   modules:
     # k8s_facts was originally slated for removal in Ansible 2.13.
     k8s_facts:
