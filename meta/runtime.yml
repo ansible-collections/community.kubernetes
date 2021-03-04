@@ -8,7 +8,6 @@ action_groups:
     - helm_repository
   k8s:
     - k8s
-    - k8s_auth
     - k8s_exec
     - k8s_facts
     - k8s_info
@@ -30,8 +29,6 @@ plugin_routing:
       redirect: community.kubernetes.k8s_info
     k8s:
       redirect: community.kubernetes.k8s_info
-    k8s_auth:
-      redirect: community.kubernetes.k8s_info
     k8s_cluster_info:
       redirect: community.kubernetes.k8s_info
     k8s_event_info:
@@ -47,6 +44,8 @@ plugin_routing:
     k8s_service:
       redirect: community.kubernetes.k8s_info
   modules:
+    k8s_auth:
+      redirect: community.okd.k8s_auth
     # k8s_facts was originally slated for removal in Ansible 2.13.
     k8s_facts:
       redirect: community.kubernetes.k8s_info
