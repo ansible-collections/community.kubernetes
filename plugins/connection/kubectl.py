@@ -17,6 +17,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+
+# pylint: disable=super-with-arguments
+# pylint: disable=raise-missing-from
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 

@@ -3,6 +3,9 @@
 # Copyright (c) 2020, Ansible Project
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
+# pylint: disable=super-with-arguments
+# pylint: disable=raise-missing-from
+
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
@@ -109,7 +112,7 @@ class ActionModule(ActionBase):
         # Option `lstrip_blocks' was added in Jinja2 version 2.7.
         if lstrip_blocks:
             try:
-                import jinja2.defaults
+                import jinja2.defaults  # pylint: disable=import-outside-toplevel
             except ImportError:
                 raise AnsibleError('Unable to import Jinja2 defaults for determining Jinja2 features.')
 
