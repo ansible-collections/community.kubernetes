@@ -38,7 +38,7 @@ options:
       variable.
     - Please note that this only works with clusters configured to use HTTP Basic Auth. If your cluster has a
       different form of authentication (e.g. OAuth2 in OpenShift), this option will not work as expected and you
-      should look into the C(k8s_auth) module, as that might do what you need.
+      should look into the M(community.okd.k8s_auth) module, as that might do what you need.
     type: str
   password:
     description:

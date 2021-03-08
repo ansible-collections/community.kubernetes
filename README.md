@@ -21,7 +21,6 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_lookup.html)
   - **Modules**:
     - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_module.html)
-    - [k8s_auth](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_auth_module.html)
     - [k8s_cluster_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_cluster_info.py)
     - [k8s_exec](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_exec_module.html)
     - [k8s_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_info_module.html)
