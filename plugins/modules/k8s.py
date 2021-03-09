@@ -265,7 +265,7 @@ import copy
 
 from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
 from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
-    AUTH_ARG_SPEC, WAIT_ARG_SPEC, NAME_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
+    AUTH_ARG_SPEC, WAIT_ARG_SPEC, NAME_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC, DELETE_OPTS_ARG_SPEC)
 
 
 def validate_spec():
@@ -287,6 +287,7 @@ def argspec():
     argument_spec['append_hash'] = dict(type='bool', default=False)
     argument_spec['apply'] = dict(type='bool', default=False)
     argument_spec['template'] = dict(type='raw', default=None)
+    argument_spec['delete_options'] = dict(type='dict', default=None, options=copy.deepcopy(DELETE_OPTS_ARG_SPEC))
     return argument_spec
 
 
