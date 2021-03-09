@@ -221,6 +221,23 @@ EXAMPLES = r'''
   community.kubernetes.k8s:
     state: present
     src: ~/metrics-server.yaml
+
+# Wait for a Deployment to pause before continuing
+- name: Pause a Deployment.
+  k8s:
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: example
+        namespace: testing
+      spec:
+        paused: True
+    wait: yes
+    wait_condition:
+      type: Progressing
+      status: Unknown
+      reason: DeploymentPaused
 '''
 
 RETURN = r'''
