@@ -193,14 +193,14 @@ get_api_client._pool = {}
 
 class K8sAnsibleMixin(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, module, *args, **kwargs):
         if not HAS_K8S_MODULE_HELPER:
-            self.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
-                           error=to_native(k8s_import_exception))
+            module.fail_json(msg=missing_required_lib('openshift'), exception=K8S_IMP_ERR,
+                             error=to_native(k8s_import_exception))
         self.openshift_version = openshift.__version__
 
         if not HAS_YAML:
-            self.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
+            module.fail_json(msg=missing_required_lib("PyYAML"), exception=YAML_IMP_ERR)
 
     def find_resource(self, kind, api_version, fail=False):
         for attribute in ['kind', 'name', 'singular_name']:

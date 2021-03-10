@@ -238,7 +238,7 @@ def main():
     from ansible_collections.community.kubernetes.plugins.module_utils.common import (
         K8sAnsibleMixin, get_api_client)
 
-    k8s_ansible_mixin = K8sAnsibleMixin()
+    k8s_ansible_mixin = K8sAnsibleMixin(module)
     k8s_ansible_mixin.client = get_api_client(module=module)
     execute_module(module, k8s_ansible_mixin)
 
