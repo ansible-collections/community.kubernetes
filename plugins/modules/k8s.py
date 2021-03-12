@@ -224,7 +224,7 @@ EXAMPLES = r'''
 
 # Wait for a Deployment to pause before continuing
 - name: Pause a Deployment.
-  k8s:
+  community.kubernetes.k8s:
     definition:
       apiVersion: apps/v1
       kind: Deployment
