@@ -208,15 +208,15 @@ class KubernetesInfoModule(K8sAnsibleMixin):
             if isinstance(resource, ResourceList):
                 continue
             results[resource.group].append({
-                  'api_version': resource.group_version,
-                  'categories': resource.categories if resource.categories else [],
-                  'kind': resource.kind,
-                  'name': resource.name,
-                  'namespaced': resource.namespaced,
-                  'preferred': resource.preferred,
-                  'short_names': resource.short_names if resource.short_names else [],
-                  'singular_name': resource.singular_name,
-              })
+                'api_version': resource.group_version,
+                'categories': resource.categories if resource.categories else [],
+                'kind': resource.kind,
+                'name': resource.name,
+                'namespaced': resource.namespaced,
+                'preferred': resource.preferred,
+                'short_names': resource.short_names if resource.short_names else [],
+                'singular_name': resource.singular_name,
+            })
         configuration = self.client.configuration
         connection = {
             'cert_file': configuration.cert_file,
