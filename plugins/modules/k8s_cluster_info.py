@@ -164,6 +164,7 @@ import traceback
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
 from ansible.module_utils.parsing.convert_bool import boolean
 from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin, AUTH_ARG_SPEC
+from collections import defaultdict
 
 try:
     try:
@@ -201,21 +202,21 @@ class KubernetesInfoModule(K8sAnsibleMixin):
         invalidate_cache = boolean(self.module.params.get('invalidate_cache', True), strict=False)
         if invalidate_cache:
             self.client.resources.invalidate_cache()
-        results = {}
+        results = defaultdict(list)
         for resource in list(self.client.resources):
             resource = resource[0]
             if isinstance(resource, ResourceList):
                 continue
-            results[resource.group] = {
-                'api_version': resource.group_version,
-                'categories': resource.categories if resource.categories else [],
-                'kind': resource.kind,
-                'name': resource.name,
-                'namespaced': resource.namespaced,
-                'preferred': resource.preferred,
-                'short_names': resource.short_names if resource.short_names else [],
-                'singular_name': resource.singular_name,
-            }
+            results[resource.group].append({
+                  'api_version': resource.group_version,
+                  'categories': resource.categories if resource.categories else [],
+                  'kind': resource.kind,
+                  'name': resource.name,
+                  'namespaced': resource.namespaced,
+                  'preferred': resource.preferred,
+                  'short_names': resource.short_names if resource.short_names else [],
+                  'singular_name': resource.singular_name,
+              })
         configuration = self.client.configuration
         connection = {
             'cert_file': configuration.cert_file,
