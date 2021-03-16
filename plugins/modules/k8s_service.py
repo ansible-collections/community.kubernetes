@@ -145,14 +145,12 @@ result:
 '''
 
 import copy
-import traceback
 
 from collections import defaultdict
 
-from ansible.module_utils.basic import AnsibleModule
-from ansible_collections.community.kubernetes.plugins.module_utils.common import (
-    K8sAnsibleMixin, AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
-
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (
+    AUTH_ARG_SPEC, COMMON_ARG_SPEC, RESOURCE_ARG_SPEC)
 
 SERVICE_ARG_SPEC = {
     'apply': {
@@ -173,100 +171,69 @@ SERVICE_ARG_SPEC = {
 }
 
 
-class KubernetesService(K8sAnsibleMixin):
-    def __init__(self, *args, **kwargs):
-        mutually_exclusive = [
-            ('resource_definition', 'src'),
-            ('merge_type', 'apply'),
-        ]
-
-        module = AnsibleModule(
-            argument_spec=self.argspec,
-            mutually_exclusive=mutually_exclusive,
-            supports_check_mode=True,
-        )
-
-        self.module = module
-        self.check_mode = self.module.check_mode
-        self.params = self.module.params
-        self.fail_json = self.module.fail_json
-        self.fail = self.module.fail_json
-        self.exit_json = self.module.exit_json
-
-        super(KubernetesService, self).__init__(*args, **kwargs)
-
-        self.client = None
-        self.warnings = []
-
-        self.kind = self.params.get('kind')
-        self.api_version = self.params.get('api_version')
-        self.name = self.params.get('name')
-        self.namespace = self.params.get('namespace')
-
-        self.check_library_version()
-        self.set_resource_definitions()
-
-    @staticmethod
-    def merge_dicts(x, y):
-        for k in set(x.keys()).union(y.keys()):
-            if k in x and k in y:
-                if isinstance(x[k], dict) and isinstance(y[k], dict):
-                    yield (k, dict(KubernetesService.merge_dicts(x[k], y[k])))
-                else:
-                    yield (k, y[k])
-            elif k in x:
-                yield (k, x[k])
+def merge_dicts(x, y):
+    for k in set(x.keys()).union(y.keys()):
+        if k in x and k in y:
+            if isinstance(x[k], dict) and isinstance(y[k], dict):
+                yield (k, dict(merge_dicts(x[k], y[k])))
             else:
                 yield (k, y[k])
+        elif k in x:
+            yield (k, x[k])
+        else:
+            yield (k, y[k])
 
-    @property
-    def argspec(self):
-        """ argspec property builder """
-        argument_spec = copy.deepcopy(AUTH_ARG_SPEC)
-        argument_spec.update(COMMON_ARG_SPEC)
-        argument_spec.update(RESOURCE_ARG_SPEC)
-        argument_spec.update(SERVICE_ARG_SPEC)
-        return argument_spec
 
-    def execute_module(self):
-        """ Module execution """
-        self.client = self.get_api_client()
+def argspec():
+    """ argspec property builder """
+    argument_spec = copy.deepcopy(AUTH_ARG_SPEC)
+    argument_spec.update(COMMON_ARG_SPEC)
+    argument_spec.update(RESOURCE_ARG_SPEC)
+    argument_spec.update(SERVICE_ARG_SPEC)
+    return argument_spec
 
-        api_version = 'v1'
-        selector = self.params.get('selector')
-        service_type = self.params.get('type')
-        ports = self.params.get('ports')
 
-        definition = defaultdict(defaultdict)
+def execute_module(module, k8s_ansible_mixin):
+    """ Module execution """
+    k8s_ansible_mixin.set_resource_definitions(module)
 
-        definition['kind'] = 'Service'
-        definition['apiVersion'] = api_version
+    api_version = 'v1'
+    selector = module.params.get('selector')
+    service_type = module.params.get('type')
+    ports = module.params.get('ports')
 
-        def_spec = definition['spec']
-        def_spec['type'] = service_type
-        def_spec['ports'] = ports
-        def_spec['selector'] = selector
+    definition = defaultdict(defaultdict)
 
-        def_meta = definition['metadata']
-        def_meta['name'] = self.params.get('name')
-        def_meta['namespace'] = self.params.get('namespace')
+    definition['kind'] = 'Service'
+    definition['apiVersion'] = api_version
 
-        # 'resource_definition:' has lower priority than module parameters
-        definition = dict(self.merge_dicts(self.resource_definitions[0], definition))
+    def_spec = definition['spec']
+    def_spec['type'] = service_type
+    def_spec['ports'] = ports
+    def_spec['selector'] = selector
 
-        resource = self.find_resource('Service', api_version, fail=True)
-        definition = self.set_defaults(resource, definition)
-        result = self.perform_action(resource, definition)
+    def_meta = definition['metadata']
+    def_meta['name'] = module.params.get('name')
+    def_meta['namespace'] = module.params.get('namespace')
 
-        self.exit_json(**result)
+    # 'resource_definition:' has lower priority than module parameters
+    definition = dict(merge_dicts(k8s_ansible_mixin.resource_definitions[0], definition))
+
+    resource = k8s_ansible_mixin.find_resource('Service', api_version, fail=True)
+    definition = k8s_ansible_mixin.set_defaults(resource, definition)
+    result = k8s_ansible_mixin.perform_action(resource, definition)
+
+    module.exit_json(**result)
 
 
 def main():
-    module = KubernetesService()
-    try:
-        module.execute_module()
-    except Exception as e:
-        module.fail_json(msg=str(e), exception=traceback.format_exc())
+    module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import (
+        K8sAnsibleMixin, get_api_client)
+
+    k8s_ansible_mixin = K8sAnsibleMixin(module)
+    k8s_ansible_mixin.client = get_api_client(module=module)
+    execute_module(module, k8s_ansible_mixin)
 
 
 if __name__ == '__main__':
