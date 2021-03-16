@@ -77,11 +77,3 @@
     path: "{{ virtualenv }}"
     state: absent
   no_log: yes
-
-# Test openshift
-
-- debug:
-    var: k8s_openshift
-
-- include: openshift.yml
-  when: k8s_openshift | bool
