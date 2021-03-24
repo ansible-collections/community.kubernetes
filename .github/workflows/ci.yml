@@ -84,8 +84,10 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
+      # The 3.3.0 release of molecule introduced a breaking change. See
+      # https://github.com/ansible-community/molecule/issues/3083
       - name: Install molecule and openshift dependencies
-        run: pip install ansible molecule yamllint openshift flake8
+        run: pip install ansible "molecule<3.3.0" yamllint openshift flake8
 
       # The latest release doesn't work with Molecule currently.
       # See: https://github.com/ansible-community/molecule/issues/2757
@@ -177,7 +179,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
 
       - name: Install molecule and openshift dependencies
-        run: pip install "ansible>=2.9.0,<2.10.0" molecule yamllint openshift flake8
+        run: pip install "ansible>=2.9.0,<2.10.0" "molecule<3.3.0" yamllint openshift flake8
 
       - name: Create default collection path symlink
         run: |
