@@ -107,54 +107,39 @@ version:
       type: str
 apis:
   description:
-  - The API(s) that exists in dictionary
+  - dictionnary of group + version of resource found from cluster
   returned: success
   type: dict
   contains:
-    api_version:
-      description: API version
-      returned: success
-      type: str
-    categories:
-      description: API categories
-      returned: success
-      type: list
-    group_version:
-      description: Resource Group version
-      returned: success
-      type: str
     kind:
       description: Resource kind
       returned: success
-      type: str
-    name:
-      description: Resource short name
-      returned: success
-      type: str
-    namespaced:
-      description: If resource is namespaced
-      returned: success
-      type: bool
-    preferred:
-      description: If resource version preferred
-      returned: success
-      type: bool
-    short_names:
-      description: Resource short names
-      returned: success
-      type: str
-    singular_name:
-      description: Resource singular name
-      returned: success
-      type: str
-    available_api_version:
-      description: All available versions of the given API
-      returned: success
-      type: list
-    preferred_api_version:
-      description: Preferred version of the given API
-      returned: success
-      type: str
+      type: dict
+      contains
+        categories:
+          description: API categories
+          returned: success
+          type: list
+        name:
+          description: Resource short name
+          returned: success
+          type: str
+        namespaced:
+          description: If resource is namespaced
+          returned: success
+          type: bool
+        preferred:
+          description: If resource version preferred
+          returned: success
+          type: bool
+        short_names:
+          description: Resource short names
+          returned: success
+          type: str
+        singular_name:
+          description: Resource singular name
+          returned: success
+          type: str
 '''
 
 
@@ -202,21 +187,21 @@ class KubernetesInfoModule(K8sAnsibleMixin):
         invalidate_cache = boolean(self.module.params.get('invalidate_cache', True), strict=False)
         if invalidate_cache:
             self.client.resources.invalidate_cache()
-        results = defaultdict(list)
+        results = defaultdict(dict)
         for resource in list(self.client.resources):
             resource = resource[0]
             if isinstance(resource, ResourceList):
                 continue
-            results[resource.group].append({
-                'api_version': resource.group_version,
-                'categories': resource.categories if resource.categories else [],
-                'kind': resource.kind,
-                'name': resource.name,
-                'namespaced': resource.namespaced,
-                'preferred': resource.preferred,
-                'short_names': resource.short_names if resource.short_names else [],
-                'singular_name': resource.singular_name,
-            })
+            key=resource.group_version if resource.group == '' else '/'.join([ resource.group,resource.group_version.split('/')[-1] ])
+            results[key][resource.kind] = {
+              'categories': resource.categories if resource.categories else [],
+              'name': resource.name,
+              'namespaced': resource.namespaced,
+              'preferred': resource.preferred,
+              'short_names': resource.short_names if resource.short_names else [],
+              'singular_name': resource.singular_name,
+            }
+            
         configuration = self.client.configuration
         connection = {
             'cert_file': configuration.cert_file,
