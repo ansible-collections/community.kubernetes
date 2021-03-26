@@ -118,7 +118,7 @@ def configuration_digest(configuration):
     return digest
 
 
-def get_api_client(module=None):
+def get_api_client(module=None, **kwargs):
     auth = {}
 
     def _raise_or_fail(exc, msg):
@@ -131,6 +131,8 @@ def get_api_client(module=None):
     for true_name, arg_name in AUTH_ARG_MAP.items():
         if module and module.params.get(arg_name):
             auth[true_name] = module.params.get(arg_name)
+        elif arg_name in kwargs and kwargs.get(arg_name) is not None:
+            auth[true_name] = kwargs.get(arg_name)
         else:
             env_value = os.getenv('K8S_AUTH_{0}'.format(arg_name.upper()), None) or os.getenv('K8S_AUTH_{0}'.format(true_name.upper()), None)
             if env_value is not None:
