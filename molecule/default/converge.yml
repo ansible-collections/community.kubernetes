@@ -28,9 +28,9 @@
     # - include_tasks: tasks/exec.yml
     # - include_tasks: tasks/log.yml
     - include_tasks: tasks/cluster_info.yml
-    # - include_tasks: tasks/access_review.yml
-    # - include_tasks: tasks/rollback.yml
-    # - include_tasks: tasks/gc.yml
+    - include_tasks: tasks/access_review.yml
+    - include_tasks: tasks/rollback.yml
+    - include_tasks: tasks/gc.yml
 
   roles:
     - helm
