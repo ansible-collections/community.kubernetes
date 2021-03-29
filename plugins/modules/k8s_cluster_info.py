@@ -161,7 +161,7 @@ def execute_module(module, client):
         resource = resource[0]
         if isinstance(resource, ResourceList):
             continue
-        key = resource.group_version if resource.group == '' else '/'.join([resource.group,resource.group_version.split('/')[-1]])
+        key = resource.group_version if resource.group == '' else '/'.join([resource.group, resource.group_version.split('/')[-1]])
         results[key][resource.kind] = {
             'categories': resource.categories if resource.categories else [],
             'name': resource.name,
