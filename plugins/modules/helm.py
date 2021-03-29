@@ -418,7 +418,10 @@ def has_plugin(command, plugin):
     for line in out.splitlines():
         if line.startswith("NAME"):
             continue
-        name, _rest = line.split(None, 1)
+        try:
+            name, _rest = line.split(None, 1)
+        except ValueError:
+            continue
         if name == plugin:
             return True
     return False

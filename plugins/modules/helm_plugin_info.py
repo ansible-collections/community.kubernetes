@@ -137,6 +137,8 @@ def main():
             name = name.strip()
             version = version.strip()
             description = description.strip()
+            if name == "":
+                continue
             if plugin_name is None:
                 plugin_list.append({
                     'name': name,

@@ -198,6 +198,8 @@ def main():
                     continue
                 name, dummy, dummy = line.split('\t', 3)
                 name = name.strip()
+                if name == "":
+                    continue
                 if name == plugin_name:
                     found = True
                     break
