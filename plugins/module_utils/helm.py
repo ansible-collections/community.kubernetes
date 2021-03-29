@@ -28,8 +28,8 @@ def prepare_helm_environ_update(module):
     environ_update = {}
     file_to_cleam_up = None
     kubeconfig_path = module.params.get('kubeconfig')
-    if module.params.get('kube_context') is not None:
-        environ_update["HELM_KUBECONTEXT"] = module.params.get('kube_context')
+    if module.params.get('context') is not None:
+        environ_update["HELM_KUBECONTEXT"] = module.params.get('context')
     if module.params.get('release_namespace'):
         environ_update["HELM_NAMESPACE"] = module.params.get('release_namespace')
     if module.params.get("api_key"):

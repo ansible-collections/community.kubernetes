@@ -43,6 +43,9 @@ plugin_routing:
       redirect: community.kubernetes.k8s_info
     k8s_service:
       redirect: community.kubernetes.k8s_info
+  inventory:
+    openshift:
+      redirect: community.okd.openshift
   modules:
     k8s_auth:
       redirect: community.okd.k8s_auth

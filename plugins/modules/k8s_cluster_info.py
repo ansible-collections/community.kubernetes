@@ -144,89 +144,60 @@ apis:
 
 
 import copy
-import traceback
 
-from ansible.module_utils.basic import AnsibleModule, missing_required_lib
+from ansible_collections.community.kubernetes.plugins.module_utils.ansiblemodule import AnsibleModule
 from ansible.module_utils.parsing.convert_bool import boolean
-from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin, AUTH_ARG_SPEC
 from collections import defaultdict
-
-try:
-    try:
-        from openshift import __version__ as version
-        # >=0.10
-        from openshift.dynamic.resource import ResourceList
-    except ImportError:
-        # <0.10
-        from openshift.dynamic.client import ResourceList
-    HAS_K8S_INSTANCE_HELPER = True
-    k8s_import_exception = None
-except ImportError:
-    HAS_K8S_INSTANCE_HELPER = False
-    k8s_import_exception = traceback.format_exc()
+from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_SPEC)
 
 
-class KubernetesInfoModule(K8sAnsibleMixin):
-
-    def __init__(self):
-        module = AnsibleModule(
-            argument_spec=self.argspec,
-            supports_check_mode=True,
-        )
-        self.module = module
-        self.params = self.module.params
-
-        if not HAS_K8S_INSTANCE_HELPER:
-            self.module.fail_json(msg=missing_required_lib("openshift >= 0.6.2", reason="for merge_type"),
-                                  exception=k8s_import_exception)
-
-        super(KubernetesInfoModule, self).__init__()
-
-    def execute_module(self):
-        self.client = self.get_api_client()
-        invalidate_cache = boolean(self.module.params.get('invalidate_cache', True), strict=False)
-        if invalidate_cache:
-            self.client.resources.invalidate_cache()
-        results = defaultdict(dict)
-        for resource in list(self.client.resources):
-            resource = resource[0]
-            if isinstance(resource, ResourceList):
-                continue
-            key=resource.group_version if resource.group == '' else '/'.join([ resource.group,resource.group_version.split('/')[-1] ])
-            results[key][resource.kind] = {
-              'categories': resource.categories if resource.categories else [],
-              'name': resource.name,
-              'namespaced': resource.namespaced,
-              'preferred': resource.preferred,
-              'short_names': resource.short_names if resource.short_names else [],
-              'singular_name': resource.singular_name,
-            }
-            
-        configuration = self.client.configuration
-        connection = {
-            'cert_file': configuration.cert_file,
-            'host': configuration.host,
-            'password': configuration.password,
-            'proxy': configuration.proxy,
-            'ssl_ca_cert': configuration.ssl_ca_cert,
-            'username': configuration.username,
-            'verify_ssl': configuration.verify_ssl,
+def execute_module(module, client):
+    invalidate_cache = boolean(module.params.get('invalidate_cache', True), strict=False)
+    if invalidate_cache:
+        client.resources.invalidate_cache()
+    results = defaultdict(dict)
+    from openshift.dynamic.resource import ResourceList
+    for resource in list(client.resources):
+        resource = resource[0]
+        if isinstance(resource, ResourceList):
+            continue
+        key=resource.group_version if resource.group == '' else '/'.join([ resource.group,resource.group_version.split('/')[-1] ])
+        results[key][resource.kind] = {
+          'categories': resource.categories if resource.categories else [],
+          'name': resource.name,
+          'namespaced': resource.namespaced,
+          'preferred': resource.preferred,
+          'short_names': resource.short_names if resource.short_names else [],
+          'singular_name': resource.singular_name,
         }
-        version_info = {
-            'client': version,
-            'server': self.client.version,
-        }
-        self.module.exit_json(changed=False, apis=results, connection=connection, version=version_info)
+    configuration = client.configuration
+    connection = {
+        'cert_file': configuration.cert_file,
+        'host': configuration.host,
+        'password': configuration.password,
+        'proxy': configuration.proxy,
+        'ssl_ca_cert': configuration.ssl_ca_cert,
+        'username': configuration.username,
+        'verify_ssl': configuration.verify_ssl,
+    }
+    from openshift import __version__ as version
+    version_info = {
+        'client': version,
+        'server': client.version,
+    }
+    module.exit_json(changed=False, apis=results, connection=connection, version=version_info)
 
-    @property
-    def argspec(self):
-        spec = copy.deepcopy(AUTH_ARG_SPEC)
-        spec['invalidate_cache'] = dict(type='bool', default=True)
-        return spec
+
+def argspec():
+    spec = copy.deepcopy(AUTH_ARG_SPEC)
+    spec['invalidate_cache'] = dict(type='bool', default=True)
+    return spec
 
 
 def main():
-    KubernetesInfoModule().execute_module()
+    module = AnsibleModule(argument_spec=argspec(), supports_check_mode=True)
+    from ansible_collections.community.kubernetes.plugins.module_utils.common import get_api_client
+    execute_module(module, client=get_api_client(module=module))
 
 
 if __name__ == '__main__':

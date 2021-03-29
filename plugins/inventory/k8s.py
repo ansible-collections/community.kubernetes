@@ -23,7 +23,7 @@ DOCUMENTATION = '''
       plugin:
          description: token that ensures this is a source file for the 'k8s' plugin.
          required: True
-         choices: ['k8s']
+         choices: ['community.kubernetes.k8s', 'k8s']
       connections:
           description:
           - Optional list of cluster connection settings. If no connections are provided, the default
@@ -117,7 +117,7 @@ connections:
 import json
 
 from ansible.errors import AnsibleError
-from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin, HAS_K8S_MODULE_HELPER, k8s_import_exception
+from ansible_collections.community.kubernetes.plugins.module_utils.common import K8sAnsibleMixin, HAS_K8S_MODULE_HELPER, k8s_import_exception, get_api_client
 from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 
 try:
@@ -180,7 +180,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
             for connection in connections:
                 if not isinstance(connection, dict):
                     raise K8sInventoryException("Expecting connection to be a dictionary.")
-                client = self.get_api_client(**connection)
+                client = get_api_client(**connection)
                 name = connection.get('name', self.get_default_host_name(client.configuration.host))
                 if connection.get('namespaces'):
                     namespaces = connection['namespaces']
@@ -190,7 +190,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable, K8sAnsibleM
                     self.get_pods_for_namespace(client, name, namespace)
                     self.get_services_for_namespace(client, name, namespace)
         else:
-            client = self.get_api_client()
+            client = get_api_client()
             name = self.get_default_host_name(client.configuration.host)
             namespaces = self.get_available_namespaces(client)
             for namespace in namespaces:
