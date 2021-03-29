@@ -161,14 +161,14 @@ def execute_module(module, client):
         resource = resource[0]
         if isinstance(resource, ResourceList):
             continue
-        key=resource.group_version if resource.group == '' else '/'.join([ resource.group,resource.group_version.split('/')[-1] ])
+        key = resource.group_version if resource.group == '' else '/'.join([resource.group,resource.group_version.split('/')[-1]])
         results[key][resource.kind] = {
-          'categories': resource.categories if resource.categories else [],
-          'name': resource.name,
-          'namespaced': resource.namespaced,
-          'preferred': resource.preferred,
-          'short_names': resource.short_names if resource.short_names else [],
-          'singular_name': resource.singular_name,
+            'categories': resource.categories if resource.categories else [],
+            'name': resource.name,
+            'namespaced': resource.namespaced,
+            'preferred': resource.preferred,
+            'short_names': resource.short_names if resource.short_names else [],
+            'singular_name': resource.singular_name,
         }
     configuration = client.configuration
     connection = {
