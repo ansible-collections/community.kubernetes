@@ -110,36 +110,32 @@ apis:
   - dictionnary of group + version of resource found from cluster
   returned: success
   type: dict
+  elements: dict
   contains:
-    kind:
-      description: Resource kind
+    categories:
+      description: API categories
       returned: success
-      type: dict
-      contains
-        categories:
-          description: API categories
-          returned: success
-          type: list
-        name:
-          description: Resource short name
-          returned: success
-          type: str
-        namespaced:
-          description: If resource is namespaced
-          returned: success
-          type: bool
-        preferred:
-          description: If resource version preferred
-          returned: success
-          type: bool
-        short_names:
-          description: Resource short names
-          returned: success
-          type: str
-        singular_name:
-          description: Resource singular name
-          returned: success
-          type: str
+      type: list
+    name:
+      description: Resource short name
+      returned: success
+      type: str
+    namespaced:
+      description: If resource is namespaced
+      returned: success
+      type: bool
+    preferred:
+      description: If resource version preferred
+      returned: success
+      type: bool
+    short_names:
+      description: Resource short names
+      returned: success
+      type: str
+    singular_name:
+      description: Resource singular name
+      returned: success
+      type: str
 '''
 
 
