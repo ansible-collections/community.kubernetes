@@ -107,7 +107,7 @@ version:
       type: str
 apis:
   description:
-  - dictionnary of group + version of resource found from cluster
+  - dictionary of group + version of resource found from cluster
   returned: success
   type: dict
   elements: dict
