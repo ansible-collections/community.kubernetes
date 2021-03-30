@@ -34,6 +34,7 @@ f_prep()
         Makefile
         setup.cfg
         .yamllint
+        requirements.txt
     )
 
     # Directories to recursively copy downstream (relative repo root dir path)
