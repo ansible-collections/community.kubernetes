@@ -1,6 +1,9 @@
 # Implement ConfigMapHash and SecretHash equivalents
 # Based on https://github.com/kubernetes/kubernetes/pull/49961
 
+from __future__ import (absolute_import, division, print_function)
+__metaclass__ = type
+
 import json
 import hashlib
 
