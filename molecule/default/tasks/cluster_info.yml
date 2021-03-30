@@ -17,6 +17,8 @@
   assert:
     that:
       - api_details.apis is defined
+      - api_details.apis.v1.Secret is defined
+      - api_details.apis.v1.Service is defined
       - crd is defined
       - host is defined
       - client_version is defined
