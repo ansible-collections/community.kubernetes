@@ -8,59 +8,59 @@ from ansible_collections.community.kubernetes.plugins.module_utils.hashes import
 
 tests = [
     dict(
-        resource = dict(
+        resource=dict(
             kind="ConfigMap",
             metadata=dict(name="foo"),
             data=dict()
         ),
-        expected = "867km9574f",
+        expected="867km9574f",
     ),
     dict(
-        resource = dict(
+        resource=dict(
             kind="ConfigMap",
             metadata=dict(name="foo"),
             type="my-type",
             data=dict()
         ),
-        expected = "867km9574f",
+        expected="867km9574f",
     ),
     dict(
-        resource = dict(
+        resource=dict(
             kind="ConfigMap",
             metadata=dict(name="foo"),
             data=dict(
                 key1="value1",
                 key2="value2")
         ),
-        expected = "gcb75dd9gb",
+        expected="gcb75dd9gb",
     ),
     dict(
-        resource = dict(
+        resource=dict(
             kind="Secret",
             metadata=dict(name="foo"),
             data=dict()
         ),
-        expected = "949tdgdkgg",
+        expected="949tdgdkgg",
     ),
     dict(
-        resource = dict(
+        resource=dict(
             kind="Secret",
             metadata=dict(name="foo"),
             type="my-type",
             data=dict()
         ),
-        expected = "dg474f9t76",
+        expected="dg474f9t76",
     ),
 
     dict(
-        resource = dict(
+        resource=dict(
             kind="Secret",
             metadata=dict(name="foo"),
             data=dict(
                 key1="dmFsdWUx",
                 key2="dmFsdWUy")
         ),
-        expected = "tf72c228m4",
+        expected="tf72c228m4",
     )
 
 ]
