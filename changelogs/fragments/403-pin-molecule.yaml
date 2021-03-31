@@ -1,0 +1,2 @@
+bugfixes:
+  - pin molecule version to <3.3.0 to fix breaking changes (https://github.com/ansible-collections/community.kubernetes/pull/403).
