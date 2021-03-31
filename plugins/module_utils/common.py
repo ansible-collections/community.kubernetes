@@ -23,6 +23,9 @@ import time
 import os
 import traceback
 import sys
+import six
+import hashlib
+import tempfile
 from datetime import datetime
 from distutils.version import LooseVersion
 
@@ -118,6 +121,40 @@ def configuration_digest(configuration):
     return digest
 
 
+def get_user():
+    if hasattr(os, 'getlogin'):
+        try:
+            user = os.getlogin()
+            if user:
+                return str(user)
+        except OSError:
+            pass
+    if hasattr(os, 'getuid'):
+        try:
+            user = os.getuid()
+            if user:
+                return str(user)
+        except OSError:
+            pass
+    user = os.environ.get("USERNAME")
+    if user:
+        return str(user)
+    return None
+
+
+def get_default_cache_id(configuration):
+    user = get_user()
+    if user:
+        cache_id = "{0}-{1}".format(configuration.host, user)
+    else:
+        cache_id = configuration.host
+
+    if six.PY3:
+        return cache_id.encode('utf-8')
+
+    return cache_id
+
+
 def get_api_client(module=None, **kwargs):
     auth = {}
 
@@ -181,8 +218,14 @@ def get_api_client(module=None, **kwargs):
         client = get_api_client._pool[digest]
         return client
 
+    def generate_cache_file(configuration):
+        return 'osrcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(configuration)).hexdigest())
+
+    kubeclient = kubernetes.client.ApiClient(configuration)
+    cache_file = generate_cache_file(kubeclient)
+
     try:
-        client = DynamicClient(kubernetes.client.ApiClient(configuration))
+        client = DynamicClient(kubernetes.client.ApiClient(configuration), cache_file)
     except Exception as err:
         _raise_or_fail(err, 'Failed to get client due to %s')
 
