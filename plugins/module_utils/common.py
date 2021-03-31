@@ -29,7 +29,7 @@ from distutils.version import LooseVersion
 from ansible_collections.community.kubernetes.plugins.module_utils.args_common import (AUTH_ARG_MAP, AUTH_ARG_SPEC)
 
 from ansible.module_utils.basic import AnsibleModule, missing_required_lib
-from ansible.module_utils.six import iteritems, string_types
+from ansible.module_utils.six import iteritems, string_types, PY3
 from ansible.module_utils._text import to_native, to_bytes, to_text
 from ansible.module_utils.common.dict_transformations import dict_merge
 from ansible.module_utils.parsing.convert_bool import boolean
@@ -139,15 +139,14 @@ def get_user():
     return None
 
 
-def get_default_cache_id(configuration):
-    import six
+def get_default_cache_id(client):
     user = get_user()
     if user:
-        cache_id = "{0}-{1}".format(configuration.host, user)
+        cache_id = "{0}-{1}".format(client.configuration.host, user)
     else:
-        cache_id = configuration.host
+        cache_id = client.configuration.host
 
-    if six.PY3:
+    if PY3:
         return cache_id.encode('utf-8')
 
     return cache_id
@@ -216,9 +215,9 @@ def get_api_client(module=None, **kwargs):
         client = get_api_client._pool[digest]
         return client
 
-    def generate_cache_file(configuration):
+    def generate_cache_file(kubeclient):
         import hashlib
-        return 'osrcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(configuration)).hexdigest())
+        return 'osrcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(kubeclient)).hexdigest())
 
     kubeclient = kubernetes.client.ApiClient(configuration)
     cache_file = generate_cache_file(kubeclient)

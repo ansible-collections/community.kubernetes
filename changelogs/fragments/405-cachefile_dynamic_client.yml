@@ -1,4 +1,4 @@
 ---
- minor_changes:
- - Add logic for cache file name generation (https://github.com/ansible-collections/community.kubernetes/pull/405).
- - Add cache_file when DynamicClient is created (https://github.com/ansible-collections/community.kubernetes/pull/405).
+minor_changes:
+- Add logic for cache file name generation (https://github.com/ansible-collections/community.kubernetes/pull/405).
+- Add cache_file when DynamicClient is created (https://github.com/ansible-collections/community.kubernetes/pull/405).
