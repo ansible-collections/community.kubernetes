@@ -23,9 +23,6 @@ import time
 import os
 import traceback
 import sys
-import six
-import hashlib
-import tempfile
 from datetime import datetime
 from distutils.version import LooseVersion
 
@@ -143,6 +140,7 @@ def get_user():
 
 
 def get_default_cache_id(configuration):
+    import six
     user = get_user()
     if user:
         cache_id = "{0}-{1}".format(configuration.host, user)
@@ -219,13 +217,14 @@ def get_api_client(module=None, **kwargs):
         return client
 
     def generate_cache_file(configuration):
+        import hashlib
         return 'osrcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(configuration)).hexdigest())
 
     kubeclient = kubernetes.client.ApiClient(configuration)
     cache_file = generate_cache_file(kubeclient)
 
     try:
-        client = DynamicClient(kubernetes.client.ApiClient(configuration), cache_file)
+        client = DynamicClient(kubeclient, cache_file)
     except Exception as err:
         _raise_or_fail(err, 'Failed to get client due to %s')
 
