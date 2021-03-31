@@ -1,0 +1,2 @@
+bugfixes:
+  - fix missing requirements.txt file in kubernetes.core (https://github.com/ansible-collections/community.kubernetes/pull/401).
