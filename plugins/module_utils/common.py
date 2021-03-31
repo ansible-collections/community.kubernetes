@@ -23,6 +23,7 @@ import time
 import os
 import traceback
 import sys
+import tempfile
 from datetime import datetime
 from distutils.version import LooseVersion
 
@@ -217,7 +218,8 @@ def get_api_client(module=None, **kwargs):
 
     def generate_cache_file(kubeclient):
         import hashlib
-        return 'osrcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(kubeclient)).hexdigest())
+        cache_file_name = 'k8srcp-{0}.json'.format(hashlib.sha1(get_default_cache_id(kubeclient)).hexdigest())
+        return os.path.join(tempfile.gettempdir(), cache_file_name)
 
     kubeclient = kubernetes.client.ApiClient(configuration)
     cache_file = generate_cache_file(kubeclient)
