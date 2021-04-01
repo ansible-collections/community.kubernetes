@@ -312,3 +312,12 @@ releases:
     - 368-helm_template.yaml
     - handle_valueerror.yml
     release_date: '2021-02-17'
+  1.2.1:
+    changes:
+      bugfixes:
+      - fix missing requirements.txt file in kubernetes.core (https://github.com/ansible-collections/community.kubernetes/pull/401).
+      - pin molecule version to <3.3.0 to fix breaking changes (https://github.com/ansible-collections/community.kubernetes/pull/403).
+    fragments:
+    - 401-requirements_file.yaml
+    - 403-pin-molecule.yaml
+    release_date: '2021-03-31'

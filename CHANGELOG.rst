@@ -5,6 +5,15 @@ Kubernetes Collection Release Notes
 .. contents:: Topics
 
 
+v1.2.1
+======
+
+Bugfixes
+--------
+
+- fix missing requirements.txt file in kubernetes.core (https://github.com/ansible-collections/community.kubernetes/pull/401).
+- pin molecule version to <3.3.0 to fix breaking changes (https://github.com/ansible-collections/community.kubernetes/pull/403).
+
 v1.2.0
 ======
 
