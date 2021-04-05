@@ -27,6 +27,9 @@ test-integration:
 test-molecule:
 	molecule test
 
+test-unit:
+	ansible-test units --docker -v --color --python $(PYTHON_VERSION) $(?TEST_ARGS)
+
 downstream-test-sanity:
 	./utils/downstream.sh -s
 

@@ -84,7 +84,7 @@ def test_run_helm_with_params():
         "api_key": "my-api-key",
         "ca_cert": "my-ca-cert",
         "host": "some-host",
-        "kube_context": "my-context",
+        "context": "my-context",
         "release_namespace": "a-release-namespace",
         "validate_certs": False,
     }
