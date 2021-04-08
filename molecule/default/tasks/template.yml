@@ -183,7 +183,7 @@
         template: pod_template_one.j2
         wait: true
         state: absent
-      
+
     - name: create pod on bad namespace ( continue_on_error set to default(false) )
       k8s:
         template:
@@ -194,7 +194,7 @@
 
     - name: validate that creation failed
       assert:
-        that: 
+        that:
           - resource is failed
           - '"Failed to create object" in resource.msg'
 
@@ -214,7 +214,7 @@
 
     - name: check that resources creation failed
       assert:
-        that: 
+        that:
           - '{{ resource.results[0].resources | length == 0 }}'
           - '{{ resource.results[1].resources | length == 0 }}'
 
@@ -230,7 +230,7 @@
 
     - name: validate that creation succeeded
       assert:
-        that: 
+        that:
           - resource is successful
 
     - name: assert pod has not been created
@@ -249,7 +249,7 @@
 
     - name: check that resources creation failed
       assert:
-        that: 
+        that:
           - '{{ resource.results[0].resources | length == 0 }}'
           - '{{ resource.results[1].resources | length > 0 }}'
 
