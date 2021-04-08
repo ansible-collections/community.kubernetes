@@ -40,7 +40,7 @@
               matchLabels:
                 app: "{{ k8s_pod_name }}"
       vars:
-        k8s_pod_name: pod
+        k8s_pod_name_one: pod
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
       ignore_errors: yes
@@ -57,7 +57,7 @@
         src: "../templates/pod_template_one.j2"
         template: "pod_template_one.j2"
       vars:
-        k8s_pod_name: pod
+        k8s_pod_name_one: pod
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
       ignore_errors: yes
@@ -73,7 +73,7 @@
         template: "pod_template_one.j2"
         wait: yes
       vars:
-        k8s_pod_name: pod-1
+        k8s_pod_name_one: pod-1
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
 
@@ -88,7 +88,7 @@
           - default
         wait: yes
       vars:
-        k8s_pod_name: pod-2
+        k8s_pod_name_one: pod-2
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
       ignore_errors: True
@@ -105,7 +105,7 @@
           path: "pod_template_one.j2"
         wait: yes
       vars:
-        k8s_pod_name: pod-3
+        k8s_pod_name_one: pod-3
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
 
@@ -122,7 +122,7 @@
           variable_end_string: ']]'
         wait: yes
       vars:
-        k8s_pod_name: pod-4
+        k8s_pod_name_two: pod-4
         k8s_pod_namespace: "[[ template_namespace ]]"
         ansible_python_interpreter: "[[ ansible_playbook_python ]]"
       register: r
@@ -138,8 +138,30 @@
           path: "pod_template_three.j2"
         wait: yes
       vars:
-        k8s_pod_name_one: pod-5
-        k8s_pod_name_two: pod-6
+        k8s_pod_name_three_one: pod-5
+        k8s_pod_name_three_two: pod-6
+        k8s_pod_namespace: "{{ template_namespace }}"
+      register: r
+
+    - name: Assert that pod creation succeeded using template
+      assert:
+        that:
+          - r is successful
+
+    - name: Create pods using list of template
+      community.kubernetes.k8s:
+        template:
+          - pod_template_one.j2
+          - path: "pod_template_two.j2"
+            variable_start_string: '[['
+            variable_end_string: ']]'
+          - path: "pod_template_three.j2"
+        wait: yes
+      vars:
+        k8s_pod_name_one: pod-7
+        k8s_pod_name_two: pod-8
+        k8s_pod_name_three_one: pod-9
+        k8s_pod_name_three_two: pod-10
         k8s_pod_namespace: "{{ template_namespace }}"
       register: r
 
