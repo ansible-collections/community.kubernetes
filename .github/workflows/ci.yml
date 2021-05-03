@@ -33,222 +33,182 @@ jobs:
         run: make test-sanity PYTHON_VERSION=${{ matrix.python_version }}
         working-directory: ./ansible_collections/community/kubernetes
 
-  integration:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Our old integration tests fail under newer Python versions.
-        python_version: ['3.6']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
+  # integration:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       # Our old integration tests fail under newer Python versions.
+  #       python_version: ['3.6']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+  #     - name: Install ansible base (devel branch)
+  #       run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
-      - name: Install Collection dependency - cloud.common
-        run: ansible-galaxy collection install cloud.common
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Run integration tests on Python ${{ matrix.python_version }}
+  #       run: make test-integration PYTHON_VERSION=${{ matrix.python_version }}
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-      - name: Install Collection dependency - kubernetes.core
-        run: ansible-galaxy collection install kubernetes.core
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Generate coverage report.
+  #       run: ansible-test coverage xml -v --requirements --group-by command --group-by version
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-      - name: Run integration tests on Python ${{ matrix.python_version }}
-        run: make test-integration PYTHON_VERSION=${{ matrix.python_version }}
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - uses: codecov/codecov-action@v1
+  #       with:
+  #         fail_ci_if_error: false
 
-      - name: Generate coverage report.
-        run: ansible-test coverage xml -v --requirements --group-by command --group-by version
-        working-directory: ./ansible_collections/community/kubernetes
+  # molecule:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python_version: ['3.7']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - uses: codecov/codecov-action@v1
-        with:
-          fail_ci_if_error: false
+  #     - name: Set up KinD cluster
+  #       uses: engineerd/setup-kind@v0.5.0
 
-  molecule:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: ['3.7']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Set up KinD cluster
-        uses: engineerd/setup-kind@v0.5.0
+  #     # The 3.3.0 release of molecule introduced a breaking change. See
+  #     # https://github.com/ansible-community/molecule/issues/3083
+  #     - name: Install molecule and openshift dependencies
+  #       run: pip install ansible "molecule<3.3.0" yamllint openshift flake8
 
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
+  #     # The latest release doesn't work with Molecule currently.
+  #     # See: https://github.com/ansible-community/molecule/issues/2757
+  #     # - name: Install ansible base, latest release.
+  #     #   run: |
+  #     #     pip uninstall -y ansible
+  #     #     pip install --pre ansible-base
 
-      # The 3.3.0 release of molecule introduced a breaking change. See
-      # https://github.com/ansible-community/molecule/issues/3083
-      - name: Install molecule and openshift dependencies
-        run: pip install ansible "molecule<3.3.0" yamllint openshift flake8
+  #     # The devel branch doesn't work with Molecule currently.
+  #     # See: https://github.com/ansible-community/molecule/issues/2757
+  #     # - name: Install ansible base (devel branch)
+  #     #   run: |
+  #     #     pip uninstall -y ansible
+  #     #     pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
-      # The latest release doesn't work with Molecule currently.
-      # See: https://github.com/ansible-community/molecule/issues/2757
-      # - name: Install ansible base, latest release.
-      #   run: |
-      #     pip uninstall -y ansible
-      #     pip install --pre ansible-base
+  #     - name: Create default collection path symlink
+  #       run: |
+  #         mkdir -p /home/runner/.ansible
+  #         ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
 
-      # The devel branch doesn't work with Molecule currently.
-      # See: https://github.com/ansible-community/molecule/issues/2757
-      # - name: Install ansible base (devel branch)
-      #   run: |
-      #     pip uninstall -y ansible
-      #     pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+  #     - name: Run molecule default test scenario
+  #       run: make test-molecule
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-      - name: Install Collection dependency - cloud.common
-        run: ansible-galaxy collection install cloud.common
-        working-directory: ./ansible_collections/community/kubernetes
+  # unit:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python_version: ['2.7', '3.7']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - name: Install Collection dependency - kubernetes.core
-        run: ansible-galaxy collection install kubernetes.core
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Create default collection path symlink
-        run: |
-          mkdir -p /home/runner/.ansible
-          ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
+  #     - name: Install ansible base (devel branch)
+  #       run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
 
-      - name: Run molecule default test scenario
-        run: make test-molecule
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Run unit tests on Python ${{ matrix.python_version }}
+  #       run: make test-unit PYTHON_VERSION=${{ matrix.python_version }}
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-  unit:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: ['2.7', '3.7']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
+  # downstream-sanity-29:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python_version: ['3.7']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+  #     - name: Install ansible base (devel branch)
+  #       run: pip install "ansible>=2.9.0,<2.10.0"
 
-      - name: Run unit tests on Python ${{ matrix.python_version }}
-        run: make test-unit PYTHON_VERSION=${{ matrix.python_version }}
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Run sanity tests on Python ${{ matrix.python_version }}
+  #       run: make downstream-test-sanity
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-  downstream-sanity-29:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: ['3.7']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
+  # downstream-integration-29:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       # Our old integration tests fail under newer Python versions.
+  #       python_version: ['3.6']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible base (devel branch)
-        run: pip install "ansible>=2.9.0,<2.10.0"
+  #     - name: Install ansible base (devel branch)
+  #       run: pip install "ansible>=2.9.0,<2.10.0" pip==20.3.1
 
-      - name: Install Collection dependency - cloud.common
-        run: ansible-galaxy collection install cloud.common
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Run integration tests on Python ${{ matrix.python_version }}
+  #       run: make downstream-test-integration
+  #       working-directory: ./ansible_collections/community/kubernetes
 
-      - name: Install Collection dependency - kubernetes.core
-        run: ansible-galaxy collection install kubernetes.core
-        working-directory: ./ansible_collections/community/kubernetes
+  # downstream-molecule-29:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       python_version: ['3.7']
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         path: ansible_collections/community/kubernetes
 
-      - name: Run sanity tests on Python ${{ matrix.python_version }}
-        run: make downstream-test-sanity
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Set up KinD cluster
+  #       uses: engineerd/setup-kind@v0.5.0
 
-  downstream-integration-29:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # Our old integration tests fail under newer Python versions.
-        python_version: ['3.6']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
+  #     - name: Set up Python ${{ matrix.python_version }}
+  #       uses: actions/setup-python@v1
+  #       with:
+  #         python-version: ${{ matrix.python_version }}
 
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
+  #     - name: Install molecule and openshift dependencies
+  #       run: pip install "ansible>=2.9.0,<2.10.0" "molecule<3.3.0" yamllint openshift flake8
 
-      - name: Install ansible base (devel branch)
-        run: pip install "ansible>=2.9.0,<2.10.0" pip==20.3.1
+  #     - name: Create default collection path symlink
+  #       run: |
+  #         mkdir -p /home/runner/.ansible
+  #         ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
 
-      - name: Install Collection dependency - cloud.common
-        run: ansible-galaxy collection install cloud.common
-        working-directory: ./ansible_collections/community/kubernetes
-
-      - name: Install Collection dependency - kubernetes.core
-        run: ansible-galaxy collection install kubernetes.core
-        working-directory: ./ansible_collections/community/kubernetes
-
-      - name: Run integration tests on Python ${{ matrix.python_version }}
-        run: make downstream-test-integration
-        working-directory: ./ansible_collections/community/kubernetes
-
-  downstream-molecule-29:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python_version: ['3.7']
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v2
-        with:
-          path: ansible_collections/community/kubernetes
-
-      - name: Set up KinD cluster
-        uses: engineerd/setup-kind@v0.5.0
-
-      - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v1
-        with:
-          python-version: ${{ matrix.python_version }}
-
-      - name: Install molecule and openshift dependencies
-        run: pip install "ansible>=2.9.0,<2.10.0" "molecule<3.3.0" yamllint openshift flake8
-
-      - name: Create default collection path symlink
-        run: |
-          mkdir -p /home/runner/.ansible
-          ln -s /home/runner/work/kubernetes/kubernetes /home/runner/.ansible/collections
-
-      - name: Install Collection dependency - cloud.common
-        run: ansible-galaxy collection install cloud.common
-        working-directory: ./ansible_collections/community/kubernetes
-
-      - name: Install Collection dependency - kubernetes.core
-        run: ansible-galaxy collection install kubernetes.core
-        working-directory: ./ansible_collections/community/kubernetes
-
-      - name: Run molecule default test scenario
-        run: make downstream-test-molecule
-        working-directory: ./ansible_collections/community/kubernetes
+  #     - name: Run molecule default test scenario
+  #       run: make downstream-test-molecule
+  #       working-directory: ./ansible_collections/community/kubernetes
