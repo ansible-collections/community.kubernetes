@@ -178,7 +178,7 @@ The process for uploading a supported release to Automation Hub is documented se
 
 ## More Information
 
-For more information about Ansible's Kubernetes integration, join the `#ansible-kubernetes` channel on Freenode IRC, and browse the resources in the [Kubernetes Working Group](https://github.com/ansible/community/wiki/Kubernetes) Community wiki page.
+For more information about Ansible's Kubernetes integration, join the `#ansible-kubernetes` channel on [irc.libera.chat](https://libera.chat/), and browse the resources in the [Kubernetes Working Group](https://github.com/ansible/community/wiki/Kubernetes) Community wiki page.
 
 ## License
 
