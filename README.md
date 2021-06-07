@@ -21,7 +21,7 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_lookup.html)
   - **Modules**:
     - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_module.html)
-    - [k8s_cluster_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_cluster_info.py)
+    - [k8s_cluster_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_cluster_info_module.html)
     - [k8s_exec](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_exec_module.html)
     - [k8s_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_info_module.html)
     - [k8s_log](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_log_module.html)
@@ -29,10 +29,10 @@ Click on the name of a plugin or module to view that content's documentation:
     - [k8s_service](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_service_module.html)
     - [helm](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_module.html)
     - [helm_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_info_module.html)
-    - [helm_plugin](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin.py)
-    - [helm_plugin_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin_info.py)
+    - [helm_plugin](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_plugin_module.html)
+    - [helm_plugin_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_plugin_info_module.html)
     - [helm_repository](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html)
-    - [helm_template](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_template.py)
+    - [helm_template](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_template_module.html)
 
 ## Installation and Usage
 
