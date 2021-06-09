@@ -9,10 +9,7 @@ authors:
   - mmazur (https://github.com/mmazur)
   - jamescassell (https://github.com/jamescassell)
 dependencies:
-  cloud.common: '*'
-  # TODO: enable the versionized dep when the 2.0.0 version is actually released.
-  # kubernetes.core: '>=2.0.0'
-  kubernetes.core: '*'
+  kubernetes.core: '>=2.0.0'
 description: Kubernetes Collection for Ansible.
 documentation: ''
 homepage: ''
