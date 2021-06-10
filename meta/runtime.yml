@@ -25,11 +25,9 @@ plugin_routing:
     kubectl:
       redirect: kubernetes.core.kubectl
   filter:
-    k8s:
-      redirect: kubernetes.core.k8s
+    k8s_config_resource_name:
+      redirect: kubernetes.core.k8s_config_resource_name
   action:
-    k8s_auth:
-      redirect: community.okd.k8s_auth
     helm:
       redirect: kubernetes.core.k8s_info
     helm_info:
@@ -50,6 +48,8 @@ plugin_routing:
       redirect: kubernetes.core.k8s_info
     k8s_info:
       redirect: kubernetes.core.k8s_info
+    k8s_json_patch:
+      redirect: kubernetes.core.k8s_info
     k8s_log:
       redirect: kubernetes.core.k8s_info
     k8s_rollback:
@@ -65,6 +65,38 @@ plugin_routing:
         removal_version: 2.0.0
         warning_text: Use kubernetes.core.k8s_info instead.
   modules:
+    helm:
+      redirect: kubernetes.core.helm
+    helm_info:
+      redirect: kubernetes.core.helm_info
+    helm_plugin:
+      redirect: kubernetes.core.helm_plugin
+    helm_plugin_info:
+      redirect: kubernetes.core.helm_plugin_info
+    helm_repository:
+      redirect: kubernetes.core.helm_repository
+    helm_template:
+      redirect: kubernetes.core.helm_template
+    k8s:
+      redirect: kubernetes.core.k8s
+    k8s_auth:
+      redirect: community.okd.openshift_auth
+    k8s_cluster_info:
+      redirect: kubernetes.core.k8s_cluster_info
+    k8s_exec:
+      redirect: kubernetes.core.k8s_exec
+    k8s_info:
+      redirect: kubernetes.core.k8s_info
+    k8s_json_patch:
+      redirect: kubernetes.core.k8s_json_patch
+    k8s_log:
+      redirect: kubernetes.core.k8s_log
+    k8s_rollback:
+      redirect: kubernetes.core.k8s_rollback
+    k8s_scale:
+      redirect: kubernetes.core.k8s_scale
+    k8s_service:
+      redirect: kubernetes.core.k8s_service
     k8s_raw:
       tombstone:
         removal_version: 0.1.0
