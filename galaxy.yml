@@ -8,7 +8,8 @@ authors:
   - willthames (https://github.com/willthames)
   - mmazur (https://github.com/mmazur)
   - jamescassell (https://github.com/jamescassell)
-dependencies: {}
+dependencies:
+  kubernetes.core: '>=2.0.0'
 description: Kubernetes Collection for Ansible.
 documentation: ''
 homepage: ''

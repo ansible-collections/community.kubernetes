@@ -1,0 +1,2 @@
+major_changes:
+- redirect everything from ``community.kubernetes`` to ``kubernetes.core``.
