@@ -19,84 +19,188 @@ plugin_routing:
   inventory:
     openshift:
       redirect: community.okd.openshift
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s:
       redirect: kubernetes.core.k8s
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
   connection:
     kubectl:
       redirect: kubernetes.core.kubectl
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
   filter:
     k8s_config_resource_name:
       redirect: kubernetes.core.k8s_config_resource_name
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
   action:
     helm:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_info:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_plugin:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_plugin_info:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_repository:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_template:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_cluster_info:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_exec:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_info:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_json_patch:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_log:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_rollback:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_scale:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_service:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     # k8s_facts was originally slated for removal in Ansible 2.13.
     k8s_facts:
-      redirect: kubernetes.core.k8s_info
-      deprecation:
+      tombstone:
         removal_version: 2.0.0
         warning_text: Use kubernetes.core.k8s_info instead.
   modules:
     helm:
       redirect: kubernetes.core.helm
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_info:
       redirect: kubernetes.core.helm_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_plugin:
       redirect: kubernetes.core.helm_plugin
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_plugin_info:
       redirect: kubernetes.core.helm_plugin_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_repository:
       redirect: kubernetes.core.helm_repository
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     helm_template:
       redirect: kubernetes.core.helm_template
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s:
       redirect: kubernetes.core.k8s
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_auth:
       redirect: community.okd.openshift_auth
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_cluster_info:
       redirect: kubernetes.core.k8s_cluster_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_exec:
       redirect: kubernetes.core.k8s_exec
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_info:
       redirect: kubernetes.core.k8s_info
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_json_patch:
       redirect: kubernetes.core.k8s_json_patch
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_log:
       redirect: kubernetes.core.k8s_log
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_rollback:
       redirect: kubernetes.core.k8s_rollback
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_scale:
       redirect: kubernetes.core.k8s_scale
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_service:
       redirect: kubernetes.core.k8s_service
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     k8s_raw:
       tombstone:
         removal_version: 0.1.0
@@ -112,6 +216,9 @@ plugin_routing:
   lookup:
     k8s:
       redirect: kubernetes.core.k8s
+      deprecation:
+        removal_version: 3.0.0
+        warning_text: The community.kubernetes collection is being renamed to kubernetes.core. Please update your FQCNs to kubernetes.core instead.
     openshift:
       tombstone:
         removal_version: 0.1.0

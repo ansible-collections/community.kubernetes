@@ -1,0 +1,3 @@
+---
+deprecated_features:
+  - The ``community.kubernetes`` collection is being renamed to ``kubernetes.core``. All content in the collection has been replaced by deprecated redirects to ``kubernetes.core``. If you are using FQCNs starting with ``community.kubernetes.``, please update them to ``kubernetes.core.``

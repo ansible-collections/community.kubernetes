@@ -2,6 +2,9 @@
 
 [![CI](https://github.com/ansible-collections/community.kubernetes/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/community.kubernetes/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.kubernetes)](https://codecov.io/gh/ansible-collections/community.kubernetes)
 
+**IMPORTANT**
+The `community.kubernetes` collection is being renamed to `kubernetes.core`. As of version 2.0.0, the collection has been replaced by deprecated redirects for all content to `kubernetes.core`. If you are using FQCNs starting with `community.kubernetes`, please update them to `kubernetes.core`.
+
 This repo hosts the `community.kubernetes` (a.k.a. `kubernetes.core`) Ansible Collection.
 
 The collection includes a variety of Ansible content to help automate the management of applications in Kubernetes and OpenShift clusters, as well as the provisioning and maintenance of clusters themselves.
