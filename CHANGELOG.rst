@@ -5,6 +5,19 @@ Kubernetes Collection Release Notes
 .. contents:: Topics
 
 
+v2.0.0
+======
+
+Major Changes
+-------------
+
+- redirect everything from ``community.kubernetes`` to ``kubernetes.core`` (https://github.com/ansible-collections/community.kubernetes/pull/425).
+
+Deprecated Features
+-------------------
+
+- The ``community.kubernetes`` collection is being renamed to ``kubernetes.core``. All content in the collection has been replaced by deprecated redirects to ``kubernetes.core``. If you are using FQCNs starting with ``community.kubernetes``, please update them to ``kubernetes.core`` (https://github.com/ansible-collections/community.kubernetes/pull/439).
+
 v1.2.0
 ======
 

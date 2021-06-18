@@ -312,3 +312,16 @@ releases:
     - 368-helm_template.yaml
     - handle_valueerror.yml
     release_date: '2021-02-17'
+  2.0.0:
+    changes:
+      deprecated_features:
+      - The ``community.kubernetes`` collection is being renamed to ``kubernetes.core``.
+        All content in the collection has been replaced by deprecated redirects to
+        ``kubernetes.core``. If you are using FQCNs starting with ``community.kubernetes``,
+        please update them to ``kubernetes.core`` (https://github.com/ansible-collections/community.kubernetes/pull/439).
+      major_changes:
+      - redirect everything from ``community.kubernetes`` to ``kubernetes.core`` (https://github.com/ansible-collections/community.kubernetes/pull/425).
+    fragments:
+    - 439-add-deprecation-warnings.yaml
+    - final_countdown.yml
+    release_date: '2021-06-17'
