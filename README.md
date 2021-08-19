@@ -1,41 +1,11 @@
 # Kubernetes Collection for Ansible
 
-[![CI](https://github.com/ansible-collections/community.kubernetes/workflows/CI/badge.svg?event=push)](https://github.com/ansible-collections/community.kubernetes/actions) [![Codecov](https://img.shields.io/codecov/c/github/ansible-collections/community.kubernetes)](https://codecov.io/gh/ansible-collections/community.kubernetes)
-
 **IMPORTANT**
-The `community.kubernetes` collection is being renamed to `kubernetes.core`. As of version 2.0.0, the collection has been replaced by deprecated redirects for all content to `kubernetes.core`. If you are using FQCNs starting with `community.kubernetes`, please update them to `kubernetes.core`.
+The `community.kubernetes` collection is being renamed to [`kubernetes.core`](https://github.com/ansible-collections/kubernetes.core). As of version 2.0.0, the collection has been replaced by deprecated redirects for all content to `kubernetes.core`. If you are using FQCNs starting with `community.kubernetes`, please update them to `kubernetes.core`.
 
-This repo hosts the `community.kubernetes` (a.k.a. `kubernetes.core`) Ansible Collection.
+This repo hosts the `community.kubernetes` (a.k.a. [`kubernetes.core`](https://github.com/ansible-collections/kubernetes.core)) Ansible Collection.
 
 The collection includes a variety of Ansible content to help automate the management of applications in Kubernetes and OpenShift clusters, as well as the provisioning and maintenance of clusters themselves.
-
-## Included content
-
-Click on the name of a plugin or module to view that content's documentation:
-
-  - **Connection Plugins**:
-    - [kubectl](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/kubectl_connection.html)
-  - **Filter Plugins**:
-    - [k8s_config_resource_name](https://docs.ansible.com/ansible/latest/user_guide/playbooks_filters.html#kubernetes-filters)
-  - **Inventory Source**:
-    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_inventory.html)
-    - [openshift](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/openshift_inventory.html)
-  - **Lookup Plugins**:
-    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_lookup.html)
-  - **Modules**:
-    - [k8s](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_module.html)
-    - [k8s_cluster_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/k8s_cluster_info.py)
-    - [k8s_exec](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_exec_module.html)
-    - [k8s_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_info_module.html)
-    - [k8s_log](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_log_module.html)
-    - [k8s_scale](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_scale_module.html)
-    - [k8s_service](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/k8s_service_module.html)
-    - [helm](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_module.html)
-    - [helm_info](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_info_module.html)
-    - [helm_plugin](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin.py)
-    - [helm_plugin_info](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_plugin_info.py)
-    - [helm_repository](https://docs.ansible.com/ansible/2.10/collections/community/kubernetes/helm_repository_module.html)
-    - [helm_template](https://github.com/ansible-collections/community.kubernetes/blob/main/plugins/modules/helm_template.py)
 
 ## Installation and Usage
 
