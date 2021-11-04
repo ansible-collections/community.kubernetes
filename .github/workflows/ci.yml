@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: ['2.7', '3.7']
+        python_version: ['3.8']
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -26,8 +26,8 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install ansible base (devel branch)
-        run: pip install https://github.com/ansible/ansible/archive/devel.tar.gz --disable-pip-version-check
+      - name: Install ansible base (milestone branch)
+        run: pip install https://github.com/ansible/ansible/archive/milestone.tar.gz --disable-pip-version-check
 
       - name: Run sanity tests on Python ${{ matrix.python_version }}
         run: make test-sanity PYTHON_VERSION=${{ matrix.python_version }}
