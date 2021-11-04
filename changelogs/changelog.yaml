@@ -325,3 +325,5 @@ releases:
     - 439-add-deprecation-warnings.yaml
     - final_countdown.yml
     release_date: '2021-06-17'
+  2.0.1:
+    release_date: '2021-11-04'
